@@ -4,13 +4,13 @@ using GraphQL.DataLoader;
 using GraphQL.Resolvers;
 using GraphQL.Types;
 using VirtoCommerce.CustomerModule.Core.Services;
+using VirtoCommerce.OrdersModule.Core.Model;
+using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Xapi.Core.Extensions;
 using VirtoCommerce.Xapi.Core.Helpers;
 using VirtoCommerce.Xapi.Core.Models;
 using VirtoCommerce.Xapi.Core.Schemas;
 using VirtoCommerce.Xapi.Core.Services;
-using VirtoCommerce.OrdersModule.Core.Model;
-using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.XOrder.Core.Extensions;
 using VirtoCommerce.XOrder.Core.Services;
 using Money = VirtoCommerce.CoreModule.Core.Currency.Money;
@@ -78,8 +78,6 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             AddField(vendorField);
 
             Field<NonNullGraphType<ListGraphType<NonNullGraphType<PaymentTransactionType>>>>(nameof(PaymentIn.Transactions), resolve: x => x.Source.Transactions);
-            //PT-5383: Add additional properties to XOrder types:
-            //public IList<Operation> ChildrenOperations);
 
             ExtendableField<NonNullGraphType<CustomerOrderType>>(
                 "order",

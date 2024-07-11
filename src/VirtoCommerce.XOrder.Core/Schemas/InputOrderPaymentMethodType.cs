@@ -30,9 +30,6 @@ namespace VirtoCommerce.XOrder.Core.Schemas
                 "Payment method type");
             Field<IntGraphType>(nameof(PaymentMethod.PaymentMethodGroupType),
                 "Payment method group type");
-
-            //PT-5383: Add additional properties to XOrder types:
-            //public ICollection<ObjectSettingEntry> Settings);
         }
     }
 }

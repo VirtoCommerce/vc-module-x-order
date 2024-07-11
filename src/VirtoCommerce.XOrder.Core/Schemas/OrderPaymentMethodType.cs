@@ -1,8 +1,8 @@
 using GraphQL;
 using GraphQL.Types;
 using VirtoCommerce.CoreModule.Core.Currency;
-using VirtoCommerce.Xapi.Core.Schemas;
 using VirtoCommerce.PaymentModule.Core.Model;
+using VirtoCommerce.Xapi.Core.Schemas;
 using VirtoCommerce.XOrder.Core.Extensions;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
@@ -50,9 +50,6 @@ namespace VirtoCommerce.XOrder.Core.Schemas
                 resolve: context => (int)context.Source.PaymentMethodType);
             Field<NonNullGraphType<IntGraphType>>(nameof(PaymentMethod.PaymentMethodGroupType),
                 resolve: context => (int)context.Source.PaymentMethodGroupType);
-
-            //PT-5383: Add additional properties to XOrder types:
-            //public ICollection<ObjectSettingEntry> Settings);
         }
     }
 }

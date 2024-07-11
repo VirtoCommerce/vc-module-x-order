@@ -55,9 +55,6 @@ namespace VirtoCommerce.XOrder.Core.Schemas
                 "Tax details");
             Field<NonNullGraphType<ListGraphType<InputOrderDiscountType>>>(nameof(LineItem.Discounts),
                 "Discounts");
-
-            //PT-5383
-            //public ICollection<DynamicObjectProperty> DynamicProperties);
         }
     }
 }

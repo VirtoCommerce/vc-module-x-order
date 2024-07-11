@@ -2,9 +2,9 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.OrdersModule.Core.Services;
+using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.XOrder.Core;
 using VirtoCommerce.XOrder.Core.Queries;
 using VirtoCommerce.XOrder.Core.Services;
@@ -36,7 +36,7 @@ namespace VirtoCommerce.XOrder.Data.Queries
             }
             else
             {
-                throw new ArgumentNullException($"{nameof(request.OrderId)} or {nameof(request.Number)}");
+                throw new ArgumentNullException(nameof(request), $"{nameof(request.OrderId)} or {nameof(request.Number)}");
             }
 
             return result;
