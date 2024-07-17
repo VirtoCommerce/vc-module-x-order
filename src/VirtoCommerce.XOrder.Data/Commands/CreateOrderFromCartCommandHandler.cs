@@ -6,14 +6,14 @@ using GraphQL;
 using MediatR;
 using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CartModule.Core.Services;
-using VirtoCommerce.Xapi.Core.Helpers;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.XOrder.Core;
-using VirtoCommerce.XOrder.Core.Commands;
-using VirtoCommerce.XOrder.Core.Services;
+using VirtoCommerce.Xapi.Core.Helpers;
 using VirtoCommerce.XCart.Core;
 using VirtoCommerce.XCart.Core.Services;
 using VirtoCommerce.XCart.Core.Validators;
+using VirtoCommerce.XOrder.Core;
+using VirtoCommerce.XOrder.Core.Commands;
+using VirtoCommerce.XOrder.Core.Services;
 
 namespace VirtoCommerce.XOrder.Data.Commands
 {
@@ -52,7 +52,7 @@ namespace VirtoCommerce.XOrder.Data.Commands
 
             await ValidateCart(cartAggregate);
 
-            // need to check for unsaved gift items before createing an order and resave the cart, otherwise an exception will be thrown on order create
+            // need to check for unsaved gift items before creating an order and resave the cart, otherwise an exception will be thrown on order create
             var hasUnsavedGifts = cartAggregate.GiftItems.Any(x => x.Id == null);
             if (hasUnsavedGifts)
             {
@@ -77,8 +77,6 @@ namespace VirtoCommerce.XOrder.Data.Commands
 
             await _cartRepository.SaveAsync(cartAggregate);
 
-            // Remark: There is potential issue, because there is no transaction thru two actions above. If a cart deletion fails, the order remains. That causes data inconsistency.
-            // Unfortunately, current architecture does not allow us to support such scenarios in a transactional manner.
             return result;
         }
 

@@ -5,8 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
 using VirtoCommerce.CoreModule.Core.Currency;
-using VirtoCommerce.Xapi.Core.Models;
-using VirtoCommerce.Xapi.Core.Services;
 using VirtoCommerce.MarketingModule.Core.Model.Promotions.Search;
 using VirtoCommerce.MarketingModule.Core.Search;
 using VirtoCommerce.OrdersModule.Core.Model;
@@ -14,6 +12,8 @@ using VirtoCommerce.PaymentModule.Core.Model;
 using VirtoCommerce.PaymentModule.Model.Requests;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
+using VirtoCommerce.Xapi.Core.Models;
+using VirtoCommerce.Xapi.Core.Services;
 using VirtoCommerce.XOrder.Core.Validators;
 
 namespace VirtoCommerce.XOrder.Core
@@ -71,8 +71,8 @@ namespace VirtoCommerce.XOrder.Core
 
             if (inPayment != null)
             {
-                //This is definetelly bad that we execute external business logic here, it must be done via domain events or in the event handler
-                //inside this aggregate we should do only related to order entities changes and shoud avoid of execution of external logic
+                //This is definitely bad that we execute external business logic here, it must be done via domain events or in the event handler
+                //inside this aggregate we should do only related to order entities changes and should avoid of execution of external logic
                 result = inPayment.PaymentMethod.ProcessPayment(request);
                 if (result.OuterId != null)
                 {

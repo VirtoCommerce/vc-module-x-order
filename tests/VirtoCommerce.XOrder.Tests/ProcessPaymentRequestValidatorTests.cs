@@ -10,7 +10,7 @@ using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.XOrder.Core.Validators;
 using Xunit;
 
-namespace VirtoCommerce.Xapi.XOrder.Tests
+namespace VirtoCommerce.XOrder.Tests
 {
     public class ProcessPaymentRequestValidatorTests
     {

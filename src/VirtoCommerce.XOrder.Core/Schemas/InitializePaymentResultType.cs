@@ -1,8 +1,8 @@
 using System.Linq;
 using GraphQL;
 using GraphQL.Types;
-using VirtoCommerce.Xapi.Core.Schemas;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Xapi.Core.Schemas;
 using VirtoCommerce.XOrder.Core.Models;
 
 namespace VirtoCommerce.XOrder.Core.Schemas

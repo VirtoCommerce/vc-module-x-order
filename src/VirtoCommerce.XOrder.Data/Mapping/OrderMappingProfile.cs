@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
-using VirtoCommerce.Xapi.Core.Extensions;
-using VirtoCommerce.Xapi.Core.Index;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.SearchModule.Core.Model;
+using VirtoCommerce.Xapi.Core.Extensions;
+using VirtoCommerce.Xapi.Core.Index;
 using CoreFacets = VirtoCommerce.Xapi.Core.Models.Facets;
 
 namespace VirtoCommerce.XOrder.Data.Mapping

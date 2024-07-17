@@ -2,9 +2,10 @@ using System;
 using GraphQL;
 using GraphQL.Builders;
 using VirtoCommerce.CoreModule.Core.Currency;
+using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.Xapi.Core.Extensions;
 using VirtoCommerce.Xapi.Core.Infrastructure;
-using VirtoCommerce.OrdersModule.Core.Model.Search;
+using static VirtoCommerce.Xapi.Core.ModuleConstants;
 
 namespace VirtoCommerce.XOrder.Core.Queries
 {
@@ -21,7 +22,7 @@ namespace VirtoCommerce.XOrder.Core.Queries
         {
             var connectionContext = (IResolveConnectionContext)context;
             Skip = Convert.ToInt32(connectionContext.After ?? 0.ToString());
-            Take = connectionContext.First ?? connectionContext.PageSize ?? 10;
+            Take = connectionContext.First ?? connectionContext.PageSize ?? Connections.DefaultPageSize;
             CultureName = connectionContext.GetArgument<string>(nameof(Currency.CultureName).ToCamelCase());
             Filter = connectionContext.GetArgument<string>("filter");
             Sort = connectionContext.GetArgument<string>("sort");

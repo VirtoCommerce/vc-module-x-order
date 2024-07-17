@@ -3,15 +3,15 @@ using System.Linq;
 using GraphQL;
 using GraphQL.Types;
 using VirtoCommerce.CoreModule.Core.Currency;
-using VirtoCommerce.Xapi.Core.Extensions;
-using VirtoCommerce.Xapi.Core.Helpers;
-using VirtoCommerce.Xapi.Core.Schemas;
-using VirtoCommerce.Xapi.Core.Services;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.PaymentModule.Core.Model.Search;
 using VirtoCommerce.PaymentModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Xapi.Core.Extensions;
+using VirtoCommerce.Xapi.Core.Helpers;
+using VirtoCommerce.Xapi.Core.Schemas;
+using VirtoCommerce.Xapi.Core.Services;
 using OrderSettings = VirtoCommerce.OrdersModule.Core.ModuleConstants.Settings.General;
 
 namespace VirtoCommerce.XOrder.Core.Schemas

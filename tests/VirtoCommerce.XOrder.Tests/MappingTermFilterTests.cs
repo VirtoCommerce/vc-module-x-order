@@ -6,7 +6,7 @@ using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.XOrder.Data.Mapping;
 using Xunit;
 
-namespace VirtoCommerce.Xapi.XOrder.Tests
+namespace VirtoCommerce.XOrder.Tests
 {
     public class MappingTermFilterTests
     {

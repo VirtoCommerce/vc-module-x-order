@@ -9,10 +9,13 @@ using VirtoCommerce.Xapi.Core.BaseQueries;
 using VirtoCommerce.Xapi.Core.Extensions;
 using VirtoCommerce.Xapi.Core.Helpers;
 using VirtoCommerce.Xapi.Core.Services;
-using VirtoCommerce.XOrder.Core.Authorization;
+using VirtoCommerce.XOrder.Core;
+using VirtoCommerce.XOrder.Core.Queries;
 using VirtoCommerce.XOrder.Core.Schemas;
+using VirtoCommerce.XOrder.Data.Authorization;
+using static VirtoCommerce.Xapi.Core.ModuleConstants;
 
-namespace VirtoCommerce.XOrder.Core.Queries.BaseQueries
+namespace VirtoCommerce.XOrder.Data.Queries.BaseQueries
 {
     public abstract class BaseSearchOrderQueryBuilder<TQuery> : QueryBuilder<TQuery, SearchOrderResponse, CustomerOrderType>
         where TQuery : SearchOrderQuery
@@ -35,7 +38,7 @@ namespace VirtoCommerce.XOrder.Core.Queries.BaseQueries
         {
             var builder = GraphTypeExtenstionHelper.CreateConnection<CustomerOrderType, EdgeType<CustomerOrderType>, CustomerOrderConnectionType<CustomerOrderType>, object>()
                 .Name(Name)
-                .PageSize(20);
+                .PageSize(Connections.DefaultPageSize);
 
             ConfigureArguments(builder.FieldType);
 

@@ -1,6 +1,6 @@
-using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.PaymentModule.Core.Model;
 using VirtoCommerce.PaymentModule.Model.Requests;
+using VirtoCommerce.Xapi.Core.Infrastructure;
 
 namespace VirtoCommerce.XOrder.Core.Commands
 {

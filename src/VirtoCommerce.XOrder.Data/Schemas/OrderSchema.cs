@@ -7,25 +7,26 @@ using GraphQL.Types;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using VirtoCommerce.CoreModule.Core.Currency;
-using VirtoCommerce.Xapi.Core.Extensions;
-using VirtoCommerce.Xapi.Core.Helpers;
-using VirtoCommerce.Xapi.Core.Infrastructure;
-using VirtoCommerce.Xapi.Core.Infrastructure.Authorization;
-using VirtoCommerce.Xapi.Core.Services;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.PaymentModule.Model.Requests;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Xapi.Core.Extensions;
+using VirtoCommerce.Xapi.Core.Helpers;
+using VirtoCommerce.Xapi.Core.Infrastructure;
+using VirtoCommerce.Xapi.Core.Security.Authorization;
+using VirtoCommerce.Xapi.Core.Services;
+using VirtoCommerce.XCart.Core;
+using VirtoCommerce.XCart.Core.Queries;
 using VirtoCommerce.XOrder.Core;
-using VirtoCommerce.XOrder.Core.Authorization;
 using VirtoCommerce.XOrder.Core.Commands;
 using VirtoCommerce.XOrder.Core.Extensions;
 using VirtoCommerce.XOrder.Core.Models;
 using VirtoCommerce.XOrder.Core.Queries;
 using VirtoCommerce.XOrder.Core.Schemas;
-using VirtoCommerce.XCart.Core;
-using VirtoCommerce.XCart.Core.Queries;
+using VirtoCommerce.XOrder.Data.Authorization;
+using static VirtoCommerce.Xapi.Core.ModuleConstants;
 using XOrderSettings = VirtoCommerce.Xapi.Core.ModuleConstants.Settings.General;
 
 namespace VirtoCommerce.XOrder.Data.Schemas
@@ -91,7 +92,7 @@ namespace VirtoCommerce.XOrder.Data.Schemas
             var paymentsConnectionBuilder = GraphTypeExtenstionHelper
                 .CreateConnection<PaymentInType, object>()
                 .Name("payments")
-                .PageSize(20)
+                .PageSize(Connections.DefaultPageSize)
                 .OrderArguments();
 
             paymentsConnectionBuilder.ResolveAsync(async context => await ResolvePaymentsConnectionAsync(_mediator, context));

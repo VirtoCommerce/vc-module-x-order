@@ -9,7 +9,7 @@ using VirtoCommerce.Platform.Core;
 using VirtoCommerce.Platform.Security.Authorization;
 using VirtoCommerce.XOrder.Core.Queries;
 
-namespace VirtoCommerce.XOrder.Core.Authorization
+namespace VirtoCommerce.XOrder.Data.Authorization
 {
     public sealed class CanAccessOrderAuthorizationRequirement : PermissionAuthorizationRequirement
     {

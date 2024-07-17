@@ -1,5 +1,5 @@
-using VirtoCommerce.Xapi.Core.Queries;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.Xapi.Core.Queries;
 using VirtoCommerce.XOrder.Core.Queries;
 using OrderSettings = VirtoCommerce.OrdersModule.Core.ModuleConstants.Settings.General;
 

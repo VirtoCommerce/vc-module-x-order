@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using GraphQL;
 using VirtoCommerce.CoreModule.Core.Currency;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Xapi.Core.Extensions;
 using VirtoCommerce.Xapi.Core.Infrastructure;
-using VirtoCommerce.Platform.Core.Common;
 
 namespace VirtoCommerce.XOrder.Core.Extensions
 {

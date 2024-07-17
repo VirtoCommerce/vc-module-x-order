@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
@@ -53,7 +52,7 @@ namespace VirtoCommerce.XOrder.Core.Commands
         protected static NameValueCollection GetParameters(AuthorizePaymentCommand request)
         {
             var parameters = new NameValueCollection();
-            foreach (var param in request?.Parameters ?? Array.Empty<KeyValue>())
+            foreach (var param in request?.Parameters ?? [])
             {
                 parameters.Add(param.Key, param.Value);
             }

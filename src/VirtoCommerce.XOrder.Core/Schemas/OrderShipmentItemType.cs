@@ -1,5 +1,5 @@
-using VirtoCommerce.Xapi.Core.Schemas;
 using VirtoCommerce.OrdersModule.Core.Model;
+using VirtoCommerce.Xapi.Core.Schemas;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {

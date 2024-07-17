@@ -20,6 +20,6 @@ namespace VirtoCommerce.XOrder.Core.Models
 
         public string ActionHtmlForm { get; set; }
 
-        public Dictionary<string, string> PublicParameters { get; set; } = new();
+        public Dictionary<string, string> PublicParameters { get; set; } = [];
     }
 }

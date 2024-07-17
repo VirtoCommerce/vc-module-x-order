@@ -1,10 +1,10 @@
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
-using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.SearchModule.Core.Services;
+using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.XOrder.Core.Queries;
 using VirtoCommerce.XOrder.Data.Services;
 

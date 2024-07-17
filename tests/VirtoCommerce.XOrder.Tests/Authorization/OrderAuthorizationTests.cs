@@ -7,8 +7,8 @@ using Moq;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Services;
 using VirtoCommerce.OrdersModule.Core.Model;
-using VirtoCommerce.XOrder.Core.Authorization;
 using VirtoCommerce.XOrder.Core.Queries;
+using VirtoCommerce.XOrder.Data.Authorization;
 using Xunit;
 
 namespace VirtoCommerce.XOrder.Tests.Authorization
@@ -186,7 +186,7 @@ namespace VirtoCommerce.XOrder.Tests.Authorization
 
         [Theory]
         [MemberData(nameof(SearchOrganizationOrderQueryTestData))]
-        public async Task CanAccessOrderAuthorizationHandler_SearchOrganizationOrderQuery(SearchOrganizationOrderQuery query, bool successed)
+        public async Task CanAccessOrderAuthorizationHandler_SearchOrganizationOrderQuery(SearchOrganizationOrderQuery query, bool succeeded)
         {
             //Arrange    
             var requirements = new[] { new CanAccessOrderAuthorizationRequirement() };
@@ -200,7 +200,7 @@ namespace VirtoCommerce.XOrder.Tests.Authorization
             await subject.HandleAsync(context);
 
             //Assert
-            Assert.Equal(successed, context.HasSucceeded);
+            Assert.Equal(succeeded, context.HasSucceeded);
         }
     }
 }

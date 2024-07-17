@@ -1,7 +1,7 @@
 using GraphQL;
 using GraphQL.Types;
-using VirtoCommerce.Xapi.Core.Schemas;
 using VirtoCommerce.OrdersModule.Core.Model;
+using VirtoCommerce.Xapi.Core.Schemas;
 using VirtoCommerce.XOrder.Core.Extensions;
 using Money = VirtoCommerce.CoreModule.Core.Currency.Money;
 

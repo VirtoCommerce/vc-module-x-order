@@ -5,13 +5,13 @@ using GraphQL.Resolvers;
 using GraphQL.Types;
 using VirtoCommerce.CoreModule.Core.Currency;
 using VirtoCommerce.CustomerModule.Core.Services;
+using VirtoCommerce.OrdersModule.Core.Model;
+using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Xapi.Core.Extensions;
 using VirtoCommerce.Xapi.Core.Helpers;
 using VirtoCommerce.Xapi.Core.Models;
 using VirtoCommerce.Xapi.Core.Schemas;
 using VirtoCommerce.Xapi.Core.Services;
-using VirtoCommerce.OrdersModule.Core.Model;
-using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.XOrder.Core.Extensions;
 using OrderSettings = VirtoCommerce.OrdersModule.Core.ModuleConstants.Settings.General;
 

@@ -4,10 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CoreModule.Core.Currency;
-using VirtoCommerce.Xapi.Core.Extensions;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Xapi.Core.Extensions;
 using VirtoCommerce.XOrder.Core;
 using VirtoCommerce.XOrder.Core.Services;
 

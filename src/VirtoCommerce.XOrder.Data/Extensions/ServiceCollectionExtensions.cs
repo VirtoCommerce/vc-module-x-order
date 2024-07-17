@@ -4,20 +4,20 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.Xapi.Core.Extensions;
 using VirtoCommerce.Xapi.Core.Pipelines;
+using VirtoCommerce.XCart.Core.Models;
 using VirtoCommerce.XOrder.Core;
-using VirtoCommerce.XOrder.Core.Authorization;
 using VirtoCommerce.XOrder.Core.Services;
+using VirtoCommerce.XOrder.Data.Authorization;
 using VirtoCommerce.XOrder.Data.Middlewares;
 using VirtoCommerce.XOrder.Data.Services;
-using VirtoCommerce.XCart.Core.Models;
 
 namespace VirtoCommerce.XOrder.Data.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddXOrder(this IServiceCollection services, IGraphQLBuilder graphQlbuilder)
+        public static IServiceCollection AddXOrder(this IServiceCollection services, IGraphQLBuilder graphQLBuilder)
         {
-            graphQlbuilder.AddSchema(typeof(CoreAssemblyMarker), typeof(DataAssemblyMarker));
+            graphQLBuilder.AddSchema(typeof(CoreAssemblyMarker), typeof(DataAssemblyMarker));
 
             services.AddTransient<ICustomerOrderAggregateRepository, CustomerOrderAggregateRepository>();
             services.AddSingleton<IAuthorizationHandler, CanAccessOrderAuthorizationHandler>();

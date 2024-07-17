@@ -8,7 +8,7 @@ namespace VirtoCommerce.XOrder.Core.Validators
 {
     public class PaymentRequestValidator : AbstractValidator<PaymentInfo>
     {
-        private readonly PaymentStatus[] _invalidStates = new[] { PaymentStatus.Paid };
+        private readonly PaymentStatus[] _invalidStates = [PaymentStatus.Paid];
 
         public PaymentRequestValidator()
         {

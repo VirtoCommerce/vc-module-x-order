@@ -8,7 +8,7 @@ namespace VirtoCommerce.XOrder.Core.Validators
 {
     public class ProcessPaymentRequestValidator : AbstractValidator<ProcessPaymentRequest>
     {
-        private readonly PaymentStatus[] _availStatusesForProcessing = new[] { PaymentStatus.New, PaymentStatus.Custom };
+        private readonly PaymentStatus[] _availStatusesForProcessing = [PaymentStatus.New, PaymentStatus.Custom];
         public ProcessPaymentRequestValidator()
         {
             RuleFor(x => x.Order).NotNull();
