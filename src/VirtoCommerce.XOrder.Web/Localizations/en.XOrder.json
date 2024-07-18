@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "XOrder:create": "Create XOrder related data",
+    "XOrder:read": "View XOrder related data",
+    "XOrder:update": "Update XOrder related data",
+    "XOrder:delete": "Delete XOrder related data"
+  }
+}
