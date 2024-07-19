@@ -12,8 +12,8 @@
     <dependency id="VirtoCommerce.Orders" version="3.803.0" />
   </dependencies>
 
-  <title>VirtoCommerce XOrder module</title>
-  <description>VirtoCommerce XOrder module</description>
+  <title>Order Experience API</title>
+  <description>Focuses on order processing, providing robust support for order lifecycle management.</description>
 
   <authors>
     <author>Eugeny Tatarincev</author>
