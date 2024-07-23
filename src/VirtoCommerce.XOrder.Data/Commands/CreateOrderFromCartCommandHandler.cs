@@ -1,14 +1,12 @@
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GraphQL;
 using MediatR;
-using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CartModule.Core.Services;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Xapi.Core.Helpers;
 using VirtoCommerce.XCart.Core;
+using VirtoCommerce.XCart.Core.Queries;
 using VirtoCommerce.XCart.Core.Services;
 using VirtoCommerce.XCart.Core.Validators;
 using VirtoCommerce.XOrder.Core;
@@ -19,10 +17,10 @@ namespace VirtoCommerce.XOrder.Data.Commands
 {
     public class CreateOrderFromCartCommandHandler : IRequestHandler<CreateOrderFromCartCommand, CustomerOrderAggregate>
     {
-        private readonly IShoppingCartService _cartService;
         private readonly ICustomerOrderAggregateRepository _customerOrderAggregateRepository;
         private readonly ICartAggregateRepository _cartRepository;
         private readonly ICartValidationContextFactory _cartValidationContextFactory;
+        private readonly IMediator _mediator;
 
         public string ValidationRuleSet { get; set; } = "*";
 
@@ -30,18 +28,18 @@ namespace VirtoCommerce.XOrder.Data.Commands
             IShoppingCartService cartService,
             ICustomerOrderAggregateRepository customerOrderAggregateRepository,
             ICartAggregateRepository cartRepository,
-            ICartValidationContextFactory cartValidationContextFactory)
+            ICartValidationContextFactory cartValidationContextFactory,
+            IMediator mediator)
         {
-            _cartService = cartService;
             _customerOrderAggregateRepository = customerOrderAggregateRepository;
             _cartRepository = cartRepository;
             _cartValidationContextFactory = cartValidationContextFactory;
+            _mediator = mediator;
         }
 
         public virtual async Task<CustomerOrderAggregate> Handle(CreateOrderFromCartCommand request, CancellationToken cancellationToken)
         {
-            var cart = await _cartService.GetByIdAsync(request.CartId);
-            var cartAggregate = await _cartRepository.GetCartForShoppingCartAsync(cart);
+            var cartAggregate = await _mediator.Send(new GetCartByIdQuery { CartId = request.CartId });
 
             // remove unselected gifts before order create
             var unselectedGifts = cartAggregate.GiftItems.Where(x => !x.SelectedForCheckout).ToList();
@@ -59,7 +57,7 @@ namespace VirtoCommerce.XOrder.Data.Commands
                 await _cartRepository.SaveAsync(cartAggregate);
             }
 
-            var result = await _customerOrderAggregateRepository.CreateOrderFromCart(cart);
+            var result = await _customerOrderAggregateRepository.CreateOrderFromCart(cartAggregate.Cart);
 
             // remove selected items after order create
             var selectedLineItemIds = cartAggregate.SelectedLineItems.Select(x => x.Id).ToArray();
@@ -82,7 +80,7 @@ namespace VirtoCommerce.XOrder.Data.Commands
 
         protected virtual async Task ValidateCart(CartAggregate cartAggregate)
         {
-            var context = await _cartValidationContextFactory.CreateValidationContextAsync(cartAggregate);
+            var context = await _cartValidationContextFactory.CreateValidationContextAsync(cartAggregate, cartAggregate.CartProducts.Select(x => x.Value).ToList());
             await cartAggregate.ValidateAsync(context, ValidationRuleSet);
 
             var errors = cartAggregate.ValidationErrors;
@@ -91,13 +89,6 @@ namespace VirtoCommerce.XOrder.Data.Commands
                 var dictionary = errors.GroupBy(x => x.ErrorCode).ToDictionary(x => x.Key, x => x.Select(y => y.ErrorMessage).FirstOrDefault());
                 throw new ExecutionError("The cart has validation errors", dictionary) { Code = Constants.ValidationErrorCode };
             }
-        }
-
-        [Obsolete("Use ValidateCart(CartAggregate cartAggregate)()", DiagnosticId = "VC0005", UrlFormat = "https://docs.virtocommerce.org/products/products-virto3-versions/")]
-        protected virtual async Task ValidateCart(ShoppingCart cart)
-        {
-            var cartAggregate = await _cartRepository.GetCartForShoppingCartAsync(cart);
-            await ValidateCart(cartAggregate);
         }
     }
 }
