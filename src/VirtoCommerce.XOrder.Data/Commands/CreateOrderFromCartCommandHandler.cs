@@ -39,7 +39,7 @@ namespace VirtoCommerce.XOrder.Data.Commands
 
         public virtual async Task<CustomerOrderAggregate> Handle(CreateOrderFromCartCommand request, CancellationToken cancellationToken)
         {
-            var cartAggregate = await _mediator.Send(new GetCartByIdQuery { CartId = request.CartId });
+            var cartAggregate = await _mediator.Send(new GetCartByIdQuery { CartId = request.CartId }, cancellationToken);
 
             // remove unselected gifts before order create
             var unselectedGifts = cartAggregate.GiftItems.Where(x => !x.SelectedForCheckout).ToList();
