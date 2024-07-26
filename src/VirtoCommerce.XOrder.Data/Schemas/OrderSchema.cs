@@ -10,6 +10,7 @@ using VirtoCommerce.CoreModule.Core.Currency;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.PaymentModule.Model.Requests;
+using VirtoCommerce.Platform.Caching;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Xapi.Core.Extensions;
@@ -274,6 +275,8 @@ namespace VirtoCommerce.XOrder.Data.Schemas
 
         private async Task<CartAggregate> GetCartAggregateAsync(string cartId)
         {
+            GenericCachingRegion<CartAggregate>.ExpireTokenForKey(cartId);
+
             var cart = await _mediator.Send(new GetCartByIdQuery { CartId = cartId })
                 ?? throw new ArgumentException($"Cart does not exist, ID: '{cartId}'", nameof(cartId));
 
