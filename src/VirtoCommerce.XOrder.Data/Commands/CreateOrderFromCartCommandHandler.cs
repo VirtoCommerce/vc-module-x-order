@@ -1,10 +1,8 @@
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GraphQL;
 using MediatR;
-using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CartModule.Core.Services;
 using VirtoCommerce.CustomerModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
@@ -78,19 +76,6 @@ namespace VirtoCommerce.XOrder.Data.Commands
             return result;
         }
 
-        protected virtual async Task ValidateCart(CartAggregate cartAggregate)
-        {
-            var context = await _cartValidationContextFactory.CreateValidationContextAsync(cartAggregate);
-            await cartAggregate.ValidateAsync(context, ValidationRuleSet);
-
-            var errors = cartAggregate.ValidationErrors;
-            if (errors.Any())
-            {
-                var dictionary = errors.GroupBy(x => x.ErrorCode).ToDictionary(x => x.Key, x => x.Select(y => y.ErrorMessage).FirstOrDefault());
-                throw new ExecutionError("The cart has validation errors", dictionary) { Code = Constants.ValidationErrorCode };
-            }
-        }
-
         private async Task UpdateCart(CartAggregate cartAggregate)
         {
             // remove unselected gifts before order create
@@ -108,11 +93,17 @@ namespace VirtoCommerce.XOrder.Data.Commands
             }
         }
 
-        [Obsolete("Use ValidateCart(CartAggregate cartAggregate)()", DiagnosticId = "VC0005", UrlFormat = "https://docs.virtocommerce.org/products/products-virto3-versions/")]
-        protected virtual async Task ValidateCart(ShoppingCart cart)
+        protected virtual async Task ValidateCart(CartAggregate cartAggregate)
         {
-            var cartAggregate = await _cartRepository.GetCartForShoppingCartAsync(cart);
-            await ValidateCart(cartAggregate);
+            var context = await _cartValidationContextFactory.CreateValidationContextAsync(cartAggregate);
+            await cartAggregate.ValidateAsync(context, ValidationRuleSet);
+
+            var errors = cartAggregate.ValidationErrors;
+            if (errors.Any())
+            {
+                var dictionary = errors.GroupBy(x => x.ErrorCode).ToDictionary(x => x.Key, x => x.Select(y => y.ErrorMessage).FirstOrDefault());
+                throw new ExecutionError("The cart has validation errors", dictionary) { Code = Constants.ValidationErrorCode };
+            }
         }
     }
 }
