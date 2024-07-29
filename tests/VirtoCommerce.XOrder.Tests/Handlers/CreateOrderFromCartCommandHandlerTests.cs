@@ -63,6 +63,8 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
 
             var orderAggregateRepositoryMock = new Mock<ICustomerOrderAggregateRepository>();
 
+            var memberService = new Mock<IMemberService>();
+
             var request = new CreateOrderFromCartCommand(cart.Id);
 
             // Act
@@ -71,6 +73,7 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
                 orderAggregateRepositoryMock.Object,
                 aggregationService.Object,
                 validationContextMock.Object,
+                memberService.Object,
                 mediatorMock.Object);
 
             // Assert
@@ -126,11 +129,14 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
                 .Setup(x => x.Send(It.IsAny<GetCartByIdQuery>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(() => { return cartAggregate; });
 
+            var memberService = new Mock<IMemberService>();
+
             var handler = new CreateOrderFromCartCommandHandler(
                 cartService.Object,
                 customerAggrRep.Object,
                 cartAggrRepository.Object,
                 contextFactory.Object,
+                memberService.Object,
                 mediatorMock.Object)
             {
                 ValidationRuleSet = "default"

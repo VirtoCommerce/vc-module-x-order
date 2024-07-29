@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using GraphQL;
 using MediatR;
 using VirtoCommerce.CartModule.Core.Services;
+using VirtoCommerce.CustomerModule.Core.Services;
 using VirtoCommerce.Xapi.Core.Helpers;
 using VirtoCommerce.XCart.Core;
 using VirtoCommerce.XCart.Core.Queries;
@@ -20,6 +21,7 @@ namespace VirtoCommerce.XOrder.Data.Commands
         private readonly ICustomerOrderAggregateRepository _customerOrderAggregateRepository;
         private readonly ICartAggregateRepository _cartRepository;
         private readonly ICartValidationContextFactory _cartValidationContextFactory;
+        private readonly IMemberService _memberService;
         private readonly IMediator _mediator;
 
         public string ValidationRuleSet { get; set; } = "*";
@@ -29,11 +31,13 @@ namespace VirtoCommerce.XOrder.Data.Commands
             ICustomerOrderAggregateRepository customerOrderAggregateRepository,
             ICartAggregateRepository cartRepository,
             ICartValidationContextFactory cartValidationContextFactory,
+            IMemberService memberService,
             IMediator mediator)
         {
             _customerOrderAggregateRepository = customerOrderAggregateRepository;
             _cartRepository = cartRepository;
             _cartValidationContextFactory = cartValidationContextFactory;
+            _memberService = memberService;
             _mediator = mediator;
         }
 
@@ -41,13 +45,7 @@ namespace VirtoCommerce.XOrder.Data.Commands
         {
             var cartAggregate = await _mediator.Send(new GetCartByIdQuery { CartId = request.CartId }, cancellationToken);
 
-            // remove unselected gifts before order create
-            var unselectedGifts = cartAggregate.GiftItems.Where(x => !x.SelectedForCheckout).ToList();
-            if (unselectedGifts.Count != 0)
-            {
-                unselectedGifts.ForEach(x => cartAggregate.Cart.Items.Remove(x));
-            }
-
+            await UpdateCart(cartAggregate);
             await ValidateCart(cartAggregate);
 
             // need to check for unsaved gift items before creating an order and resave the cart, otherwise an exception will be thrown on order create
@@ -76,6 +74,23 @@ namespace VirtoCommerce.XOrder.Data.Commands
             await _cartRepository.SaveAsync(cartAggregate);
 
             return result;
+        }
+
+        protected virtual async Task UpdateCart(CartAggregate cartAggregate)
+        {
+            // remove unselected gifts before order create
+            var unselectedGifts = cartAggregate.GiftItems.Where(x => !x.SelectedForCheckout).ToList();
+            if (unselectedGifts.Count != 0)
+            {
+                unselectedGifts.ForEach(x => cartAggregate.Cart.Items.Remove(x));
+            }
+
+            // update organization name
+            if (!string.IsNullOrEmpty(cartAggregate.Cart.OrganizationId))
+            {
+                var organization = await _memberService.GetByIdAsync(cartAggregate.Cart.OrganizationId);
+                cartAggregate.Cart.OrganizationName = organization?.Name;
+            }
         }
 
         protected virtual async Task ValidateCart(CartAggregate cartAggregate)
