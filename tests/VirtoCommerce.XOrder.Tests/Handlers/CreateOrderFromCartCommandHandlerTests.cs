@@ -62,13 +62,16 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
 
             var orderAggregateRepositoryMock = new Mock<ICustomerOrderAggregateRepository>();
 
+            var memberService = new Mock<IMemberService>();
+
             var request = new CreateOrderFromCartCommand(cart.Id);
 
             var handler = new CreateOrderFromCartCommandHandler(
                 cartService.Object,
                 orderAggregateRepositoryMock.Object,
                 aggregationService.Object,
-                validationContextMock.Object);
+                validationContextMock.Object,
+                memberService.Object);
 
             // Assert
             return Assert.ThrowsAsync<ExecutionError>(() => handler.Handle(request, CancellationToken.None));
@@ -119,7 +122,9 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
             contextFactory.Setup(x => x.CreateValidationContextAsync(It.IsAny<CartAggregate>()))
                 .ReturnsAsync(new CartValidationContext());
 
-            var handler = new CreateOrderFromCartCommandHandler(cartService.Object, customerAggrRep.Object, cartAggrRep.Object, contextFactory.Object)
+            var memberService = new Mock<IMemberService>();
+
+            var handler = new CreateOrderFromCartCommandHandler(cartService.Object, customerAggrRep.Object, cartAggrRep.Object, contextFactory.Object, memberService.Object)
             {
                 ValidationRuleSet = "default"
             };
