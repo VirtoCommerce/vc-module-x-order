@@ -55,7 +55,7 @@ namespace VirtoCommerce.XOrder.Data.Commands
                 await _cartRepository.SaveAsync(cartAggregate);
             }
 
-            var result = await _customerOrderAggregateRepository.CreateOrderFromCart(cart);
+            var result = await _customerOrderAggregateRepository.CreateOrderFromCart(cartAggregate.Cart);
 
             // remove selected items after order create
             var selectedLineItemIds = cartAggregate.SelectedLineItems.Select(x => x.Id).ToArray();
