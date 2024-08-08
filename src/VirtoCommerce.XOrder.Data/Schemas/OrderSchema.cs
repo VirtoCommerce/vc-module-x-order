@@ -282,7 +282,7 @@ namespace VirtoCommerce.XOrder.Data.Schemas
 
         private async Task AuthorizeAsync(IResolveFieldContext context, object resource, bool allowAnonymous)
         {
-            await _userManagerCore.CheckUserState(context.GetCurrentUserId(), allowAnonymous);
+            await _userManagerCore.CheckCurrentUserState(context, allowAnonymous);
             var authorizationResult = await _authorizationService.AuthorizeAsync(context.GetCurrentPrincipal(), resource, new CanAccessOrderAuthorizationRequirement());
 
             if (!authorizationResult.Succeeded)

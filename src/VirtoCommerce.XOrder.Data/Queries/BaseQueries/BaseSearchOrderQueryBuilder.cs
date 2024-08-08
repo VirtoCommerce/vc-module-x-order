@@ -77,7 +77,7 @@ namespace VirtoCommerce.XOrder.Data.Queries.BaseQueries
 
         protected override async Task Authorize(IResolveFieldContext context, object resource, IAuthorizationRequirement requirement)
         {
-            await _userManagerCore.CheckUserState(context.GetCurrentUserId(), allowAnonymous: false);
+            await _userManagerCore.CheckCurrentUserState(context, allowAnonymous: false);
 
             await base.Authorize(context, resource, requirement);
         }
