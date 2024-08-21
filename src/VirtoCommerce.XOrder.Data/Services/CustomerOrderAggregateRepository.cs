@@ -37,13 +37,13 @@ namespace VirtoCommerce.XOrder.Data.Services
             var order = await _customerOrderService.GetByIdAsync(orderId);
             if (order != null)
             {
-                var result = await InnerGetCustomerOrderAggregatesFromCustomerOrdersAsync(new[] { order });
+                var result = await InnerGetCustomerOrderAggregatesFromCustomerOrdersAsync([order]);
                 return result.FirstOrDefault();
             }
             return null;
         }
 
-        public async Task<CustomerOrderAggregate> CreateOrderFromCart(ShoppingCart cart)
+        public virtual async Task<CustomerOrderAggregate> CreateOrderFromCart(ShoppingCart cart)
         {
             var order = await _customerOrderBuilder.PlaceCustomerOrderFromCartAsync(cart);
             var aggregates = await InnerGetCustomerOrderAggregatesFromCustomerOrdersAsync([order], order.LanguageCode);
@@ -52,7 +52,7 @@ namespace VirtoCommerce.XOrder.Data.Services
 
         public async Task<CustomerOrderAggregate> GetAggregateFromOrderAsync(CustomerOrder order)
         {
-            var result = await InnerGetCustomerOrderAggregatesFromCustomerOrdersAsync(new[] { order });
+            var result = await InnerGetCustomerOrderAggregatesFromCustomerOrdersAsync([order]);
             return result.FirstOrDefault();
         }
 
@@ -68,7 +68,7 @@ namespace VirtoCommerce.XOrder.Data.Services
             return orders.Select(x =>
             {
                 var aggregate = _customerOrderAggregateFactory();
-                aggregate.GrabCustomerOrder(x.Clone() as CustomerOrder, currencies.GetCurrencyForLanguage(x.Currency, cultureName ?? x.LanguageCode));
+                aggregate.GrabCustomerOrder(x.CloneTyped(), currencies.GetCurrencyForLanguage(x.Currency, cultureName ?? x.LanguageCode));
                 return aggregate;
             }).ToList();
         }
