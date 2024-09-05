@@ -30,6 +30,11 @@ namespace VirtoCommerce.XOrder.Data.Extensions
                 builder.AddMiddleware(typeof(EvalPromoContextOrderMiddleware));
             });
 
+            services.AddPipeline<ShipmentContextCartMap>(builder =>
+            {
+                builder.AddMiddleware(typeof(ShipmentContextMiddleware));
+            });
+
             return services;
         }
     }
