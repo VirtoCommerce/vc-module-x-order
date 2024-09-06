@@ -26,6 +26,12 @@ namespace VirtoCommerce.XOrder.Data.Middlewares
         {
             ArgumentNullException.ThrowIfNull(parameter);
 
+            await RunInternal(parameter);
+            await next(parameter);
+        }
+
+        protected virtual async Task RunInternal(ShipmentContextCartMap parameter)
+        {
             var shipment = parameter.Shipment;
             var shippingAddressPolicy = GetShippingPolicy(parameter);
 
@@ -41,17 +47,18 @@ namespace VirtoCommerce.XOrder.Data.Middlewares
             };
 
             var lastOrderResult = await _customerOrderSearchService.SearchNoCloneAsync(lastOrderCriteria);
-
-            if (lastOrderResult.Results.Count != 0)
+            if (lastOrderResult.Results.Count == 0)
             {
-                var order = lastOrderResult.Results[0];
-                var address = order.Addresses?.FirstOrDefault(x => x.AddressType == BillingAndShipping || x.AddressType == Shipping);
+                return;
+            }
 
-                if (address != null)
-                {
-                    var cartShipmentAddress = CreateCartShipmentAddress(address);
-                    parameter.Shipment.DeliveryAddress = cartShipmentAddress;
-                }
+            var order = lastOrderResult.Results[0];
+            var address = order.Addresses?.FirstOrDefault(x => x.AddressType == BillingAndShipping || x.AddressType == Shipping);
+
+            if (address != null)
+            {
+                var cartShipmentAddress = CreateCartShipmentAddress(address);
+                parameter.Shipment.DeliveryAddress = cartShipmentAddress;
             }
         }
 
