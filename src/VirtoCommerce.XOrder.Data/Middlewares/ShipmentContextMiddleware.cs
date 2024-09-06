@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using PipelineNet.Middleware;
@@ -24,10 +24,12 @@ namespace VirtoCommerce.XOrder.Data.Middlewares
 
         public async Task Run(ShipmentContextCartMap parameter, Func<ShipmentContextCartMap, Task> next)
         {
-            var shipment = parameter?.Shipment;
-            var shippingAddressPolicy = parameter?.CartAggregate?.Store?.Settings?.GetValue<string>(XOrderSetting.ShippingAddressPolicy);
+            ArgumentNullException.ThrowIfNull(parameter);
 
-            if (shipment.DeliveryAddress != null || !shippingAddressPolicy.EqualsInvariant(XOrderSetting.ShippingAddressPolicyPreviousOrder))
+            var shipment = parameter.Shipment;
+            var shippingAddressPolicy = GetShippingPolicy(parameter);
+
+            if (shipment?.DeliveryAddress != null || !shippingAddressPolicy.EqualsInvariant(XOrderSetting.ShippingAddressPolicyPreviousOrder))
             {
                 return;
             }
@@ -51,6 +53,11 @@ namespace VirtoCommerce.XOrder.Data.Middlewares
                     parameter.Shipment.DeliveryAddress = cartShipmentAddress;
                 }
             }
+        }
+
+        private static string GetShippingPolicy(ShipmentContextCartMap parameter)
+        {
+            return parameter.CartAggregate?.Store?.Settings?.GetValue<string>(XOrderSetting.ShippingAddressPolicy);
         }
 
         protected virtual Address CreateCartShipmentAddress(OrdersModule.Core.Model.Address address)
