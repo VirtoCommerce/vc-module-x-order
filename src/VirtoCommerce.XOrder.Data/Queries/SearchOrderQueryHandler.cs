@@ -53,6 +53,7 @@ namespace VirtoCommerce.XOrder.Data.Queries
             {
                 case SearchCustomerOrderQuery customerOrderQuery:
                     searchCriteriaBuilder = searchCriteriaBuilder.WithCustomerId(customerOrderQuery.CustomerId);
+                    searchCriteriaBuilder = searchCriteriaBuilder.WithOrganizationId(customerOrderQuery.OrganizationId);
                     break;
                 case SearchOrganizationOrderQuery organizationOrderQuery:
                     searchCriteriaBuilder = searchCriteriaBuilder.WithOrganizationId(organizationOrderQuery.OrganizationId);

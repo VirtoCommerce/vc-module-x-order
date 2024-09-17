@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using GraphQL;
 using GraphQL.Types;
 using VirtoCommerce.Xapi.Core.BaseQueries;
+using VirtoCommerce.Xapi.Core.Extensions;
 
 namespace VirtoCommerce.XOrder.Core.Queries
 {
@@ -10,6 +11,7 @@ namespace VirtoCommerce.XOrder.Core.Queries
         public string Filter { get; set; }
         public string Facet { get; set; }
         public string CultureName { get; set; }
+        public string OrganizationId { get; set; }
 
         public override IEnumerable<QueryArgument> GetArguments()
         {
@@ -26,6 +28,7 @@ namespace VirtoCommerce.XOrder.Core.Queries
             CultureName = context.GetArgument<string>(nameof(CultureName));
             Filter = context.GetArgument<string>(nameof(Filter));
             Facet = context.GetArgument<string>(nameof(Facet));
+            OrganizationId = context.GetCurrentOrganizationId();
         }
     }
 }

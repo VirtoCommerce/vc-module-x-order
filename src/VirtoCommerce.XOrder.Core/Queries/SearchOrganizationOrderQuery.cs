@@ -6,8 +6,6 @@ namespace VirtoCommerce.XOrder.Core.Queries
 {
     public class SearchOrganizationOrderQuery : SearchOrderQuery
     {
-        public string OrganizationId { get; set; }
-
         public override IEnumerable<QueryArgument> GetArguments()
         {
             foreach (var argument in base.GetArguments())
