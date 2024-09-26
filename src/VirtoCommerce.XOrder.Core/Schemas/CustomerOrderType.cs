@@ -52,6 +52,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             Field(x => x.Order.TaxType, nullable: true);
             Field(x => x.Order.TaxPercentRate, nullable: false);
             Field(x => x.Order.LanguageCode, nullable: true);
+            Field(x => x.Order.RelevanceScore, nullable: true);
             Field(x => x.Order.CreatedDate, nullable: false);
             Field(x => x.Order.CreatedBy, nullable: true);
             Field(x => x.Order.ModifiedDate, nullable: true);
