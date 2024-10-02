@@ -8,6 +8,7 @@
     <SonarQubeTestProject>false</SonarQubeTestProject>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\VirtoCommerce.XOrder.Core\VirtoCommerce.XOrder.Core.csproj" />
     <ProjectReference Include="..\VirtoCommerce.XOrder.Data\VirtoCommerce.XOrder.Data.csproj" />
   </ItemGroup>
 </Project>
