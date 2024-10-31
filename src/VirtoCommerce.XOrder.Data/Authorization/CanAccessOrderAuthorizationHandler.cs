@@ -6,6 +6,7 @@ using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Services;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.Platform.Core;
+using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Security.Authorization;
 using VirtoCommerce.XOrder.Core.Queries;
 
@@ -83,10 +84,9 @@ namespace VirtoCommerce.XOrder.Data.Authorization
             return MemberAssignedToOrganization(member, organizationId);
         }
 
-        private static string GetUserId(AuthorizationHandlerContext context)
+        private static string GetCurrentUserId(AuthorizationHandlerContext context)
         {
-            //PT-5375 use ClaimTypes instead of "name"
-            return context.User.FindFirstValue("name");
+            return context.User.GetUserId();
         }
 
         private static string GetMemberId(AuthorizationHandlerContext context)
