@@ -97,6 +97,8 @@ namespace VirtoCommerce.XOrder.Tests.Authorization
         [MemberData(nameof(GetSearchOrderQuery))]
         public async Task CanAccessOrderAuthorizationHandler_SearchOrdersBelongToUser_ShouldSucceed(SearchCustomerOrderQuery query)
         {
+            VirtoCommerce.Platform.Core.Security.ClaimsPrincipalExtensions.UserIdClaimTypes = ["name"];
+
             //Arrange    
             var requirements = new[] { new CanAccessOrderAuthorizationRequirement() };
             var userId = "userId";
@@ -188,6 +190,8 @@ namespace VirtoCommerce.XOrder.Tests.Authorization
         [MemberData(nameof(SearchOrganizationOrderQueryTestData))]
         public async Task CanAccessOrderAuthorizationHandler_SearchOrganizationOrderQuery(SearchOrganizationOrderQuery query, bool succeeded)
         {
+            VirtoCommerce.Platform.Core.Security.ClaimsPrincipalExtensions.UserIdClaimTypes = ["name"];
+
             //Arrange    
             var requirements = new[] { new CanAccessOrderAuthorizationRequirement() };
 
