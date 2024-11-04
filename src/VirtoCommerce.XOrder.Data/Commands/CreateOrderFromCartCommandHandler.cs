@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -71,6 +72,9 @@ namespace VirtoCommerce.XOrder.Data.Commands
             cartAggregate.Cart.Coupon = string.Empty;
             cartAggregate.Cart.DynamicProperties?.Clear();
 
+            // refresh CheckoutId with a new unique value after creating the order
+            cartAggregate.Cart.CheckoutId = Guid.NewGuid().ToString();
+
             await _cartRepository.SaveAsync(cartAggregate);
 
             return result;
@@ -98,7 +102,7 @@ namespace VirtoCommerce.XOrder.Data.Commands
             var context = await _cartValidationContextFactory.CreateValidationContextAsync(cartAggregate, cartAggregate.CartProducts.Select(x => x.Value).ToList());
             await cartAggregate.ValidateAsync(context, ValidationRuleSet);
 
-            var errors = cartAggregate.ValidationErrors;
+            var errors = cartAggregate.GetValidationErrors();
             if (errors.Any())
             {
                 var dictionary = errors.GroupBy(x => x.ErrorCode).ToDictionary(x => x.Key, x => x.Select(y => y.ErrorMessage).FirstOrDefault());
