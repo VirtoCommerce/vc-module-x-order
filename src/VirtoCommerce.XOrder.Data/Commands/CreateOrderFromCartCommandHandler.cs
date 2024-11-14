@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -70,6 +71,9 @@ namespace VirtoCommerce.XOrder.Data.Commands
             cartAggregate.Cart.Comment = string.Empty;
             cartAggregate.Cart.Coupon = string.Empty;
             cartAggregate.Cart.DynamicProperties?.Clear();
+
+            // refresh CheckoutId with a new unique value after creating the order
+            cartAggregate.Cart.CheckoutId = Guid.NewGuid().ToString();
 
             await _cartRepository.SaveAsync(cartAggregate);
 
