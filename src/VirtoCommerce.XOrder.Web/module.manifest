@@ -8,7 +8,7 @@
   <dependencies>
     <dependency id="VirtoCommerce.Orders" version="3.830.0" />
     <dependency id="VirtoCommerce.Xapi" version="3.809.0" />
-    <dependency id="VirtoCommerce.XCart" version="3.813.0" />
+    <dependency id="VirtoCommerce.XCart" version="3.814.0" />
     <dependency id="VirtoCommerce.XCatalog" version="3.813.0" />
   </dependencies>
 
