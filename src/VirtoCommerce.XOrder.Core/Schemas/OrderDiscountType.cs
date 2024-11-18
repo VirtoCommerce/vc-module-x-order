@@ -14,10 +14,10 @@ namespace VirtoCommerce.XOrder.Core.Schemas
                 "Order discount amount",
                 resolve: context => new Money(context.Source.DiscountAmount, context.GetOrderCurrency()));
             Field(x => x.Coupon, nullable: true);
-            Field<StringGraphType>("Description", resolve: context => context.Source.Description, deprecationReason: "Use the new PromotionDescription field instead");
-            Field<StringGraphType>("PromotionDescription", "Description of the promotion", resolve: context => context.Source.Description);
             Field(x => x.PromotionId, nullable: true);
             Field<StringGraphType>("PromotionName", "Name of the promotion", resolve: context => context.Source.Name);
+            Field<StringGraphType>("Description", resolve: context => context.Source.Description, deprecationReason: "Use the new PromotionDescription field instead");
+            Field<StringGraphType>("PromotionDescription", "Description of the promotion", resolve: context => context.Source.Description);
         }
     }
 }
