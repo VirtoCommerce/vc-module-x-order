@@ -1,0 +1,8 @@
+{
+  "settings": {
+    "XOrder.ShippingAddressPolicy": {
+      "title": "送货地址策略 (xAPI)",
+      "description": "启用/ 禁用在结账步骤中自动填写默认地址。这是一个店铺级设置"
+    }
+  }
+}
