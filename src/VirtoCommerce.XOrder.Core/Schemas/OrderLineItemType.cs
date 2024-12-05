@@ -85,6 +85,9 @@ namespace VirtoCommerce.XOrder.Core.Schemas
                 resolve: context => new Money(context.Source.ExtendedPrice, context.GetOrderCurrency()));
             Field<NonNullGraphType<MoneyType>>(nameof(LineItem.ExtendedPriceWithTax).ToCamelCase(),
                 resolve: context => new Money(context.Source.ExtendedPriceWithTax, context.GetOrderCurrency()));
+            Field<NonNullGraphType<BooleanGraphType>>("showPlacedPrice",
+                "Indicates whether the PlacedPrice should be visible to the customer",
+                resolve: context => context.Source.IsDiscountAmountRounded);
             Field<NonNullGraphType<MoneyType>>(nameof(LineItem.PlacedPrice).ToCamelCase(),
                 resolve: context => new Money(context.Source.PlacedPrice, context.GetOrderCurrency()));
             Field<NonNullGraphType<MoneyType>>(nameof(LineItem.PlacedPriceWithTax).ToCamelCase(),
