@@ -4,8 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.StoreModule.Core.Model;
+using VirtoCommerce.Xapi.Core.Extensions;
 using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.XOrder.Core;
+using VirtoCommerce.XOrder.Data;
 using VirtoCommerce.XOrder.Data.Extensions;
 
 namespace VirtoCommerce.XOrder.Web;
@@ -24,6 +26,8 @@ public class Module : IModule, IHasConfiguration
     public void PostInitialize(IApplicationBuilder appBuilder)
     {
         var serviceProvider = appBuilder.ApplicationServices;
+
+        appBuilder.UseScopedSchema<DataAssemblyMarker>("order");
 
         // settings
         var settingsRegistrar = serviceProvider.GetRequiredService<ISettingsRegistrar>();
