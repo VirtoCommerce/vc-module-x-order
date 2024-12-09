@@ -3,6 +3,7 @@ using GraphQL.Server;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.Xapi.Core.Extensions;
+using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.Xapi.Core.Pipelines;
 using VirtoCommerce.XCart.Core.Models;
 using VirtoCommerce.XOrder.Core;
@@ -18,6 +19,8 @@ namespace VirtoCommerce.XOrder.Data.Extensions
         public static IServiceCollection AddXOrder(this IServiceCollection services, IGraphQLBuilder graphQLBuilder)
         {
             graphQLBuilder.AddSchema(typeof(CoreAssemblyMarker), typeof(DataAssemblyMarker));
+
+            services.AddSingleton<ScopedSchemaFactory<DataAssemblyMarker>>();
 
             services.AddTransient<ICustomerOrderAggregateRepository, CustomerOrderAggregateRepository>();
             services.AddSingleton<IAuthorizationHandler, CanAccessOrderAuthorizationHandler>();
