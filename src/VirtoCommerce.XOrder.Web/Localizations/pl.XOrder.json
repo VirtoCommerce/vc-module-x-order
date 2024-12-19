@@ -1,0 +1,8 @@
+{
+  "settings": {
+    "XOrder.ShippingAddressPolicy": {
+      "title": "Polityka adresów wysyłki (xAPI)",
+      "description": "Włącz/ wyłącz domyślne uzupełnianie adresu podczas procesu realizacji zamówienia. To ustawienie na poziomie sklepu"
+    }
+  }
+}

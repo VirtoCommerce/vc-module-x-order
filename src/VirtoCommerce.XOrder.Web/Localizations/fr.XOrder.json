@@ -1,0 +1,8 @@
+{
+  "settings": {
+    "XOrder.ShippingAddressPolicy": {
+      "title": "Politique d'adresse de livraison (xAPI)",
+      "description": "Activer/ désactiver le préremplissage par défaut de l'adresse lors de l'étape de paiement. C'est un paramètre au niveau du magasin"
+    }
+  }
+}

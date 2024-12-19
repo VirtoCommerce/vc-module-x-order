@@ -1,0 +1,8 @@
+{
+  "settings": {
+    "XOrder.ShippingAddressPolicy": {
+      "title": "配送先住所ポリシー (xAPI)",
+      "description": "チェックアウト段階でデフォルトの住所を自動入力する設定を有効/ 無効にします。これはストアレベルの設定です"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "settings": {
+    "XOrder.ShippingAddressPolicy": {
+      "title": "Política de endereço de envio (xAPI)",
+      "description": "Habilitar/ desabilitar o preenchimento automático do endereço padrão na etapa de checkout. Esta é uma configuração no nível da loja"
+    }
+  }
+}
