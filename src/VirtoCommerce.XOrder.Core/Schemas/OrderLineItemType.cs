@@ -147,6 +147,11 @@ namespace VirtoCommerce.XOrder.Core.Schemas
                 "Customer order Line item dynamic property values",
                 QueryArgumentPresets.GetArgumentForDynamicProperties(),
                 context => dynamicPropertyResolverService.LoadDynamicPropertyValues(context.Source, context.GetCultureName()));
+
+            ExtendableField<ListGraphType<OrderConfigurationItemType>>(
+                "configurationItems",
+                "Configuration items for configurable product",
+                resolve: context => context.Source.ConfigurationItems ?? []);
         }
     }
 }
