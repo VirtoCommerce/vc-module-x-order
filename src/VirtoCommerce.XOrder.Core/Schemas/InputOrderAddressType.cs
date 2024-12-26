@@ -9,7 +9,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
     {
         public InputOrderAddressType()
         {
-            Field<StringGraphType>("id", resolve: context => context.Source.Key, description: "ID");
+            Field(x => x.Id, nullable: true).Description("ID");
             Field(x => x.City, nullable: true).Description("City");
             Field(x => x.CountryCode, nullable: true).Description("Country code");
             Field(x => x.CountryName, nullable: true).Description("Country name");

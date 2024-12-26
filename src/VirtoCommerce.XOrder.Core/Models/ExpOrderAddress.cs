@@ -7,7 +7,7 @@ namespace VirtoCommerce.XOrder.Core.Models
 {
     public class ExpOrderAddress
     {
-        public Optional<string> Id { get; set; }
+        public Optional<string> Id { get => Key; set => Key = value; }
         public Optional<string> Key { get; set; }
         public Optional<string> City { get; set; }
         public Optional<string> CountryCode { get; set; }
@@ -32,7 +32,6 @@ namespace VirtoCommerce.XOrder.Core.Models
         {
             address ??= AbstractTypeFactory<Address>.TryCreateInstance();
 
-            Optional.SetValue(Id, x => address.Key = x);
             Optional.SetValue(Key, x => address.Key = x);
             Optional.SetValue(City, x => address.City = x);
             Optional.SetValue(CountryCode, x => address.CountryCode = x);
