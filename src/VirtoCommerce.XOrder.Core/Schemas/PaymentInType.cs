@@ -69,7 +69,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             var vendorField = new FieldType
             {
                 Name = "vendor",
-                Type = GraphTypeExtenstionHelper.GetActualType<VendorType>(),
+                Type = GraphTypeExtensionHelper.GetActualType<VendorType>(),
                 Resolver = new FuncFieldResolver<PaymentIn, IDataLoaderResult<ExpVendor>>(context =>
                 {
                     return dataLoader.LoadVendor(memberService, mapper, loaderKey: "order_vendor", vendorId: context.Source.VendorId);

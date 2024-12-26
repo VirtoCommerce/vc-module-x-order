@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using GraphQL.Types;
-using GraphQL.Types.Relay;
 using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.Xapi.Core.Models.Facets;
+using VirtoCommerce.Xapi.Core.Schemas;
 using CoreFacets = VirtoCommerce.Xapi.Core.Schemas.Facets;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class CustomerOrderConnectionType<TNodeType> : ConnectionType<TNodeType, EdgeType<TNodeType>>
+    public class CustomerOrderConnectionType<TNodeType> : ExtendableConnectionType<TNodeType>
         where TNodeType : IGraphType
     {
         public CustomerOrderConnectionType()

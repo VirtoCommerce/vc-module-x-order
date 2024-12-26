@@ -7,7 +7,7 @@ using VirtoCommerce.XOrder.Core.Extensions;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class OrderPaymentMethodType : ObjectGraphType<PaymentMethod>
+    public class OrderPaymentMethodType : ExtendableGraphType<PaymentMethod>
     {
         public OrderPaymentMethodType()
         {

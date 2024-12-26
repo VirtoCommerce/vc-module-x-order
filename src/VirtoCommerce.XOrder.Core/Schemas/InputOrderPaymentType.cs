@@ -4,7 +4,7 @@ using VirtoCommerce.XOrder.Core.Models;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class InputOrderPaymentType : InputObjectGraphType<ExpOrderPayment>
+    public class InputOrderPaymentType : ExtendableInputGraphType<ExpOrderPayment>
     {
         public InputOrderPaymentType()
         {

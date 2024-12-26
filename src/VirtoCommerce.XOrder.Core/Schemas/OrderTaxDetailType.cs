@@ -7,7 +7,7 @@ using VirtoCommerce.XOrder.Core.Extensions;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class OrderTaxDetailType : ObjectGraphType<TaxDetail>
+    public class OrderTaxDetailType : ExtendableGraphType<TaxDetail>
     {
         public OrderTaxDetailType()
         {

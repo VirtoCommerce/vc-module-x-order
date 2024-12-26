@@ -1,8 +1,9 @@
 using GraphQL.Types;
+using VirtoCommerce.Xapi.Core.Schemas;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class InputInitializePaymentType : InputObjectGraphType
+    public class InputInitializePaymentType : ExtendableInputGraphType
     {
         public InputInitializePaymentType()
         {

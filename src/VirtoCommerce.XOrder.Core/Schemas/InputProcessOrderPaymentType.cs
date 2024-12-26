@@ -1,8 +1,9 @@
 using GraphQL.Types;
+using VirtoCommerce.Xapi.Core.Schemas;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class InputProcessOrderPaymentType : InputObjectGraphType
+    public class InputProcessOrderPaymentType : ExtendableInputGraphType
     {
         public InputProcessOrderPaymentType()
         {

@@ -1,9 +1,10 @@
 using GraphQL.Types;
 using VirtoCommerce.OrdersModule.Core.Model;
+using VirtoCommerce.Xapi.Core.Schemas;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class OrderAddressType : ObjectGraphType<Address>
+    public class OrderAddressType : ExtendableGraphType<Address>
     {
         public OrderAddressType()
         {

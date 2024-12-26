@@ -6,7 +6,7 @@ using VirtoCommerce.XOrder.Core.Extensions;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class OrderDiscountType : ObjectGraphType<Discount>
+    public class OrderDiscountType : ExtendableGraphType<Discount>
     {
         public OrderDiscountType()
         {

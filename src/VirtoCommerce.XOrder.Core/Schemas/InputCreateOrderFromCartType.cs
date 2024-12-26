@@ -1,8 +1,9 @@
 using GraphQL.Types;
+using VirtoCommerce.Xapi.Core.Schemas;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class InputCreateOrderFromCartType : InputObjectGraphType
+    public class InputCreateOrderFromCartType : ExtendableInputGraphType
     {
         public InputCreateOrderFromCartType()
         {

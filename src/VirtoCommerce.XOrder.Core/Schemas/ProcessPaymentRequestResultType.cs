@@ -1,9 +1,10 @@
 using GraphQL.Types;
 using VirtoCommerce.PaymentModule.Model.Requests;
+using VirtoCommerce.Xapi.Core.Schemas;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class ProcessPaymentRequestResultType : ObjectGraphType<ProcessPaymentRequestResult>
+    public class ProcessPaymentRequestResultType : ExtendableGraphType<ProcessPaymentRequestResult>
     {
         public ProcessPaymentRequestResultType()
         {

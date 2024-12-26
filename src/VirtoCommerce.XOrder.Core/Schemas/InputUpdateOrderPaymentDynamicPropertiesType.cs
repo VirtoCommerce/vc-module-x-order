@@ -3,7 +3,7 @@ using VirtoCommerce.Xapi.Core.Schemas;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class InputUpdateOrderPaymentDynamicPropertiesType : InputObjectGraphType
+    public class InputUpdateOrderPaymentDynamicPropertiesType : ExtendableInputGraphType
     {
         public InputUpdateOrderPaymentDynamicPropertiesType()
         {

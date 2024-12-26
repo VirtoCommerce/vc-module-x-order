@@ -7,7 +7,7 @@ using VirtoCommerce.XOrder.Core.Models;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class InitializePaymentResultType : ObjectGraphType<InitializePaymentResult>
+    public class InitializePaymentResultType : ExtendableGraphType<InitializePaymentResult>
     {
         public InitializePaymentResultType()
         {

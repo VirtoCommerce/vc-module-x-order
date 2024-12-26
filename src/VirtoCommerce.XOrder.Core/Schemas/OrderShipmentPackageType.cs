@@ -1,9 +1,10 @@
 using GraphQL.Types;
 using VirtoCommerce.OrdersModule.Core.Model;
+using VirtoCommerce.Xapi.Core.Schemas;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class OrderShipmentPackageType : ObjectGraphType<ShipmentPackage>
+    public class OrderShipmentPackageType : ExtendableGraphType<ShipmentPackage>
     {
         public OrderShipmentPackageType()
         {

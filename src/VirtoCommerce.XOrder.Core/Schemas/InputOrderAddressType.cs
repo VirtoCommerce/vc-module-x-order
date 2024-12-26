@@ -1,10 +1,11 @@
 using GraphQL.Types;
 using VirtoCommerce.OrdersModule.Core.Model;
+using VirtoCommerce.Xapi.Core.Schemas;
 using VirtoCommerce.XOrder.Core.Models;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class InputOrderAddressType : InputObjectGraphType<ExpOrderAddress>
+    public class InputOrderAddressType : ExtendableInputGraphType<ExpOrderAddress>
     {
         public InputOrderAddressType()
         {

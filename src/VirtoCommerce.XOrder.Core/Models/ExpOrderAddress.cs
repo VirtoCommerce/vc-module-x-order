@@ -5,8 +5,9 @@ using Address = VirtoCommerce.OrdersModule.Core.Model.Address;
 
 namespace VirtoCommerce.XOrder.Core.Models
 {
-    public sealed class ExpOrderAddress
+    public class ExpOrderAddress
     {
+        public Optional<string> Id { get; set; }
         public Optional<string> Key { get; set; }
         public Optional<string> City { get; set; }
         public Optional<string> CountryCode { get; set; }
@@ -27,10 +28,11 @@ namespace VirtoCommerce.XOrder.Core.Models
         public Optional<string> OuterId { get; set; }
         public Optional<int> AddressType { get; set; }
 
-        public Address MapTo(Address address)
+        public virtual Address MapTo(Address address)
         {
             address ??= AbstractTypeFactory<Address>.TryCreateInstance();
 
+            Optional.SetValue(Id, x => address.Key = x);
             Optional.SetValue(Key, x => address.Key = x);
             Optional.SetValue(City, x => address.City = x);
             Optional.SetValue(CountryCode, x => address.CountryCode = x);

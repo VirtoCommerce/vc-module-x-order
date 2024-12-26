@@ -3,7 +3,7 @@ using VirtoCommerce.Xapi.Core.Schemas;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class InputAuthorizePaymentType : InputObjectGraphType
+    public class InputAuthorizePaymentType : ExtendableInputGraphType
     {
         public InputAuthorizePaymentType()
         {

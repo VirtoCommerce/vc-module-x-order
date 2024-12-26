@@ -36,8 +36,8 @@ namespace VirtoCommerce.XOrder.Data.Queries.BaseQueries
 
         protected override FieldType GetFieldType()
         {
-            var builder = GraphTypeExtenstionHelper.CreateConnection<CustomerOrderType, EdgeType<CustomerOrderType>, CustomerOrderConnectionType<CustomerOrderType>, object>()
-                .Name(Name)
+            var builder = GraphTypeExtensionHelper
+                .CreateConnection<CustomerOrderType, EdgeType<CustomerOrderType>, CustomerOrderConnectionType<CustomerOrderType>, object>(Name)
                 .PageSize(Connections.DefaultPageSize);
 
             ConfigureArguments(builder.FieldType);

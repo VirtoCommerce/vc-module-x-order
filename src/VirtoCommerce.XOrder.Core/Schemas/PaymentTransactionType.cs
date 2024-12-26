@@ -7,7 +7,7 @@ using Money = VirtoCommerce.CoreModule.Core.Currency.Money;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class PaymentTransactionType : ObjectGraphType<PaymentGatewayTransaction>
+    public class PaymentTransactionType : ExtendableGraphType<PaymentGatewayTransaction>
     {
         public PaymentTransactionType()
         {

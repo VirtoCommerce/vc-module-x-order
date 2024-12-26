@@ -106,7 +106,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             var productField = new FieldType
             {
                 Name = "product",
-                Type = GraphTypeExtenstionHelper.GetActualType<ProductType>(),
+                Type = GraphTypeExtensionHelper.GetActualType<ProductType>(),
                 Resolver = new FuncFieldResolver<LineItem, IDataLoaderResult<ExpProduct>>(context =>
                 {
                     var includeFields = context.SubFields.Values.GetAllNodesPaths(context).ToArray();
@@ -141,7 +141,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             var vendorField = new FieldType
             {
                 Name = "vendor",
-                Type = GraphTypeExtenstionHelper.GetActualType<VendorType>(),
+                Type = GraphTypeExtensionHelper.GetActualType<VendorType>(),
                 Resolver = new FuncFieldResolver<LineItem, IDataLoaderResult<ExpVendor>>(context =>
                 {
                     return dataLoader.LoadVendor(memberService, mapper, loaderKey: "order_vendor", vendorId: context.Source.VendorId);
