@@ -32,8 +32,7 @@ public class Module : IModule, IHasConfiguration
     {
         var serviceProvider = appBuilder.ApplicationServices;
 
-        // disable scoped schema for now
-        //appBuilder.UseScopedSchema<DataAssemblyMarker>("order");
+        appBuilder.UseScopedSchema<DataAssemblyMarker>("order");
 
         // settings
         var settingsRegistrar = serviceProvider.GetRequiredService<ISettingsRegistrar>();
