@@ -1,18 +1,17 @@
 using GraphQL.Types;
-using VirtoCommerce.Xapi.Core.Schemas;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class InputProcessOrderPaymentType : ExtendableInputGraphType
+    public class InputProcessOrderPaymentType : InputObjectGraphType
     {
         public InputProcessOrderPaymentType()
         {
-            Field<NonNullGraphType<StringGraphType>>("orderId",
-                "Order ID");
-            Field<NonNullGraphType<StringGraphType>>("paymentId",
-                "Payment ID");
-            Field<InputOrderBankCardInfoType>("bankCardInfo",
-                "Credit card details");
+            Field<NonNullGraphType<StringGraphType>>("orderId")
+                .Description("Order ID");
+            Field<NonNullGraphType<StringGraphType>>("paymentId")
+                .Description("Payment ID");
+            Field<InputOrderBankCardInfoType>("bankCardInfo")
+                .Description("Credit card details");
         }
     }
 }

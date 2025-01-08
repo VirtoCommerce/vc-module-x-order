@@ -1,16 +1,15 @@
 using GraphQL.Types;
-using VirtoCommerce.Xapi.Core.Schemas;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class InputChangeOrderStatusType : ExtendableInputGraphType
+    public class InputChangeOrderStatusType : InputObjectGraphType
     {
         public InputChangeOrderStatusType()
         {
-            Field<NonNullGraphType<StringGraphType>>("orderId",
-                "Order ID");
-            Field<NonNullGraphType<StringGraphType>>("status",
-                "Order status");
+            Field<NonNullGraphType<StringGraphType>>("orderId")
+                .Description("Order ID");
+            Field<NonNullGraphType<StringGraphType>>("status")
+                .Description("Order status");
         }
     }
 }

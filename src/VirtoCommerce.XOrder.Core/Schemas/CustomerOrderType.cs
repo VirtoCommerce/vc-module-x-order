@@ -57,64 +57,64 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             Field(x => x.Order.ModifiedDate, nullable: true);
             Field(x => x.Order.ModifiedBy, nullable: true);
 
-            Field<NonNullGraphType<CurrencyType>>(nameof(CustomerOrder.Currency).ToCamelCase(),
-                resolve: context => context.Source.Currency);
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.Total).ToCamelCase(),
-                resolve: context => new Money(context.Source.Order.Total, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.TaxTotal).ToCamelCase(),
-                resolve: context => new Money(context.Source.Order.TaxTotal, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.DiscountAmount).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.DiscountAmount, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.SubTotal).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.SubTotal, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.SubTotalWithTax).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.SubTotalWithTax, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.SubTotalDiscount).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.SubTotalDiscount, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.SubTotalDiscountWithTax).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.SubTotalDiscountWithTax, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.SubTotalTaxTotal).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.SubTotalTaxTotal, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.ShippingTotal).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.ShippingTotal, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.ShippingTotalWithTax).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.ShippingTotalWithTax, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.ShippingSubTotal).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.ShippingSubTotal, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.ShippingSubTotalWithTax).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.ShippingSubTotalWithTax, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.ShippingDiscountTotal).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.ShippingDiscountTotal, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.ShippingDiscountTotalWithTax).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.ShippingDiscountTotalWithTax, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.ShippingTaxTotal).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.ShippingTaxTotal, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.PaymentTotal).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.PaymentTotal, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.PaymentTotalWithTax).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.PaymentTotalWithTax, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.PaymentSubTotal).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.PaymentSubTotal, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.PaymentSubTotalWithTax).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.PaymentSubTotalWithTax, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.PaymentDiscountTotal).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.PaymentDiscountTotal, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.PaymentDiscountTotalWithTax).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.PaymentDiscountTotalWithTax, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.PaymentTaxTotal).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.PaymentTaxTotal, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.DiscountTotal).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.DiscountTotal, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.DiscountTotalWithTax).ToCamelCase(),
-                 resolve: context => new Money(context.Source.Order.DiscountTotalWithTax, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.Fee).ToCamelCase(),
-                resolve: context => new Money(context.Source.Order.Fee, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.FeeWithTax).ToCamelCase(),
-                resolve: context => new Money(context.Source.Order.FeeWithTax, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.FeeTotal).ToCamelCase(),
-                resolve: context => new Money(context.Source.Order.FeeTotal, context.Source.Currency));
-            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.FeeTotalWithTax).ToCamelCase(),
-                resolve: context => new Money(context.Source.Order.FeeTotalWithTax, context.Source.Currency));
+            Field<NonNullGraphType<CurrencyType>>(nameof(CustomerOrder.Currency).ToCamelCase())
+                .Resolve(context => context.Source.Currency);
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.Total).ToCamelCase())
+                .Resolve(context => new Money(context.Source.Order.Total, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.TaxTotal).ToCamelCase())
+                .Resolve(context => new Money(context.Source.Order.TaxTotal, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.DiscountAmount).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.DiscountAmount, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.SubTotal).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.SubTotal, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.SubTotalWithTax).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.SubTotalWithTax, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.SubTotalDiscount).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.SubTotalDiscount, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.SubTotalDiscountWithTax).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.SubTotalDiscountWithTax, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.SubTotalTaxTotal).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.SubTotalTaxTotal, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.ShippingTotal).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.ShippingTotal, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.ShippingTotalWithTax).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.ShippingTotalWithTax, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.ShippingSubTotal).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.ShippingSubTotal, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.ShippingSubTotalWithTax).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.ShippingSubTotalWithTax, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.ShippingDiscountTotal).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.ShippingDiscountTotal, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.ShippingDiscountTotalWithTax).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.ShippingDiscountTotalWithTax, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.ShippingTaxTotal).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.ShippingTaxTotal, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.PaymentTotal).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.PaymentTotal, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.PaymentTotalWithTax).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.PaymentTotalWithTax, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.PaymentSubTotal).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.PaymentSubTotal, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.PaymentSubTotalWithTax).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.PaymentSubTotalWithTax, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.PaymentDiscountTotal).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.PaymentDiscountTotal, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.PaymentDiscountTotalWithTax).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.PaymentDiscountTotalWithTax, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.PaymentTaxTotal).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.PaymentTaxTotal, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.DiscountTotal).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.DiscountTotal, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.DiscountTotalWithTax).ToCamelCase())
+                 .Resolve(context => new Money(context.Source.Order.DiscountTotalWithTax, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.Fee).ToCamelCase())
+                .Resolve(context => new Money(context.Source.Order.Fee, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.FeeWithTax).ToCamelCase())
+                .Resolve(context => new Money(context.Source.Order.FeeWithTax, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.FeeTotal).ToCamelCase())
+                .Resolve(context => new Money(context.Source.Order.FeeTotal, context.Source.Currency));
+            Field<NonNullGraphType<MoneyType>>(nameof(CustomerOrder.FeeTotalWithTax).ToCamelCase())
+                .Resolve(context => new Money(context.Source.Order.FeeTotalWithTax, context.Source.Currency));
 
             ExtendableField<NonNullGraphType<ListGraphType<NonNullGraphType<OrderAddressType>>>>(nameof(CustomerOrder.Addresses),
                 resolve: x => x.Source.Order.Addresses);
@@ -149,7 +149,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
 
             ExtendableField<NonNullGraphType<ListGraphType<NonNullGraphType<OrderShipmentType>>>>(nameof(CustomerOrder.Shipments), resolve: x => x.Source.Order.Shipments);
 
-            Field<NonNullGraphType<ListGraphType<NonNullGraphType<OrderTaxDetailType>>>>(nameof(CustomerOrder.TaxDetails), resolve: x => x.Source.Order.TaxDetails);
+            Field<NonNullGraphType<ListGraphType<NonNullGraphType<OrderTaxDetailType>>>>(nameof(CustomerOrder.TaxDetails)).Resolve(x => x.Source.Order.TaxDetails);
 
             ExtendableField<NonNullGraphType<ListGraphType<NonNullGraphType<DynamicPropertyValueType>>>>(
                 "dynamicProperties",

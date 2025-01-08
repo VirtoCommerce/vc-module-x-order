@@ -21,7 +21,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             Field(x => x.PaymentActionType, nullable: true);
             Field(x => x.ActionRedirectUrl, nullable: true);
             Field(x => x.ActionHtmlForm, nullable: true);
-            Field<ListGraphType<KeyValueType>>(nameof(InitializePaymentResult.PublicParameters).ToCamelCase(), resolve: context =>
+            Field<ListGraphType<KeyValueType>>(nameof(InitializePaymentResult.PublicParameters).ToCamelCase()).Resolve(context =>
                 context.Source.PublicParameters?.Select(x => new KeyValue { Key = x.Key, Value = x.Value }));
         }
     }

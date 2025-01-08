@@ -4,7 +4,7 @@ using VirtoCommerce.XOrder.Core.Models;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class InputOrderPaymentType : ExtendableInputGraphType<ExpOrderPayment>
+    public class InputOrderPaymentType : InputObjectGraphType<ExpOrderPayment>
     {
         public InputOrderPaymentType()
         {
@@ -18,7 +18,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             Field(x => x.Comment, nullable: true).Description("Text comment");
 
             Field<InputOrderAddressType>("billingAddress");
-            Field<ListGraphType<InputDynamicPropertyValueType>>("dynamicProperties", "Dynamic properties");
+            Field<ListGraphType<InputDynamicPropertyValueType>>("dynamicProperties").Description("Dynamic properties");
         }
     }
 }

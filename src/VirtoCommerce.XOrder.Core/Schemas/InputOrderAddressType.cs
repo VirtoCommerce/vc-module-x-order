@@ -1,21 +1,20 @@
 using GraphQL.Types;
 using VirtoCommerce.OrdersModule.Core.Model;
-using VirtoCommerce.Xapi.Core.Schemas;
 using VirtoCommerce.XOrder.Core.Models;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class InputOrderAddressType : ExtendableInputGraphType<ExpOrderAddress>
+    public class InputOrderAddressType : InputObjectGraphType<ExpOrderAddress>
     {
         public InputOrderAddressType()
         {
             Field(x => x.Id, nullable: true).Description("ID");
+            Field(x => x.Key, nullable: true).Description("Id");
             Field(x => x.City, nullable: true).Description("City");
             Field(x => x.CountryCode, nullable: true).Description("Country code");
             Field(x => x.CountryName, nullable: true).Description("Country name");
             Field(x => x.Email, nullable: true).Description("Email");
             Field(x => x.FirstName, nullable: true).Description("First name");
-            Field(x => x.Key, nullable: true).Description("Id");
             Field(x => x.LastName, nullable: true).Description("Last name");
             Field(x => x.Line1, nullable: true).Description("Line1");
             Field(x => x.Line2, nullable: true).Description("Line2");

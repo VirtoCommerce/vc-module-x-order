@@ -3,13 +3,13 @@ using VirtoCommerce.Xapi.Core.Schemas;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class InputAuthorizePaymentType : ExtendableInputGraphType
+    public class InputAuthorizePaymentType : InputObjectGraphType
     {
         public InputAuthorizePaymentType()
         {
-            Field<StringGraphType>("orderId", "Order Id");
-            Field<NonNullGraphType<StringGraphType>>("paymentId", "Payment Id");
-            Field<ListGraphType<InputKeyValueType>>("parameters", "Input parameters");
+            Field<StringGraphType>("orderId").Description("Order Id");
+            Field<NonNullGraphType<StringGraphType>>("paymentId").Description("Payment Id");
+            Field<ListGraphType<InputKeyValueType>>("parameters").Description("Input parameters");
         }
     }
 }

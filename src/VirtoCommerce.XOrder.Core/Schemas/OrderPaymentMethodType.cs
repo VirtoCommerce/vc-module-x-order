@@ -21,35 +21,35 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             Field(x => x.TypeName, nullable: false);
             Field(x => x.StoreId, nullable: true);
 
-            Field<NonNullGraphType<CurrencyType>>(nameof(PaymentMethod.Currency).ToCamelCase(),
-                resolve: context => context.GetOrderCurrency());
+            Field<NonNullGraphType<CurrencyType>>(nameof(PaymentMethod.Currency).ToCamelCase())
+                .Resolve(context => context.GetOrderCurrency());
 
-            Field<NonNullGraphType<MoneyType>>(nameof(PaymentMethod.Price).ToCamelCase(),
-                resolve: context => new Money(context.Source.Price, context.GetOrderCurrency()));
-            Field<NonNullGraphType<MoneyType>>(nameof(PaymentMethod.PriceWithTax).ToCamelCase(),
-                resolve: context => new Money(context.Source.PriceWithTax, context.GetOrderCurrency()));
+            Field<NonNullGraphType<MoneyType>>(nameof(PaymentMethod.Price).ToCamelCase())
+                .Resolve(context => new Money(context.Source.Price, context.GetOrderCurrency()));
+            Field<NonNullGraphType<MoneyType>>(nameof(PaymentMethod.PriceWithTax).ToCamelCase())
+                .Resolve(context => new Money(context.Source.PriceWithTax, context.GetOrderCurrency()));
 
-            Field<NonNullGraphType<MoneyType>>(nameof(PaymentMethod.DiscountAmount).ToCamelCase(),
-                resolve: context => new Money(context.Source.DiscountAmount, context.GetOrderCurrency()));
-            Field<NonNullGraphType<MoneyType>>(nameof(PaymentMethod.DiscountAmountWithTax).ToCamelCase(),
-                resolve: context => new Money(context.Source.DiscountAmountWithTax, context.GetOrderCurrency()));
+            Field<NonNullGraphType<MoneyType>>(nameof(PaymentMethod.DiscountAmount).ToCamelCase())
+                .Resolve(context => new Money(context.Source.DiscountAmount, context.GetOrderCurrency()));
+            Field<NonNullGraphType<MoneyType>>(nameof(PaymentMethod.DiscountAmountWithTax).ToCamelCase())
+                .Resolve(context => new Money(context.Source.DiscountAmountWithTax, context.GetOrderCurrency()));
 
-            Field<NonNullGraphType<MoneyType>>(nameof(PaymentMethod.Total).ToCamelCase(),
-                resolve: context => new Money(context.Source.Total, context.GetOrderCurrency()));
-            Field<NonNullGraphType<MoneyType>>(nameof(PaymentMethod.TotalWithTax).ToCamelCase(),
-                resolve: context => new Money(context.Source.TotalWithTax, context.GetOrderCurrency()));
+            Field<NonNullGraphType<MoneyType>>(nameof(PaymentMethod.Total).ToCamelCase())
+                .Resolve(context => new Money(context.Source.Total, context.GetOrderCurrency()));
+            Field<NonNullGraphType<MoneyType>>(nameof(PaymentMethod.TotalWithTax).ToCamelCase())
+                .Resolve(context => new Money(context.Source.TotalWithTax, context.GetOrderCurrency()));
 
             Field(x => x.TaxType, nullable: true);
             Field(x => x.TaxPercentRate, nullable: false);
-            Field<NonNullGraphType<MoneyType>>(nameof(PaymentMethod.TaxTotal).ToCamelCase(),
-                resolve: context => new Money(context.Source.TaxTotal, context.GetOrderCurrency()));
-            Field<ListGraphType<NonNullGraphType<OrderTaxDetailType>>>(nameof(PaymentMethod.TaxDetails),
-                resolve: x => x.Source.TaxDetails);
+            Field<NonNullGraphType<MoneyType>>(nameof(PaymentMethod.TaxTotal).ToCamelCase())
+                .Resolve(context => new Money(context.Source.TaxTotal, context.GetOrderCurrency()));
+            Field<ListGraphType<NonNullGraphType<OrderTaxDetailType>>>(nameof(PaymentMethod.TaxDetails))
+                .Resolve(x => x.Source.TaxDetails);
 
-            Field<NonNullGraphType<IntGraphType>>(nameof(PaymentMethod.PaymentMethodType),
-                resolve: context => (int)context.Source.PaymentMethodType);
-            Field<NonNullGraphType<IntGraphType>>(nameof(PaymentMethod.PaymentMethodGroupType),
-                resolve: context => (int)context.Source.PaymentMethodGroupType);
+            Field<NonNullGraphType<IntGraphType>>(nameof(PaymentMethod.PaymentMethodType))
+                .Resolve(context => (int)context.Source.PaymentMethodType);
+            Field<NonNullGraphType<IntGraphType>>(nameof(PaymentMethod.PaymentMethodGroupType))
+                .Resolve(context => (int)context.Source.PaymentMethodGroupType);
         }
     }
 }
