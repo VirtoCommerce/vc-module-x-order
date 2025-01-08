@@ -151,11 +151,11 @@ namespace VirtoCommerce.XOrder.Core.Schemas
 
             Field<NonNullGraphType<ListGraphType<NonNullGraphType<OrderTaxDetailType>>>>(nameof(CustomerOrder.TaxDetails)).Resolve(x => x.Source.Order.TaxDetails);
 
-            ExtendableField<NonNullGraphType<ListGraphType<NonNullGraphType<DynamicPropertyValueType>>>>(
+            ExtendableFieldAsync<NonNullGraphType<ListGraphType<NonNullGraphType<DynamicPropertyValueType>>>>(
                 "dynamicProperties",
                 "Customer order dynamic property values",
                 QueryArgumentPresets.GetArgumentForDynamicProperties(),
-                context => dynamicPropertyResolverService.LoadDynamicPropertyValues(context.Source.Order, context.GetCultureName()));
+                async context => await dynamicPropertyResolverService.LoadDynamicPropertyValues(context.Source.Order, context.GetCultureName()));
 
             ExtendableField<NonNullGraphType<ListGraphType<NonNullGraphType<StringGraphType>>>>("coupons", resolve: x => x.Source.GetCustomerOrderCoupons());
 
