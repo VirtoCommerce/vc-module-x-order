@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Authorization;
 using VirtoCommerce.CoreModule.Core.Currency;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Services;
-using VirtoCommerce.PaymentModule.Model.Requests;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Xapi.Core.Extensions;
@@ -127,20 +126,6 @@ namespace VirtoCommerce.XOrder.Data.Schemas
 
                                 return await _mediator.Send(command);
                             })
-                            .FieldType);
-
-            _ = schema.Mutation.AddField(FieldBuilder<object, ProcessPaymentRequestResult>
-                            .Create("processOrderPayment", typeof(ProcessPaymentRequestResultType))
-                            .Argument(GraphTypeExtensionHelper.GetActualComplexType<NonNullGraphType<InputProcessOrderPaymentType>>(), _commandName)
-                            .ResolveAsync(async context =>
-                            {
-                                var type = GenericTypeHelper.GetActualType<ProcessOrderPaymentCommand>();
-                                var command = (ProcessOrderPaymentCommand)context.GetArgument(type, _commandName);
-                                await CheckAuthAsync(context, command.OrderId);
-
-                                return await _mediator.Send(command);
-                            })
-                            .DeprecationReason("Obsolete. Use 'initializePayment' mutation")
                             .FieldType);
 
             _ = schema.Mutation.AddField(FieldBuilder<object, InitializePaymentResult>
