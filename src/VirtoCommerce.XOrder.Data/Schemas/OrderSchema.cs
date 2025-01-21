@@ -26,7 +26,7 @@ using VirtoCommerce.XOrder.Core.Queries;
 using VirtoCommerce.XOrder.Core.Schemas;
 using VirtoCommerce.XOrder.Data.Authorization;
 using static VirtoCommerce.Xapi.Core.ModuleConstants;
-using XOrderSettings = VirtoCommerce.Xapi.Core.ModuleConstants.Settings.General;
+using XOrderSettings = VirtoCommerce.XOrder.Core.ModuleConstants.Settings.General;
 
 namespace VirtoCommerce.XOrder.Data.Schemas
 {

@@ -3,6 +3,10 @@
     "XOrder.ShippingAddressPolicy": {
       "title": "Politique d'adresse de livraison (xAPI)",
       "description": "Activer/ désactiver le préremplissage par défaut de l'adresse lors de l'étape de paiement. C'est un paramètre au niveau du magasin"
+    },
+    "XOrder.CreateAnonymousOrderEnabled": {
+      "title": "Autoriser les utilisateurs anonymes à créer des commandes (xAPI)",
+      "description": "Ce paramètre est au niveau du magasin"
     }
   }
 }

@@ -3,6 +3,10 @@
     "XOrder.ShippingAddressPolicy": {
       "title": "Shipping address policy (xAPI)",
       "description": "Enable/ disable the default address prefill in the checkout step. This is a store-level setting"
+    },
+    "XOrder.CreateAnonymousOrderEnabled": {
+      "title": "Allow anonymous users to create orders (xAPI)",
+      "description": "This setting is store level"
     }
   }
 }
