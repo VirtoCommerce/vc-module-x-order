@@ -17,6 +17,10 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             Field(x => x.PromotionId, nullable: true);
             Field<StringGraphType>("PromotionName").Description("Name of the promotion").Resolve(context => context.Source.Name);
             Field<StringGraphType>("PromotionDescription").Description("Description of the promotion").Resolve(context => context.Source.Description);
+
+            // Deprecated
+            Field<StringGraphType>("Description").Resolve(context => context.Source.Description)
+                .DeprecationReason("Use the new PromotionDescription field instead");
         }
     }
 }
