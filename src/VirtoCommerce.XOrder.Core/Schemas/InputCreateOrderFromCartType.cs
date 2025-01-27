@@ -6,8 +6,8 @@ namespace VirtoCommerce.XOrder.Core.Schemas
     {
         public InputCreateOrderFromCartType()
         {
-            Field<StringGraphType>("cartId",
-                "Cart ID");
+            Field<StringGraphType>("cartId")
+                .Description("Cart ID");
         }
     }
 }

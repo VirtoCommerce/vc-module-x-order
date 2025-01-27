@@ -3,6 +3,10 @@
     "XOrder.ShippingAddressPolicy": {
       "title": "Política de dirección de envío (xAPI)",
       "description": "Activar/ desactivar el relleno automático de la dirección predeterminada en el paso de pago. Esta es una configuración a nivel de tienda"
+    },
+    "XOrder.CreateAnonymousOrderEnabled": {
+      "title": "Permitir a los usuarios anónimos crear pedidos (xAPI)",
+      "description": "Esta configuración es a nivel de tienda"
     }
   }
 }

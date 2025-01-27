@@ -21,11 +21,21 @@ namespace VirtoCommerce.XOrder.Core
                     AllowedValues = new[] { ShippingAddressPolicyDisabled, ShippingAddressPolicyPreviousOrder }
                 };
 
+                public static SettingDescriptor CreateAnonymousOrder { get; } = new SettingDescriptor
+                {
+                    Name = "XOrder.CreateAnonymousOrderEnabled",
+                    ValueType = SettingValueType.Boolean,
+                    GroupName = "Orders|General",
+                    DefaultValue = true,
+                    IsPublic = true,
+                };
+
                 public static IEnumerable<SettingDescriptor> AllSettings
                 {
                     get
                     {
                         yield return ShippingAddressPolicy;
+                        yield return CreateAnonymousOrder;
                     }
                 }
             }
@@ -35,6 +45,7 @@ namespace VirtoCommerce.XOrder.Core
                 get
                 {
                     yield return General.ShippingAddressPolicy;
+                    yield return General.CreateAnonymousOrder;
                 }
             }
         }

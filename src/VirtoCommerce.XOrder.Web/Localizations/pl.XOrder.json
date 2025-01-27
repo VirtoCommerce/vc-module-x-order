@@ -3,6 +3,10 @@
     "XOrder.ShippingAddressPolicy": {
       "title": "Polityka adresów wysyłki (xAPI)",
       "description": "Włącz/ wyłącz domyślne uzupełnianie adresu podczas procesu realizacji zamówienia. To ustawienie na poziomie sklepu"
+    },
+    "XOrder.CreateAnonymousOrderEnabled": {
+      "title": "Zezwalaj anonimowym użytkownikom na tworzenie zamówień (xAPI)",
+      "description": "To ustawienie dotyczy poziomu sklepu"
     }
   }
 }

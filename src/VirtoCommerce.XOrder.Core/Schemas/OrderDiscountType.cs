@@ -6,18 +6,21 @@ using VirtoCommerce.XOrder.Core.Extensions;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class OrderDiscountType : ObjectGraphType<Discount>
+    public class OrderDiscountType : ExtendableGraphType<Discount>
     {
         public OrderDiscountType()
         {
-            Field<NonNullGraphType<MoneyType>>("Amount",
-                "Order discount amount",
-                resolve: context => new Money(context.Source.DiscountAmount, context.GetOrderCurrency()));
+            Field<NonNullGraphType<MoneyType>>("Amount")
+                .Description("Order discount amount")
+                .Resolve(context => new Money(context.Source.DiscountAmount, context.GetOrderCurrency()));
             Field(x => x.Coupon, nullable: true);
             Field(x => x.PromotionId, nullable: true);
-            Field<StringGraphType>("PromotionName", "Name of the promotion", resolve: context => context.Source.Name);
-            Field<StringGraphType>("Description", resolve: context => context.Source.Description, deprecationReason: "Use the new PromotionDescription field instead");
-            Field<StringGraphType>("PromotionDescription", "Description of the promotion", resolve: context => context.Source.Description);
+            Field<StringGraphType>("PromotionName").Description("Name of the promotion").Resolve(context => context.Source.Name);
+            Field<StringGraphType>("PromotionDescription").Description("Description of the promotion").Resolve(context => context.Source.Description);
+
+            // Deprecated
+            Field<StringGraphType>("Description").Resolve(context => context.Source.Description)
+                .DeprecationReason("Use the new PromotionDescription field instead");
         }
     }
 }

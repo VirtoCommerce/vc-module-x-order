@@ -1,9 +1,9 @@
-using GraphQL.Types;
 using VirtoCommerce.ShippingModule.Core.Model;
+using VirtoCommerce.Xapi.Core.Schemas;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class OrderShippingMethodType : ObjectGraphType<ShippingMethod>
+    public class OrderShippingMethodType : ExtendableGraphType<ShippingMethod>
     {
         public OrderShippingMethodType()
         {

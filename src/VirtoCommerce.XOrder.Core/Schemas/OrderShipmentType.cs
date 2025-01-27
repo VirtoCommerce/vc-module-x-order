@@ -47,7 +47,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             Field(x => x.EmployeeName, nullable: true);
             Field(x => x.ShipmentMethodCode, nullable: true);
             Field(x => x.ShipmentMethodOption, nullable: true);
-            Field<OrderShippingMethodType>(nameof(Shipment.ShippingMethod).ToCamelCase(), resolve: x => x.Source.ShippingMethod);
+            Field<OrderShippingMethodType>(nameof(Shipment.ShippingMethod).ToCamelCase()).Resolve(x => x.Source.ShippingMethod);
             Field(x => x.CustomerOrderId, nullable: true);
             Field(x => x.WeightUnit, nullable: true);
             Field(x => x.Weight, nullable: true);
@@ -64,37 +64,37 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             Field(x => x.TrackingUrl, nullable: true);
             Field(x => x.DeliveryDate, nullable: true);
 
-            Field<NonNullGraphType<MoneyType>>(nameof(Shipment.Price).ToCamelCase(),
-                resolve: context => new Money(context.Source.Price, context.GetOrderCurrency()));
-            Field<NonNullGraphType<MoneyType>>(nameof(Shipment.PriceWithTax).ToCamelCase(),
-                resolve: context => new Money(context.Source.PriceWithTax, context.GetOrderCurrency()));
-            Field<NonNullGraphType<MoneyType>>(nameof(Shipment.Fee).ToCamelCase(),
-                resolve: context => new Money(context.Source.Fee, context.GetOrderCurrency()));
-            Field<NonNullGraphType<MoneyType>>(nameof(Shipment.FeeWithTax).ToCamelCase(),
-                resolve: context => new Money(context.Source.FeeWithTax, context.GetOrderCurrency()));
-            Field<NonNullGraphType<MoneyType>>(nameof(Shipment.Total).ToCamelCase(),
-                resolve: context => new Money(context.Source.Total, context.GetOrderCurrency()));
-            Field<NonNullGraphType<MoneyType>>(nameof(Shipment.TotalWithTax).ToCamelCase(),
-                resolve: context => new Money(context.Source.TotalWithTax, context.GetOrderCurrency()));
-            Field<NonNullGraphType<MoneyType>>(nameof(Shipment.DiscountAmount).ToCamelCase(),
-                resolve: context => new Money(context.Source.DiscountAmount, context.GetOrderCurrency()));
-            Field<NonNullGraphType<MoneyType>>(nameof(Shipment.DiscountAmountWithTax).ToCamelCase(),
-                resolve: context => new Money(context.Source.DiscountAmountWithTax, context.GetOrderCurrency()));
-            Field<NonNullGraphType<MoneyType>>(nameof(Shipment.TaxTotal).ToCamelCase(),
-                resolve: context => new Money(context.Source.TaxTotal, context.GetOrderCurrency()));
-            Field<NonNullGraphType<CurrencyType>>(nameof(Shipment.Currency).ToCamelCase(),
-                resolve: context => context.GetOrderCurrency());
+            Field<NonNullGraphType<MoneyType>>(nameof(Shipment.Price).ToCamelCase())
+                .Resolve(context => new Money(context.Source.Price, context.GetOrderCurrency()));
+            Field<NonNullGraphType<MoneyType>>(nameof(Shipment.PriceWithTax).ToCamelCase())
+                .Resolve(context => new Money(context.Source.PriceWithTax, context.GetOrderCurrency()));
+            Field<NonNullGraphType<MoneyType>>(nameof(Shipment.Fee).ToCamelCase())
+                .Resolve(context => new Money(context.Source.Fee, context.GetOrderCurrency()));
+            Field<NonNullGraphType<MoneyType>>(nameof(Shipment.FeeWithTax).ToCamelCase())
+                .Resolve(context => new Money(context.Source.FeeWithTax, context.GetOrderCurrency()));
+            Field<NonNullGraphType<MoneyType>>(nameof(Shipment.Total).ToCamelCase())
+                .Resolve(context => new Money(context.Source.Total, context.GetOrderCurrency()));
+            Field<NonNullGraphType<MoneyType>>(nameof(Shipment.TotalWithTax).ToCamelCase())
+                .Resolve(context => new Money(context.Source.TotalWithTax, context.GetOrderCurrency()));
+            Field<NonNullGraphType<MoneyType>>(nameof(Shipment.DiscountAmount).ToCamelCase())
+                .Resolve(context => new Money(context.Source.DiscountAmount, context.GetOrderCurrency()));
+            Field<NonNullGraphType<MoneyType>>(nameof(Shipment.DiscountAmountWithTax).ToCamelCase())
+                .Resolve(context => new Money(context.Source.DiscountAmountWithTax, context.GetOrderCurrency()));
+            Field<NonNullGraphType<MoneyType>>(nameof(Shipment.TaxTotal).ToCamelCase())
+                .Resolve(context => new Money(context.Source.TaxTotal, context.GetOrderCurrency()));
+            Field<NonNullGraphType<CurrencyType>>(nameof(Shipment.Currency).ToCamelCase())
+                .Resolve(context => context.GetOrderCurrency());
 
-            Field<NonNullGraphType<ListGraphType<NonNullGraphType<OrderTaxDetailType>>>>(nameof(Shipment.TaxDetails), resolve: x => x.Source.TaxDetails);
-            Field<NonNullGraphType<ListGraphType<NonNullGraphType<OrderShipmentItemType>>>>(nameof(Shipment.Items), resolve: x => x.Source.Items);
-            Field<NonNullGraphType<ListGraphType<NonNullGraphType<OrderShipmentPackageType>>>>(nameof(Shipment.Packages), resolve: x => x.Source.Packages);
+            Field<NonNullGraphType<ListGraphType<NonNullGraphType<OrderTaxDetailType>>>>(nameof(Shipment.TaxDetails)).Resolve(x => x.Source.TaxDetails);
+            Field<NonNullGraphType<ListGraphType<NonNullGraphType<OrderShipmentItemType>>>>(nameof(Shipment.Items)).Resolve(x => x.Source.Items);
+            Field<NonNullGraphType<ListGraphType<NonNullGraphType<OrderShipmentPackageType>>>>(nameof(Shipment.Packages)).Resolve(x => x.Source.Packages);
             ExtendableField<NonNullGraphType<ListGraphType<NonNullGraphType<PaymentInType>>>>(nameof(Shipment.InPayments), resolve: x => x.Source.InPayments);
-            Field<NonNullGraphType<ListGraphType<NonNullGraphType<OrderDiscountType>>>>(nameof(Shipment.Discounts), resolve: x => x.Source.Discounts);
+            Field<NonNullGraphType<ListGraphType<NonNullGraphType<OrderDiscountType>>>>(nameof(Shipment.Discounts)).Resolve(x => x.Source.Discounts);
 
             var vendorField = new FieldType
             {
                 Name = "vendor",
-                Type = GraphTypeExtenstionHelper.GetActualType<VendorType>(),
+                Type = GraphTypeExtensionHelper.GetActualType<VendorType>(),
                 Resolver = new FuncFieldResolver<Shipment, IDataLoaderResult<ExpVendor>>(context =>
                 {
                     return dataLoader.LoadVendor(memberService, mapper, loaderKey: "order_vendor", vendorId: context.Source.VendorId);
@@ -102,11 +102,11 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             };
             AddField(vendorField);
 
-            ExtendableField<NonNullGraphType<ListGraphType<NonNullGraphType<DynamicPropertyValueType>>>>(
+            ExtendableFieldAsync<NonNullGraphType<ListGraphType<NonNullGraphType<DynamicPropertyValueType>>>>(
                 "dynamicProperties",
                 "Customer order Shipment dynamic property values",
                 QueryArgumentPresets.GetArgumentForDynamicProperties(),
-                context => dynamicPropertyResolverService.LoadDynamicPropertyValues(context.Source, context.GetCultureName()));
+                async context => await dynamicPropertyResolverService.LoadDynamicPropertyValues(context.Source, context.GetCultureName()));
         }
     }
 }

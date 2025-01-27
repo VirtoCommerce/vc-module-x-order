@@ -1,9 +1,9 @@
-using GraphQL.Types;
 using VirtoCommerce.PaymentModule.Core.Model;
+using VirtoCommerce.Xapi.Core.Schemas;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class OrderBankCardInfoType : ObjectGraphType<BankCardInfo>
+    public class OrderBankCardInfoType : ExtendableGraphType<BankCardInfo>
     {
         public OrderBankCardInfoType()
         {

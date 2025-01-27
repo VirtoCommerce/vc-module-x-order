@@ -3,6 +3,10 @@
     "XOrder.ShippingAddressPolicy": {
       "title": "Versandadressrichtlinie (xAPI)",
       "description": "Aktivieren/ Deaktivieren der automatischen Voreinstellung der Standardadresse im Checkout-Schritt. Dies ist eine einstellbare Option auf Geschäftsebene"
+    },
+    "XOrder.CreateAnonymousOrderEnabled": {
+      "title": "Anonymen Benutzern erlauben, Bestellungen zu erstellen (xAPI)",
+      "description": "Diese Einstellung gilt auf Shop-Ebene"
     }
   }
 }

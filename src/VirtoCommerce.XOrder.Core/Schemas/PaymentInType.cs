@@ -56,20 +56,20 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             Field(x => x.VoidedDate, nullable: true);
             Field(x => x.OrderId, nullable: true);
 
-            Field<NonNullGraphType<MoneyType>>(nameof(PaymentIn.Price).ToCamelCase(),
-                resolve: context => new Money(context.Source.Price, context.GetOrderCurrencyByCode(context.Source.Currency)));
-            Field<NonNullGraphType<MoneyType>>(nameof(PaymentIn.Sum).ToCamelCase(),
-                resolve: context => new Money(context.Source.Sum, context.GetOrderCurrencyByCode(context.Source.Currency)));
-            Field<NonNullGraphType<MoneyType>>("tax",
-                resolve: context => new Money(context.Source.TaxTotal, context.GetOrderCurrencyByCode(context.Source.Currency)));
+            Field<NonNullGraphType<MoneyType>>(nameof(PaymentIn.Price).ToCamelCase())
+                .Resolve(context => new Money(context.Source.Price, context.GetOrderCurrencyByCode(context.Source.Currency)));
+            Field<NonNullGraphType<MoneyType>>(nameof(PaymentIn.Sum).ToCamelCase())
+                .Resolve(context => new Money(context.Source.Sum, context.GetOrderCurrencyByCode(context.Source.Currency)));
+            Field<NonNullGraphType<MoneyType>>("tax")
+                .Resolve(context => new Money(context.Source.TaxTotal, context.GetOrderCurrencyByCode(context.Source.Currency)));
             ExtendableField<OrderPaymentMethodType>(nameof(PaymentIn.PaymentMethod), resolve: context => context.Source.PaymentMethod);
-            Field<NonNullGraphType<CurrencyType>>(nameof(PaymentIn.Currency), resolve: context => context.GetOrderCurrencyByCode(context.Source.Currency));
+            Field<NonNullGraphType<CurrencyType>>(nameof(PaymentIn.Currency)).Resolve(context => context.GetOrderCurrencyByCode(context.Source.Currency));
             ExtendableField<OrderAddressType>(nameof(PaymentIn.BillingAddress), resolve: context => context.Source.BillingAddress);
 
             var vendorField = new FieldType
             {
                 Name = "vendor",
-                Type = GraphTypeExtenstionHelper.GetActualType<VendorType>(),
+                Type = GraphTypeExtensionHelper.GetActualType<VendorType>(),
                 Resolver = new FuncFieldResolver<PaymentIn, IDataLoaderResult<ExpVendor>>(context =>
                 {
                     return dataLoader.LoadVendor(memberService, mapper, loaderKey: "order_vendor", vendorId: context.Source.VendorId);
@@ -77,7 +77,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             };
             AddField(vendorField);
 
-            Field<NonNullGraphType<ListGraphType<NonNullGraphType<PaymentTransactionType>>>>(nameof(PaymentIn.Transactions), resolve: x => x.Source.Transactions);
+            Field<NonNullGraphType<ListGraphType<NonNullGraphType<PaymentTransactionType>>>>(nameof(PaymentIn.Transactions)).Resolve(x => x.Source.Transactions);
 
             ExtendableField<NonNullGraphType<CustomerOrderType>>(
                 "order",
@@ -94,11 +94,11 @@ namespace VirtoCommerce.XOrder.Core.Schemas
                 }
             );
 
-            ExtendableField<NonNullGraphType<ListGraphType<NonNullGraphType<DynamicPropertyValueType>>>>(
+            ExtendableFieldAsync<NonNullGraphType<ListGraphType<NonNullGraphType<DynamicPropertyValueType>>>>(
                 "dynamicProperties",
                 "Customer order Payment dynamic property values",
                 QueryArgumentPresets.GetArgumentForDynamicProperties(),
-                context => dynamicPropertyResolverService.LoadDynamicPropertyValues(context.Source, context.GetCultureName()));
+                async context => await dynamicPropertyResolverService.LoadDynamicPropertyValues(context.Source, context.GetCultureName()));
         }
     }
 }

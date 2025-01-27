@@ -8,19 +8,19 @@ using CoreFacets = VirtoCommerce.Xapi.Core.Schemas.Facets;
 
 namespace VirtoCommerce.XOrder.Core.Schemas
 {
-    public class CustomerOrderConnectionType<TNodeType> : ConnectionType<TNodeType, EdgeType<TNodeType>>
+    public class CustomerOrderConnectionType<TNodeType> : ConnectionType<TNodeType>
         where TNodeType : IGraphType
     {
         public CustomerOrderConnectionType()
         {
-            Field<NonNullGraphType<ListGraphType<NonNullGraphType<CoreFacets.TermFacetResultType>>>>("term_facets", description: "Term facets",
-                resolve: context => ((CustomerOrderConnection<CustomerOrderAggregate>)context.Source).Facets.OfType<TermFacetResult>());
+            Field<NonNullGraphType<ListGraphType<NonNullGraphType<CoreFacets.TermFacetResultType>>>>("term_facets").Description("Term facets")
+                .Resolve(context => ((CustomerOrderConnection<CustomerOrderAggregate>)context.Source).Facets.OfType<TermFacetResult>());
 
-            Field<NonNullGraphType<ListGraphType<NonNullGraphType<CoreFacets.RangeFacetResultType>>>>("range_facets", description: "Range facets",
-                resolve: context => ((CustomerOrderConnection<CustomerOrderAggregate>)context.Source).Facets.OfType<RangeFacetResult>());
+            Field<NonNullGraphType<ListGraphType<NonNullGraphType<CoreFacets.RangeFacetResultType>>>>("range_facets").Description("Range facets")
+                .Resolve(context => ((CustomerOrderConnection<CustomerOrderAggregate>)context.Source).Facets.OfType<RangeFacetResult>());
 
-            Field<NonNullGraphType<ListGraphType<NonNullGraphType<CoreFacets.FilterFacetResultType>>>>("filter_facets", description: "Filter facets",
-                resolve: context => ((CustomerOrderConnection<CustomerOrderAggregate>)context.Source).Facets.OfType<FilterFacetResult>());
+            Field<NonNullGraphType<ListGraphType<NonNullGraphType<CoreFacets.FilterFacetResultType>>>>("filter_facets").Description("Filter facets")
+                .Resolve(context => ((CustomerOrderConnection<CustomerOrderAggregate>)context.Source).Facets.OfType<FilterFacetResult>());
         }
     }
 

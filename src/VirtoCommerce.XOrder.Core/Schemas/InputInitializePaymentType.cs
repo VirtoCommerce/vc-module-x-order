@@ -6,8 +6,8 @@ namespace VirtoCommerce.XOrder.Core.Schemas
     {
         public InputInitializePaymentType()
         {
-            Field<StringGraphType>("orderId", "Order Id");
-            Field<NonNullGraphType<StringGraphType>>("paymentId", "Payment Id");
+            Field<StringGraphType>("orderId").Description("Order Id");
+            Field<NonNullGraphType<StringGraphType>>("paymentId").Description("Payment Id");
         }
     }
 }
