@@ -38,5 +38,10 @@ namespace VirtoCommerce.XOrder.Core.Validators
         {
             return $"The payment method code:{code} unavailable";
         }
+
+        public static string PaymentMethodInactive(string gatewayCode)
+        {
+            return $"Payment method {gatewayCode} is inactive";
+        }
     }
 }
