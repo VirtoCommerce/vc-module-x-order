@@ -25,6 +25,11 @@ namespace VirtoCommerce.XOrder.Core.Validators
                 .WithMessage(x => OrderErrorDescriber.PaymentMethodNotFound(x.Payment.GatewayCode))
                 .When(x => x.Payment != null);
 
+            RuleFor(x => x.Payment.PaymentMethod.IsActive)
+                .Equal(true)
+                .WithMessage(x => OrderErrorDescriber.PaymentMethodInactive(x.Payment.GatewayCode))
+                .When(x => x.Payment?.PaymentMethod != null);
+
             RuleFor(x => x.Store)
                 .NotNull()
                 .WithMessage(OrderErrorDescriber.StoreNotFound());
