@@ -6,7 +6,7 @@
 
   <platformVersion>3.867.0</platformVersion>
   <dependencies>
-    <dependency id="VirtoCommerce.Orders" version="3.842.0-alpha.1315-vcst-2565" />
+    <dependency id="VirtoCommerce.Orders" version="3.842.0-alpha.1317-vcst-2565" />
     <dependency id="VirtoCommerce.Xapi" version="3.904.0" />
     <dependency id="VirtoCommerce.XCart" version="3.905.0" />
     <dependency id="VirtoCommerce.XCatalog" version="3.905.0" />
