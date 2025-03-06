@@ -10,8 +10,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     <PackageReference Include="VirtoCommerce.OrdersModule.Core" Version="3.840.0" />
-    <PackageReference Include="VirtoCommerce.Xapi.Core" Version="3.904.0" />
-    <PackageReference Include="VirtoCommerce.XCart.Core" Version="3.905.0" />
-    <PackageReference Include="VirtoCommerce.XCatalog.Core" Version="3.905.0" />
+    <PackageReference Include="VirtoCommerce.Xapi.Core" Version="3.906.0-alpha.74-vcst-2821" />
+    <PackageReference Include="VirtoCommerce.XCart.Core" Version="3.906.0-alpha.78-vcst-2821" />
+    <PackageReference Include="VirtoCommerce.XCatalog.Core" Version="3.906.0-alpha.75-vcst-2821" />
   </ItemGroup>
 </Project>
