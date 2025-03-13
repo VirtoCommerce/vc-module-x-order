@@ -89,7 +89,7 @@ namespace VirtoCommerce.XOrder.Data.Services
                 .ToList();
 
             var fileUrls = configurationItems
-                .SelectMany(y => y.Files)
+                .SelectMany(x => x.Files)
                 .Where(x => !string.IsNullOrEmpty(x.Url))
                 .Select(x => x.Url)
                 .Distinct()
