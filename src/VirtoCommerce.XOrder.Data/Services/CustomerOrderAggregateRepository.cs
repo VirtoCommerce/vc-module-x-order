@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CoreModule.Core.Currency;
+using VirtoCommerce.FileExperienceApi.Core.Extensions;
 using VirtoCommerce.FileExperienceApi.Core.Services;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Services;
@@ -11,13 +12,12 @@ using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Xapi.Core.Extensions;
 using VirtoCommerce.XOrder.Core;
 using VirtoCommerce.XOrder.Core.Services;
+using static VirtoCommerce.CatalogModule.Core.ModuleConstants;
 
 namespace VirtoCommerce.XOrder.Data.Services
 {
     public class CustomerOrderAggregateRepository : ICustomerOrderAggregateRepository
     {
-        private const string _attachmentsUrlPrefix = "/api/files/";
-
         private readonly Func<CustomerOrderAggregate> _customerOrderAggregateFactory;
         private readonly ICustomerOrderService _customerOrderService;
         private readonly ICurrencyService _currencyService;
@@ -52,9 +52,7 @@ namespace VirtoCommerce.XOrder.Data.Services
         public virtual async Task<CustomerOrderAggregate> CreateOrderFromCart(ShoppingCart cart)
         {
             var order = await _customerOrderBuilder.PlaceCustomerOrderFromCartAsync(cart);
-
-            await UpdateConfigurationFiles(order.Items);
-
+            await UpdateConfigurationFiles(order);
             var aggregates = await InnerGetCustomerOrderAggregatesFromCustomerOrdersAsync([order], order.LanguageCode);
 
             return aggregates.FirstOrDefault();
@@ -83,9 +81,9 @@ namespace VirtoCommerce.XOrder.Data.Services
             }).ToList();
         }
 
-        protected virtual async Task UpdateConfigurationFiles(ICollection<OrdersModule.Core.Model.LineItem> configuredItems)
+        private async Task UpdateConfigurationFiles(CustomerOrder order)
         {
-            var configurationItems = configuredItems
+            var configurationItems = order.Items
                 .Where(x => !x.ConfigurationItems.IsNullOrEmpty())
                 .SelectMany(x => x.ConfigurationItems.Where(y => y.Files != null))
                 .ToList();
@@ -95,42 +93,25 @@ namespace VirtoCommerce.XOrder.Data.Services
                 .Where(x => !string.IsNullOrEmpty(x.Url))
                 .Select(x => x.Url)
                 .Distinct()
+                .ToArray();
+
+            var files = (await _fileUploadService.GetByPublicUrlAsync(fileUrls))
+                .Where(x => x.Scope == ConfigurationSectionFilesScope)
                 .ToList();
 
-            var ids = fileUrls
-                .Select(GetFileId)
-                .Where(x => !string.IsNullOrEmpty(x))
-                .ToList();
-
-            var files = await _fileUploadService.GetAsync(ids);
-
-            files = files
-                .Where(x => x.Scope == CatalogModule.Core.ModuleConstants.ConfigurationSectionFilesScope && (!string.IsNullOrEmpty(x.OwnerEntityId) || !string.IsNullOrEmpty(x.OwnerEntityType)))
-                .ToList();
-
-            if (!files.IsNullOrEmpty())
+            if (files.Count > 0)
             {
                 foreach (var file in files)
                 {
-                    var configurationItem = configurationItems.FirstOrDefault(x => x.Files.Any(y => y.Url == GetFileUrl(file.Id)));
-                    file.OwnerEntityId = configurationItem?.Id;
-                    file.OwnerEntityType = nameof(OrdersModule.Core.Model.ConfigurationItem);
+                    var configurationItem = configurationItems.FirstOrDefault(i => i.Files.Any(f => f.Url == file.PublicUrl));
+                    if (configurationItem != null)
+                    {
+                        file.SetOwner(configurationItem);
+                    }
                 }
 
                 await _fileUploadService.SaveChangesAsync(files);
             }
-        }
-
-        private static string GetFileId(string url)
-        {
-            return url != null && url.StartsWith(_attachmentsUrlPrefix)
-                ? url[_attachmentsUrlPrefix.Length..]
-                : null;
-        }
-
-        private static string GetFileUrl(string id)
-        {
-            return $"{_attachmentsUrlPrefix}{id}";
         }
     }
 }
