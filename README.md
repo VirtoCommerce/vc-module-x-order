@@ -16,7 +16,6 @@ The xOrder module provides high-performance API for order data with the followin
 * [How to use Postman](https://docs.virtocommerce.org/platform/developer-guide/GraphQL-Storefront-API-Reference-xAPI/postman/)
 * [How to extend](https://docs.virtocommerce.org/platform/developer-guide/GraphQL-Storefront-API-Reference-xAPI/x-api-extensions/)
 * [Virto Commerce Frontend architecture](https://docs.virtocommerce.org/storefront/developer-guide/architecture/)
-* [REST API](https://virtostart-demo-admin.govirto.com/docs/index.html?urls.primaryName=VirtoCommerce.XOrder)
 * [View on GitHub](https://github.com/VirtoCommerce/vc-module-x-order)
 
 ## References
