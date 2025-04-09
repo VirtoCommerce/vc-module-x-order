@@ -54,8 +54,9 @@ namespace VirtoCommerce.XOrder.Data.Middlewares
 
             var order = lastOrderResult.Results[0];
             var address = order.Addresses?.FirstOrDefault(x => x.AddressType == BillingAndShipping || x.AddressType == Shipping);
+            var lastOrderShipment = order.Shipments.FirstOrDefault();
 
-            if (address != null)
+            if (address != null && lastOrderShipment != null && lastOrderShipment.ShipmentMethodCode == shipment?.ShipmentMethodCode)
             {
                 var cartShipmentAddress = CreateCartShipmentAddress(address);
                 parameter.Shipment.DeliveryAddress = cartShipmentAddress;
