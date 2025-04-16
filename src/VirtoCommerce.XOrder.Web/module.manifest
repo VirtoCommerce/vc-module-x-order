@@ -7,10 +7,10 @@
   <platformVersion>3.877.0</platformVersion>
   <dependencies>
     <dependency id="VirtoCommerce.FileExperienceApi" version="3.904.0" />
-    <dependency id="VirtoCommerce.Orders" version="3.843.0" />
+    <dependency id="VirtoCommerce.Orders" version="3.844.2" />
     <dependency id="VirtoCommerce.Xapi" version="3.906.0" />
     <dependency id="VirtoCommerce.XCart" version="3.906.0" />
-    <dependency id="VirtoCommerce.XCatalog" version="3.909.0" />
+    <dependency id="VirtoCommerce.XCatalog" version="3.911.1" />
   </dependencies>
 
   <title>Order Experience API</title>
