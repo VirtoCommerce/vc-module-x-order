@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.Xapi.Core.Pipelines;
 using VirtoCommerce.XCart.Core.Models;
+using VirtoCommerce.XCatalog.Core.Models;
+using VirtoCommerce.XCatalog.Data.Index;
 using VirtoCommerce.XOrder.Core;
 using VirtoCommerce.XOrder.Core.Services;
 using VirtoCommerce.XOrder.Data.Authorization;
@@ -33,6 +35,16 @@ namespace VirtoCommerce.XOrder.Data.Extensions
             services.AddPipeline<ShipmentContextCartMap>(builder =>
             {
                 builder.AddMiddleware(typeof(ShipmentContextMiddleware));
+            });
+
+            services.AddPipeline<SearchProductResponse>(builder =>
+            {
+                builder.AddMiddleware(typeof(EvalProductIsPurchasedMiddleware));
+            });
+
+            services.AddPipeline<IndexSearchRequestBuilder>(builder =>
+            {
+                builder.AddMiddleware(typeof(EvalPurchasedBeforeFilter));
             });
 
             return services;
