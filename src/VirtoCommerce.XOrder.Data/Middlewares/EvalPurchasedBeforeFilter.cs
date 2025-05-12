@@ -25,9 +25,33 @@ public class EvalPurchasedBeforeFilter : IAsyncMiddleware<IndexSearchRequestBuil
                 // add new filter
                 var filterName = $"{PurchasedProductDocumentPrefix}_{parameter.StoreId}";
                 parameter.AddTerms(new[] { $"{filterName}:{parameter.UserId}" });
+
+                UpdateAggregations(parameter, andFilter, filterName);
             }
         }
 
         await next(parameter);
+    }
+
+    private static void UpdateAggregations(IndexSearchRequestBuilder parameter, AndFilter andFilter, string filterName)
+    {
+        foreach (var aggregation in parameter.Aggregations)
+        {
+            if (aggregation.Filter is AndFilter aggregationFilter)
+            {
+                var purchasedBeforeAggregationFilter = aggregationFilter.ChildFilters.OfType<TermFilter>().FirstOrDefault(x => x.FieldName == "isPurchased");
+                if (purchasedBeforeAggregationFilter != null)
+                {
+                    aggregationFilter.ChildFilters.Remove(purchasedBeforeAggregationFilter);
+
+                    purchasedBeforeAggregationFilter = andFilter.ChildFilters.OfType<TermFilter>().FirstOrDefault(x => x.FieldName == filterName);
+                    if (purchasedBeforeAggregationFilter != null)
+                    {
+                        var clonedFitler = purchasedBeforeAggregationFilter.CloneTyped();
+                        aggregationFilter.ChildFilters.Add(clonedFitler);
+                    }
+                }
+            }
+        }
     }
 }
