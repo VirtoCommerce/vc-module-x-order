@@ -37,19 +37,21 @@ public class EvalPurchasedBeforeFilter : IAsyncMiddleware<IndexSearchRequestBuil
     {
         foreach (var aggregation in parameter.Aggregations)
         {
-            if (aggregation.Filter is AndFilter aggregationFilter)
+            if (aggregation.Filter is not AndFilter aggregationFilter)
             {
-                var purchasedBeforeAggregationFilter = aggregationFilter.ChildFilters.OfType<TermFilter>().FirstOrDefault(x => x.FieldName == "isPurchased");
+                continue;
+            }
+
+            var purchasedBeforeAggregationFilter = aggregationFilter.ChildFilters.OfType<TermFilter>().FirstOrDefault(x => x.FieldName == "isPurchased");
+            if (purchasedBeforeAggregationFilter != null)
+            {
+                aggregationFilter.ChildFilters.Remove(purchasedBeforeAggregationFilter);
+
+                purchasedBeforeAggregationFilter = andFilter.ChildFilters.OfType<TermFilter>().FirstOrDefault(x => x.FieldName == filterName);
                 if (purchasedBeforeAggregationFilter != null)
                 {
-                    aggregationFilter.ChildFilters.Remove(purchasedBeforeAggregationFilter);
-
-                    purchasedBeforeAggregationFilter = andFilter.ChildFilters.OfType<TermFilter>().FirstOrDefault(x => x.FieldName == filterName);
-                    if (purchasedBeforeAggregationFilter != null)
-                    {
-                        var clonedFitler = purchasedBeforeAggregationFilter.CloneTyped();
-                        aggregationFilter.ChildFilters.Add(clonedFitler);
-                    }
+                    var clonedFitler = purchasedBeforeAggregationFilter.CloneTyped();
+                    aggregationFilter.ChildFilters.Add(clonedFitler);
                 }
             }
         }
