@@ -12,6 +12,7 @@ using VirtoCommerce.PaymentModule.Core.Model;
 using VirtoCommerce.PaymentModule.Model.Requests;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Domain;
+using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.Xapi.Core.Models;
 using VirtoCommerce.Xapi.Core.Services;
 using VirtoCommerce.XOrder.Core.Validators;
@@ -33,10 +34,13 @@ namespace VirtoCommerce.XOrder.Core
         public CustomerOrder Order { get; protected set; }
         public Currency Currency { get; protected set; }
 
-        public CustomerOrderAggregate GrabCustomerOrder(CustomerOrder order, Currency currency)
+        public Store Store { get; protected set; }
+
+        public CustomerOrderAggregate GrabCustomerOrder(CustomerOrder order, Currency currency, Store store)
         {
             Order = order;
             Currency = currency;
+            Store = store;
 
             return this;
         }
