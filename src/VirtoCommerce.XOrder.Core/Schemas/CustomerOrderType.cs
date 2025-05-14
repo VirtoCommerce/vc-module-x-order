@@ -9,7 +9,6 @@ using VirtoCommerce.PaymentModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
 using VirtoCommerce.Xapi.Core.Extensions;
-using VirtoCommerce.Xapi.Core.Helpers;
 using VirtoCommerce.Xapi.Core.Schemas;
 using VirtoCommerce.Xapi.Core.Services;
 using OrderSettings = VirtoCommerce.OrdersModule.Core.ModuleConstants.Settings.General;
@@ -154,7 +153,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             ExtendableFieldAsync<NonNullGraphType<ListGraphType<NonNullGraphType<DynamicPropertyValueType>>>>(
                 "dynamicProperties",
                 "Customer order dynamic property values",
-                QueryArgumentPresets.GetArgumentForDynamicProperties(),
+                null,
                 async context => await dynamicPropertyResolverService.LoadDynamicPropertyValues(context.Source.Order, context.GetCultureName()));
 
             ExtendableField<NonNullGraphType<ListGraphType<NonNullGraphType<StringGraphType>>>>("coupons", resolve: x => x.Source.GetCustomerOrderCoupons());

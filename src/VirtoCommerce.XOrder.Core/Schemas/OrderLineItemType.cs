@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using GraphQL;
@@ -114,7 +115,9 @@ namespace VirtoCommerce.XOrder.Core.Schemas
                     {
                         //Get currencies and store only from one order.
                         //We intentionally ignore the case when there are ma be the orders with the different currencies and stores in the resulting set
-                        var order = context.GetValueForSource<CustomerOrderAggregate>().Order;
+                        var orderAggregate = context.GetValueForSource<CustomerOrderAggregate>();
+                        var order = orderAggregate.Order;
+
                         var request = new LoadProductsQuery
                         {
                             UserId = context.GetArgumentOrValue<string>("userId") ?? context.GetCurrentUserId(),
@@ -123,10 +126,12 @@ namespace VirtoCommerce.XOrder.Core.Schemas
                             ObjectIds = ids.ToArray(),
                             IncludeFields = includeFields.ToArray()
                         };
-                        if (!context.UserContext.ContainsKey("storeId"))
-                        {
-                            context.UserContext.Add("storeId", order.StoreId);
-                        }
+
+                        var cultureName = context.GetArgumentOrValue<string>("cultureName") ?? order.LanguageCode;
+                        context.UserContext.TryAdd("currencyCode", order.Currency);
+                        context.UserContext.TryAdd("storeId", order.StoreId);
+                        context.UserContext.TryAdd("store", orderAggregate.Store);
+                        context.UserContext.TryAdd("cultureName", cultureName);
 
                         var response = await mediator.Send(request);
 
@@ -152,7 +157,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             ExtendableFieldAsync<NonNullGraphType<ListGraphType<NonNullGraphType<DynamicPropertyValueType>>>>(
                 "dynamicProperties",
                 "Customer order Line item dynamic property values",
-                QueryArgumentPresets.GetArgumentForDynamicProperties(),
+                null,
                 async context => await dynamicPropertyResolverService.LoadDynamicPropertyValues(context.Source, context.GetCultureName()));
 
             ExtendableField<ListGraphType<OrderConfigurationItemType>>(

@@ -9,6 +9,8 @@ using VirtoCommerce.FileExperienceApi.Core.Services;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.StoreModule.Core.Model;
+using VirtoCommerce.StoreModule.Core.Services;
 using VirtoCommerce.Xapi.Core.Extensions;
 using VirtoCommerce.XOrder.Core;
 using VirtoCommerce.XOrder.Core.Services;
@@ -23,19 +25,22 @@ namespace VirtoCommerce.XOrder.Data.Services
         private readonly ICurrencyService _currencyService;
         private readonly ICustomerOrderBuilder _customerOrderBuilder;
         private readonly IFileUploadService _fileUploadService;
+        private readonly IStoreService _storeService;
 
         public CustomerOrderAggregateRepository(
             Func<CustomerOrderAggregate> customerOrderAggregateFactory,
             ICustomerOrderService customerOrderService,
             ICurrencyService currencyService,
             ICustomerOrderBuilder customerOrderBuilder,
-            IFileUploadService fileUploadService)
+            IFileUploadService fileUploadService,
+            IStoreService storeService)
         {
             _customerOrderAggregateFactory = customerOrderAggregateFactory;
             _customerOrderService = customerOrderService;
             _currencyService = currencyService;
             _customerOrderBuilder = customerOrderBuilder;
             _fileUploadService = fileUploadService;
+            _storeService = storeService;
         }
 
         public async Task<CustomerOrderAggregate> GetOrderByIdAsync(string orderId)
@@ -73,12 +78,23 @@ namespace VirtoCommerce.XOrder.Data.Services
         {
             var currencies = await _currencyService.GetAllCurrenciesAsync();
 
-            return orders.Select(x =>
+            var orderAggregates = new List<CustomerOrderAggregate>();
+
+            foreach (var order in orders)
             {
-                var aggregate = _customerOrderAggregateFactory();
-                aggregate.GrabCustomerOrder(x.CloneTyped(), currencies.GetCurrencyForLanguage(x.Currency, cultureName ?? x.LanguageCode));
-                return aggregate;
-            }).ToList();
+                var aggregateFactory = _customerOrderAggregateFactory();
+                var orderAggregate = aggregateFactory.GrabCustomerOrder(order.CloneTyped(),
+                    currencies.GetCurrencyForLanguage(order.Currency, cultureName ?? order.LanguageCode),
+                    await GetStore(order.StoreId));
+                orderAggregates.Add(orderAggregate);
+            }
+
+            return orderAggregates;
+        }
+
+        private Task<Store> GetStore(string storeId)
+        {
+            return _storeService.GetByIdAsync(storeId);
         }
 
         private async Task UpdateConfigurationFiles(CustomerOrder order)

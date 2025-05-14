@@ -105,7 +105,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             ExtendableFieldAsync<NonNullGraphType<ListGraphType<NonNullGraphType<DynamicPropertyValueType>>>>(
                 "dynamicProperties",
                 "Customer order Shipment dynamic property values",
-                QueryArgumentPresets.GetArgumentForDynamicProperties(),
+                null,
                 async context => await dynamicPropertyResolverService.LoadDynamicPropertyValues(context.Source, context.GetCultureName()));
         }
     }
