@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <module>
   <id>VirtoCommerce.XOrder</id>
-  <version>3.909.0</version>
+  <version>3.910.0</version>
   <version-tag></version-tag>
 
   <platformVersion>3.877.0</platformVersion>
@@ -10,7 +10,7 @@
     <dependency id="VirtoCommerce.Orders" version="3.845.0" />
     <dependency id="VirtoCommerce.Xapi" version="3.906.0" />
     <dependency id="VirtoCommerce.XCart" version="3.906.0" />
-    <dependency id="VirtoCommerce.XCatalog" version="3.915.0" />
+    <dependency id="VirtoCommerce.XCatalog" version="3.916.0" />
   </dependencies>
 
   <title>Order Experience API</title>
