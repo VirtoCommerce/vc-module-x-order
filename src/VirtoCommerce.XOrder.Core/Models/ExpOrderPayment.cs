@@ -6,7 +6,7 @@ using VirtoCommerce.Xapi.Core.Models;
 
 namespace VirtoCommerce.XOrder.Core.Models
 {
-    public sealed class ExpOrderPayment
+    public class ExpOrderPayment
     {
         public Optional<string> Id { get; set; }
         public Optional<string> OuterId { get; set; }
@@ -21,7 +21,7 @@ namespace VirtoCommerce.XOrder.Core.Models
 
         public IList<DynamicPropertyValue> DynamicProperties { get; set; }
 
-        public PaymentIn MapTo(PaymentIn payment)
+        public virtual PaymentIn MapTo(PaymentIn payment)
         {
             payment ??= AbstractTypeFactory<PaymentIn>.TryCreateInstance();
 
