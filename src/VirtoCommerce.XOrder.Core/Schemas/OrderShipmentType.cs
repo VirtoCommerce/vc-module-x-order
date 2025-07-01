@@ -1,3 +1,4 @@
+using System.Linq;
 using AutoMapper;
 using GraphQL;
 using GraphQL.DataLoader;
@@ -6,12 +7,17 @@ using GraphQL.Types;
 using VirtoCommerce.CoreModule.Core.Currency;
 using VirtoCommerce.CustomerModule.Core.Services;
 using VirtoCommerce.OrdersModule.Core.Model;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Settings;
+using VirtoCommerce.ShippingModule.Core.Model;
+using VirtoCommerce.ShippingModule.Core.Model.Search;
+using VirtoCommerce.ShippingModule.Core.Services;
 using VirtoCommerce.Xapi.Core.Extensions;
 using VirtoCommerce.Xapi.Core.Helpers;
 using VirtoCommerce.Xapi.Core.Models;
 using VirtoCommerce.Xapi.Core.Schemas;
 using VirtoCommerce.Xapi.Core.Services;
+using VirtoCommerce.XCart.Core.Schemas;
 using VirtoCommerce.XOrder.Core.Extensions;
 using OrderSettings = VirtoCommerce.OrdersModule.Core.ModuleConstants.Settings.General;
 
@@ -24,7 +30,8 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             IMemberService memberService,
             IDataLoaderContextAccessor dataLoader,
             IDynamicPropertyResolverService dynamicPropertyResolverService,
-            ILocalizableSettingService localizableSettingService)
+            ILocalizableSettingService localizableSettingService,
+            IPickupLocationSearchService pickupLocationSearchService)
         {
             Field(x => x.Id, nullable: false);
             Field(x => x.OperationType, nullable: false);
@@ -101,6 +108,32 @@ namespace VirtoCommerce.XOrder.Core.Schemas
                 })
             };
             AddField(vendorField);
+
+            var pickupLocationField = new FieldType
+            {
+                Name = "pickupLocation",
+                Type = typeof(PickupLocationType),
+                Resolver = new FuncFieldResolver<Shipment, IDataLoaderResult<PickupLocation>>(context =>
+                {
+                    var loader = dataLoader.Context.GetOrAddBatchLoader<string, PickupLocation>("cart_pickup_location",
+                        async pickupLocationIds =>
+                        {
+                            var orderAggregate = context.GetValueForSource<CustomerOrderAggregate>();
+                            var criteria = AbstractTypeFactory<PickupLocationSearchCriteria>.TryCreateInstance();
+                            criteria.ObjectIds = pickupLocationIds.ToArray();
+                            criteria.StoreId = orderAggregate.Order.StoreId;
+
+                            var result = await pickupLocationSearchService.SearchAsync(criteria);
+
+                            return result.Results.ToDictionary(x => x.Id);
+                        });
+
+                    return loader.LoadAsync(context.Source.PickupLocationId);
+
+                })
+            };
+
+            AddField(pickupLocationField);
 
             ExtendableFieldAsync<NonNullGraphType<ListGraphType<NonNullGraphType<DynamicPropertyValueType>>>>(
                 "dynamicProperties",
