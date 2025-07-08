@@ -2,6 +2,8 @@ using GraphQL;
 using GraphQL.Types;
 using VirtoCommerce.CoreModule.Core.Currency;
 using VirtoCommerce.PaymentModule.Core.Model;
+using VirtoCommerce.Platform.Core.Common;
+using VirtoCommerce.Xapi.Core.Extensions;
 using VirtoCommerce.Xapi.Core.Schemas;
 using VirtoCommerce.XOrder.Core.Extensions;
 
@@ -12,7 +14,6 @@ namespace VirtoCommerce.XOrder.Core.Schemas
         public OrderPaymentMethodType()
         {
             Field(x => x.Code, nullable: false);
-            Field(x => x.Name, nullable: true);
             Field(x => x.Description, nullable: true);
             Field(x => x.LogoUrl, nullable: true);
             Field(x => x.Priority, nullable: false);
@@ -20,6 +21,10 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             Field(x => x.IsAvailableForPartial, nullable: false);
             Field(x => x.TypeName, nullable: false);
             Field(x => x.StoreId, nullable: true);
+
+            Field<StringGraphType>("name")
+                .Resolve(context => GetLocalizedValue(context, context.Source.LocalizedName, context.Source.Name))
+                .Description("Localized name of payment method.");
 
             Field<NonNullGraphType<CurrencyType>>(nameof(PaymentMethod.Currency).ToCamelCase())
                 .Resolve(context => context.GetOrderCurrency());
@@ -50,6 +55,22 @@ namespace VirtoCommerce.XOrder.Core.Schemas
                 .Resolve(context => (int)context.Source.PaymentMethodType);
             Field<NonNullGraphType<IntGraphType>>(nameof(PaymentMethod.PaymentMethodGroupType))
                 .Resolve(context => (int)context.Source.PaymentMethodGroupType);
+        }
+
+        private static string GetLocalizedValue(IResolveFieldContext context, LocalizedString localizedString, string fallbackValue = null)
+        {
+            var cultureName = context.GetArgumentOrValue<string>("cultureName");
+
+            if (!string.IsNullOrEmpty(cultureName))
+            {
+                var localizedValue = localizedString?.GetValue(cultureName);
+                if (!string.IsNullOrEmpty(localizedValue))
+                {
+                    return localizedValue;
+                }
+            }
+
+            return fallbackValue;
         }
     }
 }
