@@ -23,7 +23,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             Field(x => x.StoreId, nullable: true);
 
             Field<StringGraphType>("name")
-                .Resolve(context => GetLocalizedValue(context, context.Source.LocalizedName, context.Source.Name))
+                .Resolve(context => GetLocalizedValue(context, context.Source.LocalizedName, context.Source.Id, context.Source.Name))
                 .Description("Localized name of payment method.");
 
             Field<NonNullGraphType<CurrencyType>>(nameof(PaymentMethod.Currency).ToCamelCase())
@@ -57,9 +57,14 @@ namespace VirtoCommerce.XOrder.Core.Schemas
                 .Resolve(context => (int)context.Source.PaymentMethodGroupType);
         }
 
-        private static string GetLocalizedValue(IResolveFieldContext context, LocalizedString localizedString, string fallbackValue = null)
+        private static string GetLocalizedValue(IResolveFieldContext context, LocalizedString localizedString, string paymentMethodId, string fallbackValue = null)
         {
             var cultureName = context.GetArgumentOrValue<string>("cultureName");
+
+            if (string.IsNullOrEmpty(cultureName))
+            {
+                cultureName = context.GetArgumentOrValue<CustomerOrderAggregate>(paymentMethodId)?.Order?.LanguageCode;
+            }
 
             if (!string.IsNullOrEmpty(cultureName))
             {
