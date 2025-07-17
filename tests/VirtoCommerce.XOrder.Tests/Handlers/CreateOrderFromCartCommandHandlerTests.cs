@@ -13,7 +13,9 @@ using VirtoCommerce.CartModule.Core.Services;
 using VirtoCommerce.CoreModule.Core.Currency;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Services;
+using VirtoCommerce.FileExperienceApi.Core.Services;
 using VirtoCommerce.MarketingModule.Core.Services;
+using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.TaxModule.Core.Services;
 using VirtoCommerce.Xapi.Core.Pipelines;
 using VirtoCommerce.Xapi.Core.Services;
@@ -113,7 +115,7 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
             customerAggrRep.Setup(x => x.CreateOrderFromCart(It.IsAny<ShoppingCart>()))
                 .ReturnsAsync(new CustomerOrderAggregate(null, null));
 
-            var cartAggregate = new CartAggregate(null, null, null, null, null, null, null, null);
+            var cartAggregate = new CartAggregate(null, null, null, null, null, null, null, null, null, null);
             cartAggregate.GrabCart(cart, new Store(), new Contact(), new Currency());
 
             var cartAggrRepository = new Mock<ICartAggregateRepository>();
@@ -154,12 +156,14 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
             var cartAggregate = new CartAggregate(
                 Mock.Of<IMarketingPromoEvaluator>(),
                 Mock.Of<IShoppingCartTotalsCalculator>(),
-                new Mock<ITaxProviderSearchService>().Object,
+                new Mock<IOptionalDependency<ITaxProviderSearchService>>().Object,
                 Mock.Of<ICartProductService>(),
                 Mock.Of<IDynamicPropertyUpdaterService>(),
                 Mock.Of<IMapper>(),
                 Mock.Of<IMemberService>(),
-                Mock.Of<IGenericPipelineLauncher>());
+                Mock.Of<IGenericPipelineLauncher>(),
+                Mock.Of<IConfigurationItemValidator>(),
+                Mock.Of<IFileUploadService>());
 
             var contact = new Contact()
             {

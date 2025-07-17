@@ -15,7 +15,7 @@ namespace VirtoCommerce.XOrder.Core.Validators
 
                 if (availPaymentMethods != null && !string.IsNullOrEmpty(paymentCode))
                 {
-                    var paymentMethod = availPaymentMethods.FirstOrDefault(x => paymentCode.EqualsInvariant(x.Code));
+                    var paymentMethod = availPaymentMethods.FirstOrDefault(x => paymentCode.EqualsIgnoreCase(x.Code));
                     if (paymentMethod == null)
                     {
                         context.AddFailure(OrderErrorDescriber.PaymentMethodUnavailable(paymentCode));

@@ -35,7 +35,7 @@ namespace VirtoCommerce.XOrder.Data.Middlewares
             var shipment = parameter.Shipment;
             var shippingAddressPolicy = GetShippingPolicy(parameter);
 
-            if (shipment?.DeliveryAddress != null || !shippingAddressPolicy.EqualsInvariant(XOrderSetting.ShippingAddressPolicyPreviousOrder))
+            if (shipment?.DeliveryAddress != null || !shippingAddressPolicy.EqualsIgnoreCase(XOrderSetting.ShippingAddressPolicyPreviousOrder))
             {
                 return;
             }

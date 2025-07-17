@@ -21,10 +21,10 @@ namespace VirtoCommerce.XOrder.Core.Extensions
             //Try to get a currency from order if currency code is not set explicitly or undefined
             var result = userContext.GetOrderCurrency();
             //If the passed currency differs from the order currency, we try to find it from the all registered currencies.
-            if (result == null || !string.IsNullOrEmpty(currencyCode) && !result.Code.EqualsInvariant(currencyCode))
+            if (result == null || !string.IsNullOrEmpty(currencyCode) && !result.Code.EqualsIgnoreCase(currencyCode))
             {
                 var allCurrencies = userContext.GetValue<IEnumerable<Currency>>("allCurrencies");
-                result = allCurrencies?.FirstOrDefault(x => x.Code.EqualsInvariant(currencyCode));
+                result = allCurrencies?.FirstOrDefault(x => x.Code.EqualsIgnoreCase(currencyCode));
             }
             if (result == null)
             {
