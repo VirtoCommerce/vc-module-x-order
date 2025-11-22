@@ -24,7 +24,7 @@ public class EvalPurchasedBeforeFilter : IAsyncMiddleware<IndexSearchRequestBuil
 
                 // add new filter
                 var filterName = $"{PurchasedProductDocumentPrefix}_{parameter.StoreId}";
-                parameter.AddTerms(new[] { $"{filterName}:{parameter.UserId}" });
+                parameter.AddTermFilter(filterName, parameter.UserId);
 
                 UpdateAggregations(parameter, andFilter, filterName);
             }
