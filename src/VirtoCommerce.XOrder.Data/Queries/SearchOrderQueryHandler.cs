@@ -42,6 +42,28 @@ namespace VirtoCommerce.XOrder.Data.Queries
 
         protected virtual async Task<SearchOrderResponse> SearchOrderQueryHandle(SearchOrderQuery request)
         {
+            var searchCriteriaBuilder = GetIndexedSearchRequestBuilder(request);
+
+            var searchCriteria = searchCriteriaBuilder.Build();
+
+            var searchResult = await _customerOrderSearchService.SearchCustomerOrdersAsync(searchCriteria);
+            var aggregates = await _customerOrderAggregateRepository.GetAggregatesFromOrdersAsync(searchResult.Results, request.CultureName);
+
+            var facets = searchResult.Aggregations?.Select(x => _mapper.Map<FacetResult>(x, options =>
+            {
+                options.Items["cultureName"] = request.CultureName;
+            })).ToList() ?? [];
+
+            return new SearchOrderResponse
+            {
+                TotalCount = searchResult.TotalCount,
+                Results = aggregates,
+                Facets = facets,
+            };
+        }
+
+        protected virtual CustomerOrderSearchCriteriaBuilder GetIndexedSearchRequestBuilder(SearchOrderQuery request)
+        {
             var searchCriteriaBuilder = new CustomerOrderSearchCriteriaBuilder(_searchPhraseParser)
                                         .WithCultureName(request.CultureName)
                                         .ParseFilters(request.Filter)
@@ -60,22 +82,7 @@ namespace VirtoCommerce.XOrder.Data.Queries
                     break;
             }
 
-            var searchCriteria = searchCriteriaBuilder.Build();
-
-            var searchResult = await _customerOrderSearchService.SearchCustomerOrdersAsync(searchCriteria);
-            var aggregates = await _customerOrderAggregateRepository.GetAggregatesFromOrdersAsync(searchResult.Results, request.CultureName);
-
-            var facets = searchResult.Aggregations?.Select(x => _mapper.Map<FacetResult>(x, options =>
-            {
-                options.Items["cultureName"] = request.CultureName;
-            })).ToList() ?? [];
-
-            return new SearchOrderResponse
-            {
-                TotalCount = searchResult.TotalCount,
-                Results = aggregates,
-                Facets = facets,
-            };
+            return searchCriteriaBuilder;
         }
     }
 }
