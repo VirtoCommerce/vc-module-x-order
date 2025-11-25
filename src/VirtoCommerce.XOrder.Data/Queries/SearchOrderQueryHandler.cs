@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.OrdersModule.Core.Search.Indexed;
 using VirtoCommerce.SearchModule.Core.Services;
 using VirtoCommerce.Xapi.Core.Infrastructure;
@@ -42,9 +43,7 @@ namespace VirtoCommerce.XOrder.Data.Queries
 
         protected virtual async Task<SearchOrderResponse> SearchOrderQueryHandle(SearchOrderQuery request)
         {
-            var searchCriteriaBuilder = GetIndexedSearchRequestBuilder(request);
-
-            var searchCriteria = searchCriteriaBuilder.Build();
+            var searchCriteria = GetOrderIndexedSearchCriteria(request);
 
             var searchResult = await _customerOrderSearchService.SearchCustomerOrdersAsync(searchCriteria);
             var aggregates = await _customerOrderAggregateRepository.GetAggregatesFromOrdersAsync(searchResult.Results, request.CultureName);
@@ -60,6 +59,12 @@ namespace VirtoCommerce.XOrder.Data.Queries
                 Results = aggregates,
                 Facets = facets,
             };
+        }
+
+        protected virtual CustomerOrderIndexedSearchCriteria GetOrderIndexedSearchCriteria(SearchOrderQuery request)
+        {
+            var searchCriteriaBuilder = GetIndexedSearchRequestBuilder(request);
+            return searchCriteriaBuilder.Build();
         }
 
         protected virtual CustomerOrderSearchCriteriaBuilder GetIndexedSearchRequestBuilder(SearchOrderQuery request)
