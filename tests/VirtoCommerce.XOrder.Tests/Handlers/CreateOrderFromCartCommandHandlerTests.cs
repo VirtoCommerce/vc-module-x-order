@@ -115,7 +115,7 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
             customerAggrRep.Setup(x => x.CreateOrderFromCart(It.IsAny<ShoppingCart>()))
                 .ReturnsAsync(new CustomerOrderAggregate(null, null));
 
-            var cartAggregate = new CartAggregate(null, null, null, null, null, null, null, null, null, null);
+            var cartAggregate = new CartAggregate(null, null, null, null, null, null, null, null, null, null, null);
             cartAggregate.GrabCart(cart, new Store(), new Contact(), new Currency());
 
             var cartAggrRepository = new Mock<ICartAggregateRepository>();
@@ -163,7 +163,8 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
                 Mock.Of<IMemberService>(),
                 Mock.Of<IGenericPipelineLauncher>(),
                 Mock.Of<IConfigurationItemValidator>(),
-                Mock.Of<IFileUploadService>());
+                Mock.Of<IFileUploadService>(),
+                Mock.Of<ICartSharingService>());
 
             var contact = new Contact()
             {

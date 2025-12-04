@@ -168,15 +168,13 @@ namespace VirtoCommerce.XOrder.Core
 
         public virtual async Task<IEnumerable<string>> GetCustomerOrderCoupons()
         {
-            var criteria = new PromotionUsageSearchCriteria
-            {
-                ObjectId = Order.Id,
-                ObjectType = nameof(CustomerOrder)
-            };
+            var criteria = AbstractTypeFactory<PromotionUsageSearchCriteria>.TryCreateInstance();
+            criteria.ObjectId = Order.Id;
+            criteria.ObjectType = nameof(CustomerOrder);
 
-            var result = await _promotionUsageSearchService.SearchUsagesAsync(criteria);
+            var promotionUsages = await _promotionUsageSearchService.SearchAllNoCloneAsync(criteria);
 
-            return result.Results.Select(x => x.CouponCode);
+            return promotionUsages.Select(x => x.CouponCode);
         }
 
         public object Clone()
