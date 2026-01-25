@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using AutoMapper;
 using GraphQL;
 using GraphQL.DataLoader;
@@ -15,7 +13,6 @@ using VirtoCommerce.Xapi.Core.Models;
 using VirtoCommerce.Xapi.Core.Schemas;
 using VirtoCommerce.Xapi.Core.Services;
 using VirtoCommerce.XCatalog.Core.Models;
-using VirtoCommerce.XCatalog.Core.Queries;
 using VirtoCommerce.XCatalog.Core.Schemas;
 using VirtoCommerce.XOrder.Core.Extensions;
 using Money = VirtoCommerce.CoreModule.Core.Currency.Money;
@@ -109,37 +106,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
                 Name = "product",
                 Type = GraphTypeExtensionHelper.GetActualType<ProductType>(),
                 Resolver = new FuncFieldResolver<LineItem, IDataLoaderResult<ExpProduct>>(context =>
-                {
-                    var includeFields = context.SubFields.Values.GetAllNodesPaths(context).ToArray();
-                    var loader = dataLoader.Context.GetOrAddBatchLoader<string, ExpProduct>("order_lineItems_products", async (ids) =>
-                    {
-                        //Get currencies and store only from one order.
-                        //We intentionally ignore the case when there are ma be the orders with the different currencies and stores in the resulting set
-                        var orderAggregate = context.GetValueForSource<CustomerOrderAggregate>();
-                        var order = orderAggregate.Order;
-
-                        var request = new LoadProductsQuery
-                        {
-                            UserId = context.GetArgumentOrValue<string>("userId") ?? context.GetCurrentUserId(),
-                            StoreId = order.StoreId,
-                            CurrencyCode = order.Currency,
-                            ObjectIds = ids.ToArray(),
-                            IncludeFields = includeFields.ToArray()
-                        };
-
-                        var cultureName = context.GetArgumentOrValue<string>("cultureName") ?? order.LanguageCode;
-                        context.UserContext.TryAdd("currencyCode", order.Currency);
-                        context.UserContext.TryAdd("storeId", order.StoreId);
-                        context.UserContext.TryAdd("store", orderAggregate.Store);
-                        context.UserContext.TryAdd("cultureName", cultureName);
-
-                        var response = await mediator.Send(request);
-
-                        return response.Products.ToDictionary(x => x.Id);
-                    });
-
-                    return loader.LoadAsync(context.Source.ProductId);
-                })
+                    dataLoader.LoadOrderProduct(context, mediator, "order_lineItems_products", context.Source.ProductId)),
             };
             AddField(productField);
 
@@ -148,9 +115,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
                 Name = "vendor",
                 Type = GraphTypeExtensionHelper.GetActualType<VendorType>(),
                 Resolver = new FuncFieldResolver<LineItem, IDataLoaderResult<ExpVendor>>(context =>
-                {
-                    return dataLoader.LoadVendor(memberService, mapper, loaderKey: "order_vendor", vendorId: context.Source.VendorId);
-                })
+                    dataLoader.LoadVendor(memberService, mapper, loaderKey: "order_vendor", vendorId: context.Source.VendorId)),
             };
             AddField(vendorField);
 
