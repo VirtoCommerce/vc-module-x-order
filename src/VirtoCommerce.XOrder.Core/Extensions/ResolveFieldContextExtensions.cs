@@ -11,6 +11,11 @@ namespace VirtoCommerce.XOrder.Core.Extensions
 {
     public static class ResolveFieldContextExtensions
     {
+        public static CustomerOrderAggregate GetOrder(this IResolveFieldContext userContext)
+        {
+            return userContext.GetValueForSource<CustomerOrderAggregate>();
+        }
+
         public static Currency GetOrderCurrency<T>(this IResolveFieldContext<T> userContext)
         {
             return userContext.GetValueForSource<CustomerOrderAggregate>()?.Currency;
