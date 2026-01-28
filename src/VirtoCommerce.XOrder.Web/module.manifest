@@ -8,7 +8,7 @@
   <dependencies>
     <dependency id="VirtoCommerce.FileExperienceApi" version="3.906.0" />
     <dependency id="VirtoCommerce.Orders" version="3.863.0" />
-    <dependency id="VirtoCommerce.Payment" version="3.813.0-alpha.264-vcst-4564" />
+    <dependency id="VirtoCommerce.Payment" version="3.813.0-alpha.266-vcst-4564" />
     <dependency id="VirtoCommerce.Xapi" version="3.929.0" />
     <dependency id="VirtoCommerce.XCart" version="3.950.0" />
     <dependency id="VirtoCommerce.XCatalog" version="3.942.0" />
