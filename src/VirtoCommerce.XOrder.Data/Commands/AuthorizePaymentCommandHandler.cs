@@ -37,7 +37,7 @@ namespace VirtoCommerce.XOrder.Data.Commands
 
             var parameters = GetParameters(request);
 
-            var validatePostProcessResult = paymentInfo.Payment.PaymentMethod.ValidatePostProcessRequest(parameters);
+            var validatePostProcessResult = await paymentInfo.Payment.PaymentMethod.ValidatePostProcessRequestAsync(parameters);
             if (!validatePostProcessResult.IsSuccess)
             {
                 return ErrorResult<AuthorizePaymentResult>(validatePostProcessResult.ErrorMessage);
@@ -54,7 +54,7 @@ namespace VirtoCommerce.XOrder.Data.Commands
                 Parameters = parameters,
             };
 
-            var processPaymentRequestResult = paymentInfo.Payment.PaymentMethod.PostProcessPayment(postProcessPaymentRequest);
+            var processPaymentRequestResult = await paymentInfo.Payment.PaymentMethod.PostProcessPaymentAsync(postProcessPaymentRequest);
 
             if (processPaymentRequestResult.IsSuccess)
             {

@@ -50,7 +50,7 @@ namespace VirtoCommerce.XOrder.Core
             Order.Status = status;
         }
 
-        public ProcessPaymentRequestResult ProcessOrderPayment(ProcessPaymentRequest request)
+        public async Task<ProcessPaymentRequestResult> ProcessOrderPayment(ProcessPaymentRequest request)
         {
             var result = new ProcessPaymentRequestResult();
 
@@ -77,7 +77,7 @@ namespace VirtoCommerce.XOrder.Core
             {
                 //This is definitely bad that we execute external business logic here, it must be done via domain events or in the event handler
                 //inside this aggregate we should do only related to order entities changes and should avoid of execution of external logic
-                result = inPayment.PaymentMethod.ProcessPayment(request);
+                result = await inPayment.PaymentMethod.ProcessPaymentAsync(request);
                 if (result.OuterId != null)
                 {
                     inPayment.OuterId = result.OuterId;
