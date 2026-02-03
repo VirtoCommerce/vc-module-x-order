@@ -42,7 +42,7 @@ namespace VirtoCommerce.XOrder.Data.Commands
                 Store = paymentInfo.Store,
             };
 
-            var processPaymentResult = paymentInfo.Payment.PaymentMethod.ProcessPayment(processPaymentRequest);
+            var processPaymentResult = await paymentInfo.Payment.PaymentMethod.ProcessPaymentAsync(processPaymentRequest, cancellationToken);
 
             var result = new InitializePaymentResult
             {
