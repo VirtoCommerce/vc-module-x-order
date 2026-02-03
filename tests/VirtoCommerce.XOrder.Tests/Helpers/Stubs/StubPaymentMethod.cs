@@ -1,6 +1,4 @@
-using System.Collections.Specialized;
 using VirtoCommerce.PaymentModule.Core.Model;
-using VirtoCommerce.PaymentModule.Model.Requests;
 
 namespace VirtoCommerce.XOrder.Tests.Helpers.Stubs
 {

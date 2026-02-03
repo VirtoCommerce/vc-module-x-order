@@ -10,7 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     <PackageReference Include="VirtoCommerce.OrdersModule.Core" Version="3.863.0" />
-    <PackageReference Include="VirtoCommerce.PaymentModule.Core" Version="3.813.0-alpha.266-vcst-4564" />
+    <PackageReference Include="VirtoCommerce.PaymentModule.Core" Version="3.813.0" />
     <PackageReference Include="VirtoCommerce.Xapi.Core" Version="3.929.0" />
     <PackageReference Include="VirtoCommerce.XCart.Core" Version="3.950.0" />
     <PackageReference Include="VirtoCommerce.XCatalog.Core" Version="3.942.0" />
