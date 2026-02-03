@@ -56,7 +56,7 @@ namespace VirtoCommerce.XOrder.Core
             return ProcessOrderPayment(request, default);
         }
 
-        public async Task<ProcessPaymentRequestResult> ProcessOrderPayment(ProcessPaymentRequest request, CancellationToken cancellationToken = default)
+        public async Task<ProcessPaymentRequestResult> ProcessOrderPayment(ProcessPaymentRequest request, CancellationToken cancellationToken)
         {
             var result = new ProcessPaymentRequestResult();
 
