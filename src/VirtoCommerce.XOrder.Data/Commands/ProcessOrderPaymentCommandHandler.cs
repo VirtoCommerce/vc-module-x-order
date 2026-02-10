@@ -45,9 +45,9 @@ namespace VirtoCommerce.XOrder.Data.Commands
                 Store = store,
                 BankCardInfo = request.BankCardInfo
             };
-            var result = orderAggregate.ProcessOrderPayment(processPaymentRequest);
+            var result = await orderAggregate.ProcessOrderPayment(processPaymentRequest, cancellationToken);
 
-            await _customerOrderService.SaveChangesAsync(new[] { orderAggregate.Order });
+            await _customerOrderService.SaveChangesAsync([orderAggregate.Order]);
 
             return result;
         }

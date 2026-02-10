@@ -1,7 +1,5 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.PaymentModule.Core.Model;
 using VirtoCommerce.PaymentModule.Model.Requests;
@@ -205,36 +203,6 @@ namespace VirtoCommerce.XOrder.Tests
         {
             public TestPaymentMethod(string code) : base(code)
             {
-            }
-
-            public override ProcessPaymentRequestResult ProcessPayment(ProcessPaymentRequest request)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override PostProcessPaymentRequestResult PostProcessPayment(PostProcessPaymentRequest request)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override VoidPaymentRequestResult VoidProcessPayment(VoidPaymentRequest request)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override CapturePaymentRequestResult CaptureProcessPayment(CapturePaymentRequest context)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override RefundPaymentRequestResult RefundProcessPayment(RefundPaymentRequest context)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override ValidatePostProcessRequestResult ValidatePostProcessRequest(NameValueCollection queryString)
-            {
-                throw new NotImplementedException();
             }
 
             public override PaymentMethodType PaymentMethodType { get; }
