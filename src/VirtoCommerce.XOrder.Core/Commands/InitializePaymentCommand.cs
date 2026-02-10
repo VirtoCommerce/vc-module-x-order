@@ -1,4 +1,3 @@
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.XOrder.Core.Models;
 
