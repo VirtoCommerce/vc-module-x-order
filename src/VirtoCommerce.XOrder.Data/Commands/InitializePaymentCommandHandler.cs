@@ -32,6 +32,8 @@ namespace VirtoCommerce.XOrder.Data.Commands
                 return ErrorResult<InitializePaymentResult>(validationResult.Errors.FirstOrDefault()?.ErrorMessage);
             }
 
+            var parameters = GetParameters(request);
+
             var processPaymentRequest = new ProcessPaymentRequest
             {
                 OrderId = paymentInfo.CustomerOrder.Id,
@@ -40,6 +42,7 @@ namespace VirtoCommerce.XOrder.Data.Commands
                 Payment = paymentInfo.Payment,
                 StoreId = paymentInfo.Store.Id,
                 Store = paymentInfo.Store,
+                Parameters = parameters,
             };
 
             var processPaymentResult = await paymentInfo.Payment.PaymentMethod.ProcessPaymentAsync(processPaymentRequest, cancellationToken);
