@@ -49,7 +49,7 @@ namespace VirtoCommerce.XOrder.Core.Commands
             return result;
         }
 
-        protected static NameValueCollection GetParameters(AuthorizePaymentCommand request)
+        protected static NameValueCollection GetParameters(PaymentCommandBase request)
         {
             var parameters = new NameValueCollection();
             foreach (var param in request?.Parameters ?? [])

@@ -1,3 +1,5 @@
+using VirtoCommerce.Platform.Core.Common;
+
 namespace VirtoCommerce.XOrder.Core.Commands
 {
     public class PaymentCommandBase
@@ -5,5 +7,7 @@ namespace VirtoCommerce.XOrder.Core.Commands
         public string OrderId { get; set; }
 
         public string PaymentId { get; set; }
+
+        public KeyValue[] Parameters { get; set; }
     }
 }
