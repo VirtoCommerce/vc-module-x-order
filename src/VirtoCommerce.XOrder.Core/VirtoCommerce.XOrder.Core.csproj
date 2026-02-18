@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <IsPackable>True</IsPackable>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
@@ -8,11 +8,10 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
-    <PackageReference Include="VirtoCommerce.OrdersModule.Core" Version="3.867.0-alpha.1395-variation-configuration-type" />
-    <PackageReference Include="VirtoCommerce.PaymentModule.Core" Version="3.812.0" />
-    <PackageReference Include="VirtoCommerce.Xapi.Core" Version="3.929.0" />
-    <PackageReference Include="VirtoCommerce.XCart.Core" Version="3.953.0-alpha.201-variation-configuration-type" />
-    <PackageReference Include="VirtoCommerce.XCatalog.Core" Version="3.942.0" />
+    <PackageReference Include="VirtoCommerce.OrdersModule.Core" Version="3.1001.0-alpha.1407-variation-configuration-type" />
+    <PackageReference Include="VirtoCommerce.PaymentModule.Core" Version="3.1000.0" />
+    <PackageReference Include="VirtoCommerce.Xapi.Core" Version="3.1001.0" />
+    <PackageReference Include="VirtoCommerce.XCart.Core" Version="x-cart-alpha-pending" />
+    <PackageReference Include="VirtoCommerce.XCatalog.Core" Version="3.945.0" />
   </ItemGroup>
 </Project>
