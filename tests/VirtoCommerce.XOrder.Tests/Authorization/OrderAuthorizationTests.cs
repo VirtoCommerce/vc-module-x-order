@@ -29,7 +29,9 @@ namespace VirtoCommerce.XOrder.Tests.Authorization
         [Fact]
         public async Task CanAccessOrderAuthorizationHandler_OrderBelongUser_ShouldSucceed()
         {
-            //Arrange    
+            VirtoCommerce.Platform.Core.Security.ClaimsPrincipalExtensions.UserIdClaimTypes = ["name"];
+
+            //Arrange
             var requirements = new[] { new CanAccessOrderAuthorizationRequirement() };
             var userId = "userId";
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("name", userId) }));
