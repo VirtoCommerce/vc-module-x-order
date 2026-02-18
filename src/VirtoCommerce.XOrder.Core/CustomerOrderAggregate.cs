@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentValidation;
 using VirtoCommerce.CoreModule.Core.Currency;
@@ -50,7 +51,12 @@ namespace VirtoCommerce.XOrder.Core
             Order.Status = status;
         }
 
-        public ProcessPaymentRequestResult ProcessOrderPayment(ProcessPaymentRequest request)
+        public Task<ProcessPaymentRequestResult> ProcessOrderPayment(ProcessPaymentRequest request)
+        {
+            return ProcessOrderPayment(request, default);
+        }
+
+        public async Task<ProcessPaymentRequestResult> ProcessOrderPayment(ProcessPaymentRequest request, CancellationToken cancellationToken)
         {
             var result = new ProcessPaymentRequestResult();
 
@@ -77,7 +83,7 @@ namespace VirtoCommerce.XOrder.Core
             {
                 //This is definitely bad that we execute external business logic here, it must be done via domain events or in the event handler
                 //inside this aggregate we should do only related to order entities changes and should avoid of execution of external logic
-                result = inPayment.PaymentMethod.ProcessPayment(request);
+                result = await inPayment.PaymentMethod.ProcessPaymentAsync(request, cancellationToken);
                 if (result.OuterId != null)
                 {
                     inPayment.OuterId = result.OuterId;
