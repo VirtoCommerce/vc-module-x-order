@@ -7,6 +7,7 @@ using Moq;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Services;
 using VirtoCommerce.OrdersModule.Core.Model;
+using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.XOrder.Core.Queries;
 using VirtoCommerce.XOrder.Data.Authorization;
 using Xunit;
@@ -19,6 +20,8 @@ namespace VirtoCommerce.XOrder.Tests.Authorization
 
         public OrderAuthorizationTests()
         {
+            ClaimsPrincipalExtensions.UserIdClaimTypes = ["name"];
+
             _memberServiceMock = new Mock<IMemberService>();
 
             _memberServiceMock
@@ -97,9 +100,7 @@ namespace VirtoCommerce.XOrder.Tests.Authorization
         [MemberData(nameof(GetSearchOrderQuery))]
         public async Task CanAccessOrderAuthorizationHandler_SearchOrdersBelongToUser_ShouldSucceed(SearchCustomerOrderQuery query)
         {
-            VirtoCommerce.Platform.Core.Security.ClaimsPrincipalExtensions.UserIdClaimTypes = ["name"];
-
-            //Arrange    
+            //Arrange
             var requirements = new[] { new CanAccessOrderAuthorizationRequirement() };
             var userId = "userId";
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("name", userId) }));
@@ -190,9 +191,7 @@ namespace VirtoCommerce.XOrder.Tests.Authorization
         [MemberData(nameof(SearchOrganizationOrderQueryTestData))]
         public async Task CanAccessOrderAuthorizationHandler_SearchOrganizationOrderQuery(SearchOrganizationOrderQuery query, bool succeeded)
         {
-            VirtoCommerce.Platform.Core.Security.ClaimsPrincipalExtensions.UserIdClaimTypes = ["name"];
-
-            //Arrange    
+            //Arrange
             var requirements = new[] { new CanAccessOrderAuthorizationRequirement() };
 
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("name", "userId"), new Claim("memberId", "memberId") }));
