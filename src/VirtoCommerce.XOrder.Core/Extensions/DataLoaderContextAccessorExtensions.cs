@@ -23,20 +23,21 @@ public static class DataLoaderContextAccessorExtensions
         {
             // Get currencies and store only from one order.
             // We intentionally ignore the case when there may be orders with different currencies and stores in the resulting set
-            var orderAggregate = context.GetValueForSource<CustomerOrderAggregate>();
+            var orderAggregate = context.GetOrder();
             var order = orderAggregate.Order;
             var userId = context.GetArgumentOrValue<string>("userId") ?? context.GetCurrentUserId();
+
+            var cultureName = context.GetArgumentOrValue<string>("cultureName") ?? order.LanguageCode;
 
             var request = new LoadProductsQuery
             {
                 UserId = userId,
                 StoreId = order.StoreId,
                 CurrencyCode = order.Currency,
+                CultureName = cultureName,
                 ObjectIds = ids.ToArray(),
                 IncludeFields = context.SubFields.Values.GetAllNodesPaths(context).ToArray(),
             };
-
-            var cultureName = context.GetArgumentOrValue<string>("cultureName") ?? order.LanguageCode;
             context.UserContext.TryAdd("currencyCode", order.Currency);
             context.UserContext.TryAdd("storeId", order.StoreId);
             context.UserContext.TryAdd("store", orderAggregate.Store);
