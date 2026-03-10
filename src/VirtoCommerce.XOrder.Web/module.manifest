@@ -7,10 +7,10 @@
   <platformVersion>3.1002.0</platformVersion>
   <dependencies>
     <dependency id="VirtoCommerce.FileExperienceApi" version="3.1000.0" />
-    <dependency id="VirtoCommerce.Orders" version="3.1001.0-alpha.1407-variation-configuration-type" />
+    <dependency id="VirtoCommerce.Orders" version="3.1002.0-alpha.1415-variation-configuration-type" />
     <dependency id="VirtoCommerce.Payment" version="3.1000.0" />
     <dependency id="VirtoCommerce.Xapi" version="3.1001.0" />
-    <dependency id="VirtoCommerce.XCart" version="3.1000.0-alpha.207-variation-configuration-type" />
+    <dependency id="VirtoCommerce.XCart" version="3.1001.0-alpha.243-variation-configuration-type" />
     <dependency id="VirtoCommerce.XCatalog" version="3.1000.0" />
   </dependencies>
 
