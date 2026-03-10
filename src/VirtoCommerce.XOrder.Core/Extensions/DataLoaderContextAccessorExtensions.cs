@@ -90,9 +90,9 @@ public static class DataLoaderContextAccessorExtensions
         if (!string.IsNullOrEmpty(productSnapshot))
         {
             var cache = GetOrAddSnapshotCache(context);
-            // Cache by ProductId — if multiple items share the same product, first snapshot wins.
-            // Within a single order this is safe (all snapshots captured at the same time).
-            var expProduct = cache.GetOrAdd(productId, _ => DeserializeSnapshot(productSnapshot));
+            var orderId = context.GetOrder()?.Order?.Id;
+            var cacheKey = $"{orderId}:{productId}";
+            var expProduct = cache.GetOrAdd(cacheKey, _ => DeserializeSnapshot(productSnapshot));
             return new DataLoaderResult<ExpProduct>(expProduct);
         }
 

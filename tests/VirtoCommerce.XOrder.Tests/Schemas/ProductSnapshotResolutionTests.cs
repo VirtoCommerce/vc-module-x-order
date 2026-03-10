@@ -9,7 +9,9 @@ using MediatR;
 using Moq;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Serialization;
+using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.XCatalog.Core.Models;
+using VirtoCommerce.XOrder.Core;
 using VirtoCommerce.XOrder.Core.Extensions;
 using Xunit;
 
@@ -25,7 +27,7 @@ public class ProductSnapshotResolutionTests
         var snapshotJson = ProductJsonSerializer.Serialize(product);
 
         var dataLoader = new Mock<IDataLoaderContextAccessor>();
-        var context = CreateResolveFieldContext();
+        var context = CreateResolveFieldContext("order1", "lineItem1");
         var mediator = new Mock<IMediator>();
 
         // Act
@@ -41,17 +43,17 @@ public class ProductSnapshotResolutionTests
     }
 
     [Fact]
-    public async Task LoadOrderProductWithSnapshot_WithSnapshot_CachesByProductId()
+    public async Task LoadOrderProductWithSnapshot_WithSnapshot_CachesByOrderAndProductId()
     {
         // Arrange
         var product = new CatalogProduct { Id = "product1", Name = "Test Product" };
         var snapshotJson = ProductJsonSerializer.Serialize(product);
 
         var dataLoader = new Mock<IDataLoaderContextAccessor>();
-        var context = CreateResolveFieldContext();
+        var context = CreateResolveFieldContext("order1", "lineItem1");
         var mediator = new Mock<IMediator>();
 
-        // Act — call twice with same ProductId
+        // Act — call twice with same ProductId within same order
         var result1 = dataLoader.Object.LoadOrderProductWithSnapshot(
             context, mediator.Object, "test_loader", "product1", snapshotJson);
         var result2 = dataLoader.Object.LoadOrderProductWithSnapshot(
@@ -64,11 +66,39 @@ public class ProductSnapshotResolutionTests
     }
 
     [Fact]
+    public async Task LoadOrderProductWithSnapshot_DifferentOrders_ReturnsDifferentSnapshots()
+    {
+        // Arrange
+        var product1 = new CatalogProduct { Id = "product1", Name = "Version A" };
+        var product2 = new CatalogProduct { Id = "product1", Name = "Version B" };
+        var snapshot1 = ProductJsonSerializer.Serialize(product1);
+        var snapshot2 = ProductJsonSerializer.Serialize(product2);
+
+        var dataLoader = new Mock<IDataLoaderContextAccessor>();
+        var userContext = new Dictionary<string, object>();
+        var context1 = CreateResolveFieldContext("order1", "lineItem1", userContext);
+        var context2 = CreateResolveFieldContext("order2", "lineItem2", userContext);
+        var mediator = new Mock<IMediator>();
+
+        // Act
+        var result1 = dataLoader.Object.LoadOrderProductWithSnapshot(
+            context1, mediator.Object, "test_loader", "product1", snapshot1);
+        var result2 = dataLoader.Object.LoadOrderProductWithSnapshot(
+            context2, mediator.Object, "test_loader", "product1", snapshot2);
+
+        // Assert — different snapshots for different orders
+        var expProduct1 = await GetResultValueAsync(result1);
+        var expProduct2 = await GetResultValueAsync(result2);
+        expProduct1.IndexedProduct.Name.Should().Be("Version A");
+        expProduct2.IndexedProduct.Name.Should().Be("Version B");
+    }
+
+    [Fact]
     public async Task LoadOrderProductWithSnapshot_WithNullProductId_ReturnsNullProduct()
     {
         // Arrange
         var dataLoader = new Mock<IDataLoaderContextAccessor>();
-        var context = CreateResolveFieldContext();
+        var context = CreateResolveFieldContext("order1", "lineItem1");
         var mediator = new Mock<IMediator>();
 
         // Act
@@ -80,11 +110,26 @@ public class ProductSnapshotResolutionTests
         expProduct.Should().BeNull();
     }
 
-    private static IResolveFieldContext CreateResolveFieldContext()
+    private static IResolveFieldContext CreateResolveFieldContext(string orderId, string lineItemId,
+        Dictionary<string, object> userContext = null)
     {
+        userContext ??= new Dictionary<string, object>();
+
+        var order = new CustomerOrder { Id = orderId };
+        var orderAggregate = new CustomerOrderAggregate(null, null);
+        orderAggregate.GrabCustomerOrder(order, null, null);
+
+        // SetExpandedObjectGraph puts the aggregate under each entity's Id
+        userContext.TryAdd(lineItemId, orderAggregate);
+        userContext.TryAdd(orderId, orderAggregate);
+
+        var lineItem = new LineItem { Id = lineItemId };
+
         var context = new Mock<IResolveFieldContext>();
-        context.Setup(x => x.UserContext).Returns(new Dictionary<string, object>());
+        context.Setup(x => x.Source).Returns(lineItem);
+        context.Setup(x => x.UserContext).Returns(userContext);
         context.Setup(x => x.SubFields).Returns(new Dictionary<string, (GraphQLField, FieldType)>());
+
         return context.Object;
     }
 
