@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using FluentAssertions;
 using GraphQL;
 using GraphQL.DataLoader;
@@ -17,7 +18,7 @@ namespace VirtoCommerce.XOrder.Tests.Schemas;
 public class ProductSnapshotResolutionTests
 {
     [Fact]
-    public void LoadOrderProductWithSnapshot_WithSnapshot_ReturnsDeserializedProduct()
+    public async Task LoadOrderProductWithSnapshot_WithSnapshot_ReturnsDeserializedProduct()
     {
         // Arrange
         var product = new CatalogProduct { Id = "product1", Name = "Test Product" };
@@ -32,7 +33,7 @@ public class ProductSnapshotResolutionTests
             context, mediator.Object, "test_loader", "product1", snapshotJson);
 
         // Assert
-        var expProduct = GetResultValue(result);
+        var expProduct = await GetResultValueAsync(result);
         expProduct.Should().NotBeNull();
         expProduct.IndexedProduct.Should().NotBeNull();
         expProduct.IndexedProduct.Id.Should().Be("product1");
@@ -40,7 +41,7 @@ public class ProductSnapshotResolutionTests
     }
 
     [Fact]
-    public void LoadOrderProductWithSnapshot_WithSnapshot_CachesByProductId()
+    public async Task LoadOrderProductWithSnapshot_WithSnapshot_CachesByProductId()
     {
         // Arrange
         var product = new CatalogProduct { Id = "product1", Name = "Test Product" };
@@ -57,13 +58,13 @@ public class ProductSnapshotResolutionTests
             context, mediator.Object, "test_loader", "product1", snapshotJson);
 
         // Assert — same instance returned (cached)
-        var expProduct1 = GetResultValue(result1);
-        var expProduct2 = GetResultValue(result2);
+        var expProduct1 = await GetResultValueAsync(result1);
+        var expProduct2 = await GetResultValueAsync(result2);
         expProduct1.Should().BeSameAs(expProduct2);
     }
 
     [Fact]
-    public void LoadOrderProductWithSnapshot_WithNullProductId_ReturnsNullProduct()
+    public async Task LoadOrderProductWithSnapshot_WithNullProductId_ReturnsNullProduct()
     {
         // Arrange
         var dataLoader = new Mock<IDataLoaderContextAccessor>();
@@ -75,7 +76,7 @@ public class ProductSnapshotResolutionTests
             context, mediator.Object, "test_loader", null, "some json");
 
         // Assert
-        var expProduct = GetResultValue(result);
+        var expProduct = await GetResultValueAsync(result);
         expProduct.Should().BeNull();
     }
 
@@ -87,8 +88,8 @@ public class ProductSnapshotResolutionTests
         return context.Object;
     }
 
-    private static ExpProduct GetResultValue(IDataLoaderResult<ExpProduct> result)
+    private static async Task<ExpProduct> GetResultValueAsync(IDataLoaderResult<ExpProduct> result)
     {
-        return result.GetResultAsync().GetAwaiter().GetResult();
+        return await result.GetResultAsync();
     }
 }

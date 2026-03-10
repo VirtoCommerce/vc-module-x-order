@@ -6,6 +6,7 @@ using GraphQL.DataLoader;
 using MediatR;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.CatalogModule.Core.Serialization;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Xapi.Core.Extensions;
 using VirtoCommerce.XCatalog.Core.Models;
 using VirtoCommerce.XCatalog.Core.Queries;
@@ -117,9 +118,9 @@ public static class DataLoaderContextAccessorExtensions
     {
         var catalogProduct = ProductJsonSerializer.DeserializePolymorphic<CatalogProduct>(snapshotJson);
 
-        return new ExpProduct
-        {
-            IndexedProduct = catalogProduct,
-        };
+        var result = AbstractTypeFactory<ExpProduct>.TryCreateInstance();
+        result.IndexedProduct = catalogProduct;
+
+        return result;
     }
 }
