@@ -118,7 +118,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
                     var loader = dataLoader.Context.GetOrAddBatchLoader<string, PickupLocation>("cart_pickup_location",
                         async pickupLocationIds =>
                         {
-                            var orderAggregate = context.GetValueForSource<CustomerOrderAggregate>();
+                            var orderAggregate = context.GetOrder();
                             var criteria = AbstractTypeFactory<PickupLocationSearchCriteria>.TryCreateInstance();
                             criteria.ObjectIds = pickupLocationIds.ToArray();
                             criteria.StoreId = orderAggregate.Order.StoreId;

@@ -49,33 +49,11 @@ namespace VirtoCommerce.XOrder.Data.Commands
             await UpdateCart(cartAggregate);
             await ValidateCart(cartAggregate);
 
-            // need to check for unsaved gift items before creating an order and resave the cart, otherwise an exception will be thrown on order create
-            var hasUnsavedGifts = cartAggregate.GiftItems.Any(x => x.Id == null);
-            if (hasUnsavedGifts)
-            {
-                await _cartRepository.SaveAsync(cartAggregate);
-            }
+            await CheckUnsavedGifts(cartAggregate);
 
             var result = await _customerOrderAggregateRepository.CreateOrderFromCart(cartAggregate.Cart);
 
-            // remove selected items after order create
-            var selectedLineItemIds = cartAggregate.SelectedLineItems.Select(x => x.Id).ToArray();
-            await cartAggregate.RemoveItemsAsync(selectedLineItemIds);
-
-            // clear cart
-            cartAggregate.Cart.Shipments?.Clear();
-            cartAggregate.Cart.Payments?.Clear();
-            cartAggregate.Cart.Coupons?.Clear();
-
-            cartAggregate.Cart.PurchaseOrderNumber = string.Empty;
-            cartAggregate.Cart.Comment = string.Empty;
-            cartAggregate.Cart.Coupon = string.Empty;
-            cartAggregate.Cart.DynamicProperties?.Clear();
-
-            // refresh CheckoutId with a new unique value after creating the order
-            cartAggregate.Cart.CheckoutId = Guid.NewGuid().ToString();
-
-            await _cartRepository.SaveAsync(cartAggregate);
+            await CleanupCart(cartAggregate);
 
             return result;
         }
@@ -108,6 +86,38 @@ namespace VirtoCommerce.XOrder.Data.Commands
                 var dictionary = errors.GroupBy(x => x.ErrorCode).ToDictionary(x => x.Key, x => x.Select(y => y.ErrorMessage).FirstOrDefault());
                 throw new ExecutionError("The cart has validation errors", dictionary) { Code = Constants.ValidationErrorCode };
             }
+        }
+
+        protected virtual async Task CheckUnsavedGifts(CartAggregate cartAggregate)
+        {
+            // need to check for unsaved gift items before creating an order and resave the cart, otherwise an exception will be thrown on order create
+            var hasUnsavedGifts = cartAggregate.GiftItems.Any(x => x.Id == null);
+            if (hasUnsavedGifts)
+            {
+                await _cartRepository.SaveAsync(cartAggregate);
+            }
+        }
+
+        protected virtual async Task CleanupCart(CartAggregate cartAggregate)
+        {
+            // remove selected items after order create
+            var selectedLineItemIds = cartAggregate.SelectedLineItems.Select(x => x.Id).ToArray();
+            await cartAggregate.RemoveItemsAsync(selectedLineItemIds);
+
+            // clear cart
+            cartAggregate.Cart.Shipments?.Clear();
+            cartAggregate.Cart.Payments?.Clear();
+            cartAggregate.Cart.Coupons?.Clear();
+
+            cartAggregate.Cart.PurchaseOrderNumber = string.Empty;
+            cartAggregate.Cart.Comment = string.Empty;
+            cartAggregate.Cart.Coupon = string.Empty;
+            cartAggregate.Cart.DynamicProperties?.Clear();
+
+            // refresh CheckoutId with a new unique value after creating the order
+            cartAggregate.Cart.CheckoutId = Guid.NewGuid().ToString();
+
+            await _cartRepository.SaveAsync(cartAggregate);
         }
     }
 }

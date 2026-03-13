@@ -18,6 +18,11 @@ namespace VirtoCommerce.XOrder.Tests.Authorization
     {
         private readonly Mock<IMemberService> _memberServiceMock;
 
+        static OrderAuthorizationTests()
+        {
+            VirtoCommerce.Platform.Core.Security.ClaimsPrincipalExtensions.UserIdClaimTypes = ["name"];
+        }
+
         public OrderAuthorizationTests()
         {
             ClaimsPrincipalExtensions.UserIdClaimTypes = ["name"];
@@ -32,7 +37,7 @@ namespace VirtoCommerce.XOrder.Tests.Authorization
         [Fact]
         public async Task CanAccessOrderAuthorizationHandler_OrderBelongUser_ShouldSucceed()
         {
-            //Arrange    
+            //Arrange
             var requirements = new[] { new CanAccessOrderAuthorizationRequirement() };
             var userId = "userId";
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim("name", userId) }));
