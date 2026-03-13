@@ -8,10 +8,10 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="VirtoCommerce.OrdersModule.Core" Version="3.1002.0-alpha.1415-variation-configuration-type" />
+    <PackageReference Include="VirtoCommerce.OrdersModule.Core" Version="3.1002.0" />
     <PackageReference Include="VirtoCommerce.PaymentModule.Core" Version="3.1000.0" />
     <PackageReference Include="VirtoCommerce.Xapi.Core" Version="3.1001.0" />
-    <PackageReference Include="VirtoCommerce.XCart.Core" Version="3.1001.0-alpha.243-variation-configuration-type" />
+    <PackageReference Include="VirtoCommerce.XCart.Core" Version="3.1001.0" />
     <PackageReference Include="VirtoCommerce.XCatalog.Core" Version="3.1000.0" />
   </ItemGroup>
 </Project>
