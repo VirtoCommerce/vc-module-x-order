@@ -9,7 +9,6 @@ using GraphQLParser.AST;
 using MediatR;
 using Moq;
 using VirtoCommerce.CatalogModule.Core.Model;
-using VirtoCommerce.CatalogModule.Core.Serialization;
 using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Modularity;
@@ -24,18 +23,18 @@ namespace VirtoCommerce.XOrder.Tests.Schemas;
 public class ProductSnapshotResolutionTests
 {
     [Fact]
-    public async Task LoadOrderProductWithSnapshot_WithSnapshot_ReturnsProduct()
+    public async Task LoadOrderProduct_WithSnapshot_ReturnsProduct()
     {
         // Arrange
         var product = new CatalogProduct { Id = "product1", Name = "Test Product" };
 
         var dataLoader = new Mock<IDataLoaderContextAccessor>();
+        dataLoader.SetupGet(x => x.Context).Returns(new DataLoaderContext());
         var context = CreateResolveFieldContext("order1", "lineItem1", products: [product]);
         var mediator = new Mock<IMediator>();
 
         // Act
-        var result = dataLoader.Object.LoadOrderProduct(
-            context, mediator.Object, "test_loader", "product1");
+        var result = dataLoader.Object.LoadOrderProduct(context, mediator.Object, "test_loader", "product1");
 
         // Assert
         var expProduct = await GetResultValueAsync(result);
@@ -45,49 +44,25 @@ public class ProductSnapshotResolutionTests
         expProduct.IndexedProduct.Name.Should().Be("Test Product");
     }
 
-    //[Fact]
-    //public async Task LoadOrderProductWithSnapshot_WithSnapshot_CachesByOrderAndProductId()
-    //{
-    //    // Arrange
-    //    var product = new CatalogProduct { Id = "product1", Name = "Test Product" };
-    //    var snapshotJson = ProductJsonSerializer.Serialize(product);
-
-    //    var dataLoader = new Mock<IDataLoaderContextAccessor>();
-    //    var context = CreateResolveFieldContext("order1", "lineItem1");
-    //    var mediator = new Mock<IMediator>();
-
-    //    // Act — call twice with same ProductId within same order
-    //    var result1 = dataLoader.Object.LoadOrderProduct(
-    //        context, mediator.Object, "test_loader", "product1");
-    //    var result2 = dataLoader.Object.LoadOrderProduct(
-    //        context, mediator.Object, "test_loader", "product1");
-
-    //    // Assert — same instance returned (cached)
-    //    var expProduct1 = await GetResultValueAsync(result1);
-    //    var expProduct2 = await GetResultValueAsync(result2);
-    //    expProduct1.Should().BeSameAs(expProduct2);
-    //}
-
     [Fact]
-    public async Task LoadOrderProductWithSnapshot_DifferentOrders_ReturnsDifferentSnapshots()
+    public async Task LoadOrderProduct_DifferentOrders_ReturnsDifferentSnapshots()
     {
         // Arrange
         var product1 = new CatalogProduct { Id = "product1", Name = "Version A" };
         var product2 = new CatalogProduct { Id = "product1", Name = "Version B" };
-        var snapshot1 = ProductJsonSerializer.Serialize(product1);
-        var snapshot2 = ProductJsonSerializer.Serialize(product2);
 
-        var dataLoader = new Mock<IDataLoaderContextAccessor>();
+        var dataLoader1 = new Mock<IDataLoaderContextAccessor>();
+        dataLoader1.SetupGet(x => x.Context).Returns(new DataLoaderContext());
+        var dataLoader2 = new Mock<IDataLoaderContextAccessor>();
+        dataLoader2.SetupGet(x => x.Context).Returns(new DataLoaderContext());
         var userContext = new Dictionary<string, object>();
-        var context1 = CreateResolveFieldContext("order1", "lineItem1", userContext);
-        var context2 = CreateResolveFieldContext("order2", "lineItem2", userContext);
+        var context1 = CreateResolveFieldContext("order1", "lineItem1", userContext, [product1]);
+        var context2 = CreateResolveFieldContext("order2", "lineItem2", userContext, [product2]);
         var mediator = new Mock<IMediator>();
 
         // Act
-        var result1 = dataLoader.Object.LoadOrderProduct(
-            context1, mediator.Object, "test_loader", "product1");
-        var result2 = dataLoader.Object.LoadOrderProduct(
-            context2, mediator.Object, "test_loader", "product1");
+        var result1 = dataLoader1.Object.LoadOrderProduct(context1, mediator.Object, "test_loader", "product1");
+        var result2 = dataLoader2.Object.LoadOrderProduct(context2, mediator.Object, "test_loader", "product1");
 
         // Assert — different snapshots for different orders
         var expProduct1 = await GetResultValueAsync(result1);
@@ -97,17 +72,15 @@ public class ProductSnapshotResolutionTests
     }
 
     [Fact]
-    public async Task LoadOrderProductWithSnapshot_WithNullProductId_ReturnsNullProduct()
+    public async Task LoadOrderProduct_WithNullProductId_ReturnsNullProduct()
     {
         // Arrange
         var dataLoader = new Mock<IDataLoaderContextAccessor>();
         var context = CreateResolveFieldContext("order1", "lineItem1");
         var mediator = new Mock<IMediator>();
-        ///var snapshot = "some json";
 
         // Act
-        var result = dataLoader.Object.LoadOrderProduct(
-            context, mediator.Object, "test_loader", null);
+        var result = dataLoader.Object.LoadOrderProduct(context, mediator.Object, "test_loader", null);
 
         // Assert
         var expProduct = await GetResultValueAsync(result);
