@@ -51,18 +51,16 @@ public class ProductSnapshotResolutionTests
         var product1 = new CatalogProduct { Id = "product1", Name = "Version A" };
         var product2 = new CatalogProduct { Id = "product1", Name = "Version B" };
 
-        var dataLoader1 = new Mock<IDataLoaderContextAccessor>();
-        dataLoader1.SetupGet(x => x.Context).Returns(new DataLoaderContext());
-        var dataLoader2 = new Mock<IDataLoaderContextAccessor>();
-        dataLoader2.SetupGet(x => x.Context).Returns(new DataLoaderContext());
+        var dataLoader = new Mock<IDataLoaderContextAccessor>();
+        dataLoader.SetupGet(x => x.Context).Returns(new DataLoaderContext());
         var userContext = new Dictionary<string, object>();
         var context1 = CreateResolveFieldContext("order1", "lineItem1", userContext, [product1]);
         var context2 = CreateResolveFieldContext("order2", "lineItem2", userContext, [product2]);
         var mediator = new Mock<IMediator>();
 
         // Act
-        var result1 = dataLoader1.Object.LoadOrderProduct(context1, mediator.Object, "test_loader", "product1");
-        var result2 = dataLoader2.Object.LoadOrderProduct(context2, mediator.Object, "test_loader", "product1");
+        var result1 = dataLoader.Object.LoadOrderProduct(context1, mediator.Object, "test_loader", "product1");
+        var result2 = dataLoader.Object.LoadOrderProduct(context2, mediator.Object, "test_loader", "product1");
 
         // Assert — different snapshots for different orders
         var expProduct1 = await GetResultValueAsync(result1);

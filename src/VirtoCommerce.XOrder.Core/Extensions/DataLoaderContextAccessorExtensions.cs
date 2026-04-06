@@ -43,7 +43,10 @@ public static class DataLoaderContextAccessorExtensions
         IMediator mediator,
         string loaderKey)
     {
-        var loader = dataLoader.Context.GetOrAddBatchLoader<string, ExpProduct>(loaderKey, async ids =>
+        var orderId = context.GetOrder()?.Order?.Id;
+        var scopedLoaderKey = string.IsNullOrEmpty(orderId) ? loaderKey : $"{loaderKey}:{orderId}";
+
+        var loader = dataLoader.Context.GetOrAddBatchLoader<string, ExpProduct>(scopedLoaderKey, async ids =>
         {
             // try load products from snapshots then load the missing products by mediator GetProducts query
             var orderAggregate = context.GetOrder();
