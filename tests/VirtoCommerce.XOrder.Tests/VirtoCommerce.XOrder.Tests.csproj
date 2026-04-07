@@ -23,4 +23,7 @@
     <ProjectReference Include="..\..\src\VirtoCommerce.XOrder.Data\VirtoCommerce.XOrder.Data.csproj" />
     <ProjectReference Include="..\..\src\VirtoCommerce.XOrder.Web\VirtoCommerce.XOrder.Web.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Schemas\" />
+  </ItemGroup>
 </Project>

@@ -5,13 +5,12 @@ using GraphQL;
 using GraphQL.DataLoader;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Modularity;
-using VirtoCommerce.ProductSnapshot.Core.Services;
 using VirtoCommerce.Xapi.Core.Extensions;
+using VirtoCommerce.Xapi.Core.Pipelines;
 using VirtoCommerce.XCatalog.Core.Models;
 using VirtoCommerce.XCatalog.Core.Queries;
+using VirtoCommerce.XOrder.Core.Models;
 
 namespace VirtoCommerce.XOrder.Core.Extensions;
 
@@ -90,39 +89,33 @@ public static class DataLoaderContextAccessorExtensions
     {
         var products = new List<ExpProduct>();
 
-        var moduleCatalog = context.RequestServices.GetService<IModuleService>();
-        if (moduleCatalog == null || !moduleCatalog.IsInstalled("VirtoCommerce.ProductSnapshot"))
+        var pipeline = context.RequestServices.GetService<IGenericPipelineLauncher>();
+        if (pipeline == null)
         {
             return products.ToDictionary(x => x.Id);
         }
 
-        var snapshotProvider = context.RequestServices.GetService<ICatalogProductSnapshotProvider>();
-        if (snapshotProvider == null)
+        var externalOrdeProducts = new ExternalOrderProducts
+        {
+            OrderId = orderId,
+        };
+
+        await pipeline.Execute(externalOrdeProducts);
+
+        if (externalOrdeProducts.Products.IsNullOrEmpty())
         {
             return products.ToDictionary(x => x.Id);
         }
-
-        var orderProductSnapshots = await snapshotProvider.GetOrderProductSnapshotsAsync(orderId);
 
         foreach (var productId in productIds)
         {
-            var catalogProductSnapshot = orderProductSnapshots.FirstOrDefault(x => x.Id == productId);
+            var catalogProductSnapshot = externalOrdeProducts.Products.FirstOrDefault(x => x.Id == productId);
             if (catalogProductSnapshot != null)
             {
-                var expProduct = GetExpProduct(catalogProductSnapshot);
-                products.Add(expProduct);
+                products.Add(catalogProductSnapshot);
             }
         }
 
         return products.ToDictionary(x => x.Id);
-    }
-
-    private static ExpProduct GetExpProduct(CatalogProduct catalogProduct)
-    {
-        var result = AbstractTypeFactory<ExpProduct>.TryCreateInstance();
-
-        result.IndexedProduct = catalogProduct;
-
-        return result;
     }
 }

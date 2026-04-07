@@ -8,6 +8,7 @@ using VirtoCommerce.XCart.Core.Models;
 using VirtoCommerce.XCatalog.Core.Models;
 using VirtoCommerce.XCatalog.Data.Index;
 using VirtoCommerce.XOrder.Core;
+using VirtoCommerce.XOrder.Core.Models;
 using VirtoCommerce.XOrder.Core.Services;
 using VirtoCommerce.XOrder.Data.Authorization;
 using VirtoCommerce.XOrder.Data.Middlewares;
@@ -46,6 +47,8 @@ namespace VirtoCommerce.XOrder.Data.Extensions
             {
                 builder.AddMiddleware(typeof(EvalPurchasedBeforeFilter));
             });
+
+            services.AddPipeline<ExternalOrderProducts>();
 
             return services;
         }
