@@ -7,7 +7,6 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Platform.Core.Extensions;
 using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.ProductSnapshot.Core.Services;
 using VirtoCommerce.Xapi.Core.Extensions;
@@ -91,8 +90,8 @@ public static class DataLoaderContextAccessorExtensions
     {
         var products = new List<ExpProduct>();
 
-        var moduleCatalog = context.RequestServices.GetService<IModuleCatalog>();
-        if (moduleCatalog == null || !moduleCatalog.IsModuleInstalled("VirtoCommerce.ProductSnapshot"))
+        var moduleCatalog = context.RequestServices.GetService<IModuleService>();
+        if (moduleCatalog == null || !moduleCatalog.IsInstalled("VirtoCommerce.ProductSnapshot"))
         {
             return products.ToDictionary(x => x.Id);
         }

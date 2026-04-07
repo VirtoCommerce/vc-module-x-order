@@ -111,11 +111,10 @@ public class ProductSnapshotResolutionTests
         context.Setup(x => x.SubFields).Returns(new Dictionary<string, (GraphQLField, FieldType)>());
 
         // mock service resolver
-        var moduleCatalog = new Mock<IModuleCatalog>();
-        var moduleManifest = new ModuleManifest { Id = "VirtoCommerce.ProductSnapshot", Version = "1.0.0", VersionTag = "", PlatformVersion = "1.0.0" };
-        var manifestModuleInfo = new ManifestModuleInfo { IsInstalled = true };
-        manifestModuleInfo.LoadFromManifest(moduleManifest);
-        moduleCatalog.SetupGet(x => x.Modules).Returns([manifestModuleInfo]);
+        var moduleService = new Mock<IModuleService>();
+        moduleService
+            .Setup(x => x.IsInstalled(It.Is<string>(x => x.EqualsIgnoreCase("VirtoCommerce.ProductSnapshot"))))
+            .Returns(true);
 
         var snapshotProvider = new Mock<ICatalogProductSnapshotProvider>();
         snapshotProvider
@@ -123,7 +122,7 @@ public class ProductSnapshotResolutionTests
             .ReturnsAsync(products ?? []);
 
         var serviceProvider = new Mock<IServiceProvider>();
-        serviceProvider.Setup(x => x.GetService(typeof(IModuleCatalog))).Returns(moduleCatalog.Object);
+        serviceProvider.Setup(x => x.GetService(typeof(IModuleService))).Returns(moduleService.Object);
         serviceProvider.Setup(x => x.GetService(typeof(ICatalogProductSnapshotProvider))).Returns(snapshotProvider.Object);
 
         context.Setup(x => x.RequestServices).Returns(serviceProvider.Object);
