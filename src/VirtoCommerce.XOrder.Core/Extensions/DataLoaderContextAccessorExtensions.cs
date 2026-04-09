@@ -43,20 +43,24 @@ public static class DataLoaderContextAccessorExtensions
     {
         var loader = dataLoader.Context.GetOrAddBatchLoader<string, ExpProduct>(loaderKey, async ids =>
         {
-            // try load products from snapshots then load the missing products by mediator GetProducts query
             var orderAggregate = context.GetOrder();
             var order = orderAggregate.Order;
 
+            // Get currencies and store only from one order.
+            // We intentionally ignore the case when there may be orders with different currencies and stores in the resulting set
+            var cultureName = context.GetArgumentOrValue<string>("cultureName") ?? order.LanguageCode;
+            context.UserContext.TryAdd("currencyCode", order.Currency);
+            context.UserContext.TryAdd("storeId", order.StoreId);
+            context.UserContext.TryAdd("store", orderAggregate.Store);
+            context.UserContext.TryAdd("cultureName", cultureName);
+
+            // try load products from snapshots then load the missing products by mediator GetProducts query
             var result = await LoadSnapshotProductsAsync(context, ids, order.Id);
 
             var productIds = ids.Except(result.Keys).ToArray();
             if (productIds.Length > 0)
             {
-                // Get currencies and store only from one order.
-                // We intentionally ignore the case when there may be orders with different currencies and stores in the resulting set
                 var userId = context.GetArgumentOrValue<string>("userId") ?? context.GetCurrentUserId();
-                var cultureName = context.GetArgumentOrValue<string>("cultureName") ?? order.LanguageCode;
-
                 var request = new LoadProductsQuery
                 {
                     UserId = userId,
@@ -66,10 +70,6 @@ public static class DataLoaderContextAccessorExtensions
                     ObjectIds = productIds,
                     IncludeFields = context.SubFields.Values.GetAllNodesPaths(context).ToArray(),
                 };
-                context.UserContext.TryAdd("currencyCode", order.Currency);
-                context.UserContext.TryAdd("storeId", order.StoreId);
-                context.UserContext.TryAdd("store", orderAggregate.Store);
-                context.UserContext.TryAdd("cultureName", cultureName);
 
                 var loadProductsResponse = await mediator.Send(request);
 
