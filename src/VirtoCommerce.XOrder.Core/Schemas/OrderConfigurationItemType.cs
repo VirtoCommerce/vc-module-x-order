@@ -49,7 +49,7 @@ public class OrderConfigurationItemType : ExtendableGraphType<ConfigurationItem>
             Name = "product",
             Type = GraphTypeExtensionHelper.GetActualType<ProductType>(),
             Resolver = new FuncFieldResolver<ConfigurationItem, IDataLoaderResult<ExpProduct>>(context =>
-                dataLoader.LoadOrderProduct(
+                dataLoader.LoadOrderProductWithSnapshot(
                     context, mediator, $"order_configurationItems_products_{context.Source.CustomerOrderId}",
                     context.Source.ProductId)),
         };

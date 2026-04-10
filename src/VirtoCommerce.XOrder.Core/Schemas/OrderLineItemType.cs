@@ -106,7 +106,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
                 Name = "product",
                 Type = GraphTypeExtensionHelper.GetActualType<ProductType>(),
                 Resolver = new FuncFieldResolver<LineItem, IDataLoaderResult<ExpProduct>>(context =>
-                    dataLoader.LoadOrderProduct(
+                    dataLoader.LoadOrderProductWithSnapshot(
                         context, mediator, $"order_lineItems_products_{context.Source.CustomerOrderId}",
                         context.Source.ProductId)),
             };

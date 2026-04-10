@@ -18,7 +18,7 @@ public static class DataLoaderContextAccessorExtensions
 {
     private static readonly DataLoaderResult<ExpProduct> _defaultProductResult = new((ExpProduct)null);
 
-    public static IDataLoaderResult<ExpProduct> LoadOrderProduct(
+    public static IDataLoaderResult<ExpProduct> LoadOrderProductWithSnapshot(
         this IDataLoaderContextAccessor dataLoader,
         IResolveFieldContext context,
         IMediator mediator,
