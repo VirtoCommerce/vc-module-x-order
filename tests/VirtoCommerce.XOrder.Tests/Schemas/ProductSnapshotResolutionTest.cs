@@ -11,6 +11,7 @@ using MediatR;
 using Moq;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Model;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Xapi.Core.Pipelines;
 using VirtoCommerce.XCatalog.Core.Models;
 using VirtoCommerce.XOrder.Core;
@@ -114,7 +115,7 @@ public class ProductSnapshotResolutionTests
             .Setup(x => x.Execute(It.Is<ExternalOrderProducts>(x => x.OrderId == orderId)))
             .Callback((ExternalOrderProducts x) =>
             {
-                x.Products = products.ToDictionary(x => x.Id) ?? [];
+                x.Products = !products.IsNullOrEmpty() ? products.ToDictionary(x => x.Id) : [];
             });
 
         var serviceProvider = new Mock<IServiceProvider>();

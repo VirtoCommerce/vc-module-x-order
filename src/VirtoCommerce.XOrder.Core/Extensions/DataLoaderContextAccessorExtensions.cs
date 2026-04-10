@@ -5,7 +5,6 @@ using GraphQL;
 using GraphQL.DataLoader;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Xapi.Core.Extensions;
 using VirtoCommerce.Xapi.Core.Pipelines;
 using VirtoCommerce.XCatalog.Core.Models;
@@ -57,7 +56,7 @@ public static class DataLoaderContextAccessorExtensions
             // try load products from snapshots then load the missing products by mediator GetProducts query
             var result = await LoadSnapshotProductsAsync(context, ids, order.Id);
 
-            var productIds = ids.Except(result.Keys).ToArray();
+            var productIds = result.Where(x => x.Value == null).Select(x => x.Key).ToArray();
             if (productIds.Length > 0)
             {
                 var userId = context.GetArgumentOrValue<string>("userId") ?? context.GetCurrentUserId();
@@ -75,7 +74,10 @@ public static class DataLoaderContextAccessorExtensions
 
                 foreach (var product in loadProductsResponse.Products)
                 {
-                    result.TryAdd(product.Id, product);
+                    if (result.TryGetValue(product.Id, out var value) && value == null)
+                    {
+                        result[product.Id] = product;
+                    }
                 }
             }
 
@@ -85,27 +87,24 @@ public static class DataLoaderContextAccessorExtensions
         return loader;
     }
 
-    private static async Task<Dictionary<string, ExpProduct>> LoadSnapshotProductsAsync(IResolveFieldContext context, IEnumerable<string> productIds, string orderId)
+    private static async Task<IDictionary<string, ExpProduct>> LoadSnapshotProductsAsync(IResolveFieldContext context, IEnumerable<string> productIds, string orderId)
     {
+        var products = productIds.Distinct().ToDictionary(x => x, x => default(ExpProduct));
+
         var pipeline = context.RequestServices.GetService<IGenericPipelineLauncher>();
         if (pipeline == null)
         {
-            return [];
+            return products;
         }
 
         var externalOrdeProducts = new ExternalOrderProducts
         {
             OrderId = orderId,
-            Products = productIds.Distinct().ToDictionary(x => x, x => default(ExpProduct)),
+            Products = products,
         };
 
         await pipeline.Execute(externalOrdeProducts);
 
-        if (externalOrdeProducts.Products.IsNullOrEmpty())
-        {
-            return [];
-        }
-
-        return externalOrdeProducts.Products.Where(x => x.Value != null).ToDictionary();
+        return externalOrdeProducts.Products;
     }
 }
