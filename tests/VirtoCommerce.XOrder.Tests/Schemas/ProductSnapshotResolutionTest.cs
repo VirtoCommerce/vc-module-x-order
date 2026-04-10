@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using GraphQL;
@@ -113,7 +114,7 @@ public class ProductSnapshotResolutionTests
             .Setup(x => x.Execute(It.Is<ExternalOrderProducts>(x => x.OrderId == orderId)))
             .Callback((ExternalOrderProducts x) =>
             {
-                x.Products = products ?? [];
+                x.Products = products.ToDictionary(x => x.Id) ?? [];
             });
 
         var serviceProvider = new Mock<IServiceProvider>();

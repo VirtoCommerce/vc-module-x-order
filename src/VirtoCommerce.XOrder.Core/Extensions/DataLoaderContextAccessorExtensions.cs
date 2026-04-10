@@ -87,35 +87,25 @@ public static class DataLoaderContextAccessorExtensions
 
     private static async Task<Dictionary<string, ExpProduct>> LoadSnapshotProductsAsync(IResolveFieldContext context, IEnumerable<string> productIds, string orderId)
     {
-        var products = new List<ExpProduct>();
-
         var pipeline = context.RequestServices.GetService<IGenericPipelineLauncher>();
         if (pipeline == null)
         {
-            return products.ToDictionary(x => x.Id);
+            return [];
         }
 
         var externalOrdeProducts = new ExternalOrderProducts
         {
             OrderId = orderId,
+            Products = productIds.Distinct().ToDictionary(x => x, x => default(ExpProduct)),
         };
 
         await pipeline.Execute(externalOrdeProducts);
 
         if (externalOrdeProducts.Products.IsNullOrEmpty())
         {
-            return products.ToDictionary(x => x.Id);
+            return [];
         }
 
-        foreach (var productId in productIds)
-        {
-            var catalogProductSnapshot = externalOrdeProducts.Products.FirstOrDefault(x => x.Id == productId);
-            if (catalogProductSnapshot != null)
-            {
-                products.Add(catalogProductSnapshot);
-            }
-        }
-
-        return products.ToDictionary(x => x.Id);
+        return externalOrdeProducts.Products.Where(x => x.Value != null).ToDictionary();
     }
 }
