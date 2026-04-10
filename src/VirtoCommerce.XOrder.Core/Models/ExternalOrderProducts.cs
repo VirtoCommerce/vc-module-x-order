@@ -7,5 +7,7 @@ public class ExternalOrderProducts
 {
     public string OrderId { get; set; }
 
-    public IDictionary<string, ExpProduct> Products { get; set; }
+    public IList<string> ProductIds { get; set; } = [];
+
+    public IList<ExpProduct> Products { get; set; } = [];
 }
