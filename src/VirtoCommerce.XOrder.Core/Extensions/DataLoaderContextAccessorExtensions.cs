@@ -51,6 +51,7 @@ public static class DataLoaderContextAccessorExtensions
                 resolveContext.StoreId = order.StoreId;
                 resolveContext.CurrencyCode = order.Currency;
                 resolveContext.CultureName = cultureName;
+                resolveContext.IncludeFields = context.SubFields.Values.GetAllNodesPaths(context).ToArray();
 
                 var result = await resolver.ResolveOrderProductsAsync(order.Id, ids.ToList(), resolveContext);
 

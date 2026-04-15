@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace VirtoCommerce.XOrder.Core.Models;
 
 public class OrderProductResolveContext
@@ -7,4 +9,5 @@ public class OrderProductResolveContext
     public string StoreId { get; set; }
     public string CurrencyCode { get; set; }
     public string CultureName { get; set; }
+    public IList<string> IncludeFields { get; set; } = [];
 }

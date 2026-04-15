@@ -77,6 +77,10 @@ public class OrderProductResolver(IGenericPipelineLauncher pipeline, IMediator m
     /// </summary>
     protected virtual async Task<IList<ExpProduct>> LoadProductsAsync(IList<string> productIds, OrderProductResolveContext context)
     {
+        var includeFields = context.IncludeFields is { Count: > 0 }
+            ? context.IncludeFields.ToArray()
+            : DefaultIncludeFields;
+
         var response = await mediator.Send(new LoadProductsQuery
         {
             ObjectIds = productIds,
@@ -84,7 +88,7 @@ public class OrderProductResolver(IGenericPipelineLauncher pipeline, IMediator m
             StoreId = context.StoreId,
             CurrencyCode = context.CurrencyCode,
             CultureName = context.CultureName,
-            IncludeFields = DefaultIncludeFields,
+            IncludeFields = includeFields,
         });
 
         return response.Products?.ToList();
