@@ -50,6 +50,8 @@ namespace VirtoCommerce.XOrder.Data.Extensions
 
             services.AddPipeline<ExternalOrderProducts>();
 
+            services.AddScoped<IOrderProductResolver, OrderProductResolver>();
+
             return services;
         }
     }

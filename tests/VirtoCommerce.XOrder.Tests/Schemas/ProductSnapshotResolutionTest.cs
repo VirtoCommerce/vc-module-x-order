@@ -4,17 +4,17 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using GraphQL;
 using GraphQL.DataLoader;
+using GraphQL.Execution;
 using GraphQL.Types;
 using GraphQLParser.AST;
-using MediatR;
 using Moq;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Model;
-using VirtoCommerce.Xapi.Core.Pipelines;
 using VirtoCommerce.XCatalog.Core.Models;
 using VirtoCommerce.XOrder.Core;
 using VirtoCommerce.XOrder.Core.Extensions;
 using VirtoCommerce.XOrder.Core.Models;
+using VirtoCommerce.XOrder.Core.Services;
 using Xunit;
 
 namespace VirtoCommerce.XOrder.Tests.Schemas;
@@ -22,7 +22,7 @@ namespace VirtoCommerce.XOrder.Tests.Schemas;
 public class ProductSnapshotResolutionTests
 {
     [Fact]
-    public async Task LoadSnapshotProductsAsync_WithSnapshot_ReturnsProduct()
+    public async Task LoadOrderProductWithSnapshot_WithSnapshot_ReturnsProduct()
     {
         // Arrange
         var product = new ExpProduct { IndexedProduct = new CatalogProduct { Id = "product1", Name = "Test Product" } };
@@ -30,10 +30,9 @@ public class ProductSnapshotResolutionTests
         var dataLoader = new Mock<IDataLoaderContextAccessor>();
         dataLoader.SetupGet(x => x.Context).Returns(new DataLoaderContext());
         var context = CreateResolveFieldContext("order1", "lineItem1", products: [product]);
-        var mediator = new Mock<IMediator>();
 
         // Act
-        var result = dataLoader.Object.LoadOrderProductWithSnapshot(context, mediator.Object, "test_loader", "product1");
+        var result = dataLoader.Object.LoadOrderProductWithSnapshot(context, "test_loader", "product1");
 
         // Assert
         var expProduct = await GetResultValueAsync(result);
@@ -44,7 +43,7 @@ public class ProductSnapshotResolutionTests
     }
 
     [Fact]
-    public async Task LoadSnapshotProductsAsync_DifferentOrders_ReturnsDifferentSnapshots()
+    public async Task LoadOrderProductWithSnapshot_DifferentOrders_ReturnsDifferentSnapshots()
     {
         // Arrange
         var product1 = new ExpProduct { IndexedProduct = new CatalogProduct { Id = "product1", Name = "Version A" } };
@@ -55,11 +54,10 @@ public class ProductSnapshotResolutionTests
         var userContext = new Dictionary<string, object>();
         var context1 = CreateResolveFieldContext("order1", "lineItem1", userContext, [product1]);
         var context2 = CreateResolveFieldContext("order2", "lineItem2", userContext, [product2]);
-        var mediator = new Mock<IMediator>();
 
         // Act
-        var result1 = dataLoader.Object.LoadOrderProductWithSnapshot(context1, mediator.Object, "test_loader_order1", "product1");
-        var result2 = dataLoader.Object.LoadOrderProductWithSnapshot(context2, mediator.Object, "test_loader_order2", "product1");
+        var result1 = dataLoader.Object.LoadOrderProductWithSnapshot(context1, "test_loader_order1", "product1");
+        var result2 = dataLoader.Object.LoadOrderProductWithSnapshot(context2, "test_loader_order2", "product1");
 
         // Assert — different snapshots for different orders
         var expProduct1 = await GetResultValueAsync(result1);
@@ -69,15 +67,14 @@ public class ProductSnapshotResolutionTests
     }
 
     [Fact]
-    public async Task LoadSnapshotProductsAsync_WithNullProductId_ReturnsNullProduct()
+    public async Task LoadOrderProductWithSnapshot_WithNullProductId_ReturnsNullProduct()
     {
         // Arrange
         var dataLoader = new Mock<IDataLoaderContextAccessor>();
         var context = CreateResolveFieldContext("order1", "lineItem1");
-        var mediator = new Mock<IMediator>();
 
         // Act
-        var result = dataLoader.Object.LoadOrderProductWithSnapshot(context, mediator.Object, "test_loader", null);
+        var result = dataLoader.Object.LoadOrderProductWithSnapshot(context, "test_loader", null);
 
         // Assert
         var expProduct = await GetResultValueAsync(result);
@@ -102,22 +99,41 @@ public class ProductSnapshotResolutionTests
 
         var lineItem = new LineItem { Id = lineItemId };
 
+        var arguments = new Dictionary<string, ArgumentValue>
+        {
+            ["userId"] = new("testUser", ArgumentSource.Literal),
+            ["cultureName"] = new("en-US", ArgumentSource.Literal),
+        };
+
         var context = new Mock<IResolveFieldContext>();
         context.Setup(x => x.Source).Returns(lineItem);
         context.Setup(x => x.UserContext).Returns(userContext);
+        context.Setup(x => x.Arguments).Returns(arguments);
         context.Setup(x => x.SubFields).Returns(new Dictionary<string, (GraphQLField, FieldType)>());
 
-        // mock service resolver
-        var pipeleine = new Mock<IGenericPipelineLauncher>();
-        pipeleine
-            .Setup(x => x.Execute(It.Is<ExternalOrderProducts>(x => x.OrderId == orderId)))
-            .Callback((ExternalOrderProducts x) =>
+        // Mock IOrderProductResolver
+        var resolver = new Mock<IOrderProductResolver>();
+        resolver
+            .Setup(x => x.ResolveOrderProductsAsync(
+                orderId,
+                It.IsAny<IList<string>>(),
+                It.IsAny<OrderProductResolveContext>()))
+            .ReturnsAsync((string _, IList<string> ids, OrderProductResolveContext _) =>
             {
-                x.Products = products ?? [];
+                var result = new Dictionary<string, ExpProduct>();
+                foreach (var product in products ?? [])
+                {
+                    if (ids.Contains(product.Id))
+                    {
+                        result[product.Id] = product;
+                    }
+                }
+
+                return result;
             });
 
         var serviceProvider = new Mock<IServiceProvider>();
-        serviceProvider.Setup(x => x.GetService(typeof(IGenericPipelineLauncher))).Returns(pipeleine.Object);
+        serviceProvider.Setup(x => x.GetService(typeof(IOrderProductResolver))).Returns(resolver.Object);
 
         context.Setup(x => x.RequestServices).Returns(serviceProvider.Object);
 
