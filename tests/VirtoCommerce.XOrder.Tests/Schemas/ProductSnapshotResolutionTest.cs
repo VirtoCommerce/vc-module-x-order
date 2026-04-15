@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using FluentAssertions;
 using GraphQL;
@@ -10,6 +11,7 @@ using GraphQLParser.AST;
 using Moq;
 using VirtoCommerce.CatalogModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Model;
+using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.XCatalog.Core.Models;
 using VirtoCommerce.XOrder.Core;
 using VirtoCommerce.XOrder.Core.Extensions;
@@ -51,7 +53,7 @@ public class ProductSnapshotResolutionTests
 
         var dataLoader = new Mock<IDataLoaderContextAccessor>();
         dataLoader.SetupGet(x => x.Context).Returns(new DataLoaderContext());
-        var userContext = new Dictionary<string, object>();
+        var userContext = new GraphQLUserContext(new ClaimsPrincipal());
         var context1 = CreateResolveFieldContext("order1", "lineItem1", userContext, [product1]);
         var context2 = CreateResolveFieldContext("order2", "lineItem2", userContext, [product2]);
 
@@ -84,10 +86,10 @@ public class ProductSnapshotResolutionTests
     private static IResolveFieldContext CreateResolveFieldContext(
         string orderId,
         string lineItemId,
-        Dictionary<string, object> userContext = null,
+        GraphQLUserContext userContext = null,
         IList<ExpProduct> products = null)
     {
-        userContext ??= [];
+        userContext ??= new GraphQLUserContext(new ClaimsPrincipal());
 
         var order = new CustomerOrder { Id = orderId };
         var orderAggregate = new CustomerOrderAggregate(null, null);
