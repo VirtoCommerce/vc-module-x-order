@@ -8,6 +8,10 @@ namespace VirtoCommerce.XOrder.Core.Commands
 
         public string PaymentId { get; set; }
 
+        public string StoreId { get; set; }
+
+        public string CultureName { get; set; }
+
         public KeyValue[] Parameters { get; set; }
     }
 }

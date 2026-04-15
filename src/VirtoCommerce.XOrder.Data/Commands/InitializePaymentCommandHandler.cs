@@ -42,6 +42,9 @@ namespace VirtoCommerce.XOrder.Data.Commands
                 Payment = paymentInfo.Payment,
                 StoreId = paymentInfo.Store.Id,
                 Store = paymentInfo.Store,
+                CultureName = !string.IsNullOrEmpty(request.CultureName)
+                    ? request.CultureName
+                    : paymentInfo.Store?.DefaultLanguage,
                 Parameters = parameters,
             };
 

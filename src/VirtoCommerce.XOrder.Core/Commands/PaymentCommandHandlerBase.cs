@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
@@ -45,6 +46,13 @@ namespace VirtoCommerce.XOrder.Core.Commands
             }
 
             result.Store = await _storeService.GetByIdAsync(result.CustomerOrder?.StoreId, StoreResponseGroup.StoreInfo.ToString());
+
+            if (!string.IsNullOrEmpty(command.StoreId) &&
+                result.CustomerOrder != null &&
+                !string.Equals(command.StoreId, result.CustomerOrder.StoreId, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException($"Store '{command.StoreId}' does not match order store '{result.CustomerOrder.StoreId}'.");
+            }
 
             return result;
         }
