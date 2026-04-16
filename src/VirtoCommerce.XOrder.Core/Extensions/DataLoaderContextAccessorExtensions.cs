@@ -3,10 +3,8 @@ using System.Linq;
 using GraphQL;
 using GraphQL.DataLoader;
 using Microsoft.Extensions.DependencyInjection;
-using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Xapi.Core.Extensions;
 using VirtoCommerce.XCatalog.Core.Models;
-using VirtoCommerce.XOrder.Core.Models;
 using VirtoCommerce.XOrder.Core.Services;
 
 namespace VirtoCommerce.XOrder.Core.Extensions;
@@ -44,16 +42,11 @@ public static class DataLoaderContextAccessorExtensions
                 context.UserContext.TryAdd("store", orderAggregate.Store);
                 context.UserContext.TryAdd("cultureName", cultureName);
 
-                var resolver = context.RequestServices.GetRequiredService<IOrderProductResolver>();
-                var resolveContext = AbstractTypeFactory<OrderProductResolveContext>.TryCreateInstance();
-                resolveContext.UserId = context.GetArgumentOrValue<string>("userId") ?? context.GetCurrentUserId();
-                resolveContext.OrganizationId = context.GetCurrentOrganizationId();
-                resolveContext.StoreId = order.StoreId;
-                resolveContext.CurrencyCode = order.Currency;
-                resolveContext.CultureName = cultureName;
+                var resolveContext = context.CreateOrderProductResolveContext(orderAggregate);
                 resolveContext.IncludeFields = context.SubFields.Values.GetAllNodesPaths(context).ToArray();
 
-                var result = await resolver.ResolveOrderProductsAsync(order.Id, ids.ToList(), resolveContext);
+                var productResolver = context.RequestServices.GetRequiredService<IOrderProductResolver>();
+                var result = await productResolver.ResolveOrderProductsAsync(order.Id, ids.ToList(), resolveContext);
 
                 return result;
             });

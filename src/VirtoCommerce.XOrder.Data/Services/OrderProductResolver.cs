@@ -34,6 +34,8 @@ public class OrderProductResolver(IGenericPipelineLauncher pipeline, IMediator m
             .Where(id => !orderCache.ContainsKey(id))
             .ToList();
 
+        Dictionary<string, ExpProduct> nonCached = null;
+
         if (uncached.Count > 0)
         {
             // ExternalOrderProducts pipeline (snapshots, etc.)
@@ -57,15 +59,28 @@ public class OrderProductResolver(IGenericPipelineLauncher pipeline, IMediator m
             {
                 var products = await LoadProductsAsync(missing, context);
 
+                // Don't cache products loaded with custom IncludeFields —
+                // they may be incomplete and would poison the cache for subsequent callers
+                // expecting full products (DefaultIncludeFields).
+                var canCache = context.IncludeFields is not { Count: > 0 };
+
                 foreach (var product in products ?? [])
                 {
-                    orderCache.TryAdd(product.Id, product);
+                    if (canCache)
+                    {
+                        orderCache.TryAdd(product.Id, product);
+                    }
+                    else
+                    {
+                        nonCached ??= [];
+                        nonCached[product.Id] = product;
+                    }
                 }
             }
         }
 
         return productIds
-            .Select(id => (id, Product: orderCache.GetValueOrDefault(id)))
+            .Select(id => (id, Product: orderCache.GetValueOrDefault(id) ?? nonCached?.GetValueOrDefault(id)))
             .Where(x => x.Product is not null)
             .ToDictionary(x => x.id, x => x.Product!);
     }
@@ -78,7 +93,7 @@ public class OrderProductResolver(IGenericPipelineLauncher pipeline, IMediator m
     protected virtual async Task<IList<ExpProduct>> LoadProductsAsync(IList<string> productIds, OrderProductResolveContext context)
     {
         var includeFields = context.IncludeFields is { Count: > 0 }
-            ? context.IncludeFields.ToArray()
+            ? context.IncludeFields
             : DefaultIncludeFields;
 
         var response = await mediator.Send(new LoadProductsQuery
