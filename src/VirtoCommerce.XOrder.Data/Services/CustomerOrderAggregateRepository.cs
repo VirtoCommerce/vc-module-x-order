@@ -97,7 +97,7 @@ namespace VirtoCommerce.XOrder.Data.Services
             return _storeService.GetByIdAsync(storeId);
         }
 
-        private async Task UpdateConfigurationFiles(CustomerOrder order)
+        protected async Task UpdateConfigurationFiles(CustomerOrder order)
         {
             var configurationItems = order.Items
                 .Where(x => !x.ConfigurationItems.IsNullOrEmpty())
