@@ -50,8 +50,7 @@ public class OrderConfigurationItemType : ExtendableGraphType<ConfigurationItem>
             Type = GraphTypeExtensionHelper.GetActualType<ProductType>(),
             Resolver = new FuncFieldResolver<ConfigurationItem, IDataLoaderResult<ExpProduct>>(context =>
                 dataLoader.LoadOrderProductWithSnapshot(
-                    context, mediator, "order_configurationItems_products",
-                    context.Source.ProductId, context.Source.ProductSnapshot)),
+                    context, $"order_configurationItems_products_{context.Source.CustomerOrderId}", context.Source.ProductId)),
         };
         AddField(productField);
     }
