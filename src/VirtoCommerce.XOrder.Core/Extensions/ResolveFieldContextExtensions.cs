@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GraphQL;
 using VirtoCommerce.CoreModule.Core.Currency;
+using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Xapi.Core.Extensions;
 using VirtoCommerce.Xapi.Core.Infrastructure;
@@ -62,6 +63,12 @@ namespace VirtoCommerce.XOrder.Core.Extensions
 
                 return result ?? throw new OperationCanceledException($"the currency with code '{currencyCode}' is not registered");
             }
+        }
+
+        public static Currency GetLineItemCurrency(this IResolveFieldContext<LineItem> userContext)
+        {
+            var order = userContext.GetOrder();
+            return order?.CurrencyList?.FirstOrDefault(x => x.Code.EqualsIgnoreCase(userContext.Source.Currency)) ?? order.Currency;
         }
     }
 }
