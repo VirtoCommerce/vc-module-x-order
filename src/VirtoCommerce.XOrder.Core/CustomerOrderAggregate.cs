@@ -37,7 +37,7 @@ namespace VirtoCommerce.XOrder.Core
 
         public Currency Currency { get; protected set; }
 
-        public IList<Currency> CurrencyList { get; protected set; }
+        public IList<Currency> AllCurrencies { get; protected set; }
 
         public Store Store { get; protected set; }
 
@@ -50,7 +50,7 @@ namespace VirtoCommerce.XOrder.Core
                 foreach (var item in orderTotals)
                 {
                     item.IsDefaultTotalCurrency = Order.Currency.EqualsIgnoreCase(item.OrderTotal.CurrencyCode);
-                    item.Currency = CurrencyList?.FirstOrDefault(x => x.Code.EqualsIgnoreCase(item.OrderTotal.CurrencyCode)) ?? Currency;
+                    item.Currency = AllCurrencies?.FirstOrDefault(x => x.Code.EqualsIgnoreCase(item.OrderTotal.CurrencyCode)) ?? Currency;
                 }
 
                 return orderTotals;
@@ -61,7 +61,7 @@ namespace VirtoCommerce.XOrder.Core
         {
             Order = order;
             Currency = mainCurrency;
-            CurrencyList = currencyList;
+            AllCurrencies = currencyList;
             Store = store;
 
             return this;
