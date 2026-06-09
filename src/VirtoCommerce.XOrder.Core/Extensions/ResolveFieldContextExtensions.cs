@@ -84,8 +84,13 @@ namespace VirtoCommerce.XOrder.Core.Extensions
         public static Currency GetConfiguratonItemCurrency(this IResolveFieldContext<ConfigurationItem> context)
         {
             var order = context.GetOrder();
+            if (order == null)
+            {
+                return null;
+            }
+
             var lineItemId = context.Source.LineItemId;
-            var lineItem = order?.Order?.Items?.FirstOrDefault(x => x.Id == lineItemId);
+            var lineItem = order.Order?.Items?.FirstOrDefault(x => x.Id == lineItemId);
             if (lineItem == null)
             {
                 return null;

@@ -73,7 +73,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             Field(x => x.ProductId, nullable: false);
 
             Field<NonNullGraphType<CurrencyType>>(nameof(LineItem.Currency).ToCamelCase())
-                .Resolve(context => context.GetCurrencyByCode(context.Source.Currency));
+                .Resolve(context => context.GetOrderItemCurrency());
             Field<NonNullGraphType<MoneyType>>(nameof(LineItem.DiscountAmount).ToCamelCase())
                 .Resolve(context => context.Source.DiscountAmount.ToMoney(context.GetOrderItemCurrency()));
             Field<NonNullGraphType<MoneyType>>(nameof(LineItem.DiscountAmountWithTax).ToCamelCase())
