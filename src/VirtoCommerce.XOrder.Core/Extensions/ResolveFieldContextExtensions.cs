@@ -65,12 +65,38 @@ namespace VirtoCommerce.XOrder.Core.Extensions
             }
         }
 
+        public static Currency GetOrderItemCurrency(this IResolveFieldContext<LineItem> context)
+        {
+            var order = context.GetOrder();
+            if (order == null)
+            {
+                return null;
+            }
+
+            if (context.Source.Currency.IsNullOrEmpty())
+            {
+                return order.Currency;
+            }
+
+            return order.AllCurrencies?.FirstOrDefault(x => x.Code.EqualsIgnoreCase(context.Source.Currency));
+        }
+
         public static Currency GetConfiguratonItemCurrency(this IResolveFieldContext<ConfigurationItem> context)
         {
             var order = context.GetOrder();
             var lineItemId = context.Source.LineItemId;
-            var lineItem = order?.Order.Items.FirstOrDefault(x => x.Id == lineItemId);
-            return context.GetCurrencyByCode(lineItem?.Currency);
+            var lineItem = order?.Order?.Items?.FirstOrDefault(x => x.Id == lineItemId);
+            if (lineItem == null)
+            {
+                return null;
+            }
+
+            if (lineItem.Currency.IsNullOrEmpty())
+            {
+                return order.Currency;
+            }
+
+            return order.AllCurrencies?.FirstOrDefault(x => x.Code.EqualsIgnoreCase(lineItem.Currency));
         }
     }
 }

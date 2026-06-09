@@ -59,13 +59,13 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             Field(x => x.Sku, nullable: false);
             Field(x => x.PriceId, nullable: true);
             Field<NonNullGraphType<MoneyType>>(nameof(LineItem.Price).ToCamelCase())
-                .Resolve(context => context.Source.Price.ToMoney(context.GetCurrencyByCode(context.Source.Currency)));
+                .Resolve(context => context.Source.Price.ToMoney(context.GetOrderItemCurrency()));
             Field<NonNullGraphType<MoneyType>>(nameof(LineItem.PriceWithTax).ToCamelCase())
-                .Resolve(context => context.Source.PriceWithTax.ToMoney(context.GetCurrencyByCode(context.Source.Currency)));
+                .Resolve(context => context.Source.PriceWithTax.ToMoney(context.GetOrderItemCurrency()));
             Field<NonNullGraphType<MoneyType>>(nameof(LineItem.ListTotal).ToCamelCase())
-                .Resolve(context => context.Source.ListTotal.ToMoney(context.GetCurrencyByCode(context.Source.Currency)));
+                .Resolve(context => context.Source.ListTotal.ToMoney(context.GetOrderItemCurrency()));
             Field<NonNullGraphType<MoneyType>>(nameof(LineItem.ListTotalWithTax).ToCamelCase())
-                .Resolve(context => context.Source.ListTotalWithTax.ToMoney(context.GetCurrencyByCode(context.Source.Currency)));
+                .Resolve(context => context.Source.ListTotalWithTax.ToMoney(context.GetOrderItemCurrency()));
             Field(x => x.TaxType, nullable: true);
             Field(x => x.TaxPercentRate, nullable: false);
             Field(x => x.ReserveQuantity, nullable: false);
@@ -75,26 +75,26 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             Field<NonNullGraphType<CurrencyType>>(nameof(LineItem.Currency).ToCamelCase())
                 .Resolve(context => context.GetCurrencyByCode(context.Source.Currency));
             Field<NonNullGraphType<MoneyType>>(nameof(LineItem.DiscountAmount).ToCamelCase())
-                .Resolve(context => context.Source.DiscountAmount.ToMoney(context.GetCurrencyByCode(context.Source.Currency)));
+                .Resolve(context => context.Source.DiscountAmount.ToMoney(context.GetOrderItemCurrency()));
             Field<NonNullGraphType<MoneyType>>(nameof(LineItem.DiscountAmountWithTax).ToCamelCase())
-                .Resolve(context => context.Source.DiscountAmountWithTax.ToMoney(context.GetCurrencyByCode(context.Source.Currency)));
+                .Resolve(context => context.Source.DiscountAmountWithTax.ToMoney(context.GetOrderItemCurrency()));
             Field<NonNullGraphType<MoneyType>>(nameof(LineItem.DiscountTotal).ToCamelCase())
-                .Resolve(context => context.Source.DiscountTotal.ToMoney(context.GetCurrencyByCode(context.Source.Currency)));
+                .Resolve(context => context.Source.DiscountTotal.ToMoney(context.GetOrderItemCurrency()));
             Field<NonNullGraphType<MoneyType>>(nameof(LineItem.DiscountTotalWithTax).ToCamelCase())
-                .Resolve(context => context.Source.DiscountTotalWithTax.ToMoney(context.GetCurrencyByCode(context.Source.Currency)));
+                .Resolve(context => context.Source.DiscountTotalWithTax.ToMoney(context.GetOrderItemCurrency()));
             Field<NonNullGraphType<MoneyType>>(nameof(LineItem.ExtendedPrice).ToCamelCase())
-                .Resolve(context => context.Source.ExtendedPrice.ToMoney(context.GetCurrencyByCode(context.Source.Currency)));
+                .Resolve(context => context.Source.ExtendedPrice.ToMoney(context.GetOrderItemCurrency()));
             Field<NonNullGraphType<MoneyType>>(nameof(LineItem.ExtendedPriceWithTax).ToCamelCase())
-                .Resolve(context => context.Source.ExtendedPriceWithTax.ToMoney(context.GetCurrencyByCode(context.Source.Currency)));
+                .Resolve(context => context.Source.ExtendedPriceWithTax.ToMoney(context.GetOrderItemCurrency()));
             Field<NonNullGraphType<BooleanGraphType>>("showPlacedPrice")
                 .Description("Indicates whether the PlacedPrice should be visible to the customer")
                 .Resolve(context => context.Source.IsDiscountAmountRounded);
             Field<NonNullGraphType<MoneyType>>(nameof(LineItem.PlacedPrice).ToCamelCase())
-                .Resolve(context => context.Source.PlacedPrice.ToMoney(context.GetCurrencyByCode(context.Source.Currency)));
+                .Resolve(context => context.Source.PlacedPrice.ToMoney(context.GetOrderItemCurrency()));
             Field<NonNullGraphType<MoneyType>>(nameof(LineItem.PlacedPriceWithTax).ToCamelCase())
-                .Resolve(context => context.Source.PlacedPriceWithTax.ToMoney(context.GetCurrencyByCode(context.Source.Currency)));
+                .Resolve(context => context.Source.PlacedPriceWithTax.ToMoney(context.GetOrderItemCurrency()));
             Field<NonNullGraphType<MoneyType>>(nameof(LineItem.TaxTotal).ToCamelCase())
-                .Resolve(context => context.Source.TaxTotal.ToMoney(context.GetCurrencyByCode(context.Source.Currency)));
+                .Resolve(context => context.Source.TaxTotal.ToMoney(context.GetOrderItemCurrency()));
             Field<NonNullGraphType<ListGraphType<NonNullGraphType<OrderTaxDetailType>>>>(nameof(LineItem.TaxDetails))
                 .Resolve(x => x.Source.TaxDetails);
             Field<NonNullGraphType<ListGraphType<NonNullGraphType<OrderDiscountType>>>>(nameof(LineItem.Discounts))
