@@ -14,12 +14,15 @@ namespace VirtoCommerce.XOrder.Benchmark;
 ///
 /// createOrderFromCart consumes the cart (cleanup removes the items), so it is NOT idempotent across
 /// invocations — each iteration rebuilds a fresh cart in [IterationSetup], outside the measured
-/// region. That forces InvocationCount=1: the Allocated gate stays exact; only Mean precision softens.
+/// region. That forces InvocationCount=1: the deterministic Allocated figure stays exact; only Mean
+/// precision softens.
 ///
-/// Tier 2 (heavier, run nightly). The cart size param doubles as scale + superlinearity canary at 100.
+/// Two axes: the <b>shape</b> (Flat vs Configured — configured items carry a configuration-item set
+/// that ConvertCartToOrder maps and the recalculates walk, so a configured-product regression shows
+/// up here) and the cart-size count. Read the Allocated column across the rows and before/after a
+/// change; 100 surfaces super-linear growth.
 /// </summary>
 [MemoryDiagnoser]
-[BenchmarkCategory(BenchmarkCategories.Tier2)]
 public class CreateOrderFromCartBenchmarks
 {
     private OrderBenchmarkFixtures.OrderHarness _harness = null!;
@@ -28,13 +31,16 @@ public class CreateOrderFromCartBenchmarks
     [Params(1, 5, 20, 100)]
     public int LineItemCount { get; set; }
 
+    [Params(CartShape.Flat, CartShape.Configured)]
+    public CartShape Shape { get; set; }
+
     [GlobalSetup]
     public void Setup() => _harness = OrderBenchmarkFixtures.CreateHarness();
 
     // A fresh cart per iteration — createOrderFromCart empties it, so it must be rebuilt before each
     // measured invocation. Synchronous by BDN contract; the rebuild cost is excluded from the result.
     [IterationSetup]
-    public void IterationSetup() => _harness.CurrentCart = OrderBenchmarkFixtures.CreateCartAggregate(LineItemCount);
+    public void IterationSetup() => _harness.CurrentCart = OrderBenchmarkFixtures.CreateCartAggregate(LineItemCount, Shape);
 
     [Benchmark]
     public Task<CustomerOrderAggregate> CreateOrderFromCart() => _harness.Handler.Handle(_command, CancellationToken.None);

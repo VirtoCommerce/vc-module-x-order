@@ -136,20 +136,32 @@ internal static class OrderBenchmarkFixtures
             },
         };
 
+    private static List<ConfigurationItem> CreateConfigurationItems(int lineItemIndex) =>
+        // A small priced configuration-item set per configured line item — the part
+        // ConvertCartToOrder maps across the cart→order boundary and the recalculates walk.
+        Enumerable.Range(0, 3).Select(v => new ConfigurationItem
+        {
+            Id = $"ci-{lineItemIndex}-{v}",
+            Type = "Variation",
+            ProductId = $"variation-{lineItemIndex}-{v}",
+            Quantity = 1,
+        }).ToList();
+
     /// <summary>
     /// Builds a fresh, valid, recalculated checkout cart with <paramref name="itemCount"/> selected
-    /// flat-SKU line items and matching active/buyable products — so the handler's ValidateCart
-    /// passes and conversion has real data. No payments/shipments (the validator only checks those
-    /// when present).
+    /// line items of the given <paramref name="shape"/> and matching active/buyable products — so
+    /// the handler's ValidateCart passes and conversion has real data. Configured items additionally
+    /// carry a configuration-item set so the configured cart→order conversion path is exercised.
+    /// No payments/shipments (the validator only checks those when present).
     /// </summary>
-    public static CartAggregate CreateCartAggregate(int itemCount)
+    public static CartAggregate CreateCartAggregate(int itemCount, CartShape shape)
     {
         var aggregate = CreateBareAggregate();
 
         var items = new List<LineItem>(itemCount);
         for (var i = 0; i < itemCount; i++)
         {
-            items.Add(new LineItem
+            var item = new LineItem
             {
                 Id = $"li-{i}",
                 ProductId = $"product-{i}",
@@ -161,7 +173,15 @@ internal static class OrderBenchmarkFixtures
                 ListPrice = 10m,
                 SalePrice = 9m,
                 SelectedForCheckout = true,
-            });
+            };
+
+            if (shape == CartShape.Configured)
+            {
+                item.IsConfigured = true;
+                item.ConfigurationItems = CreateConfigurationItems(i);
+            }
+
+            items.Add(item);
         }
 
         var cart = new ShoppingCart
