@@ -25,9 +25,18 @@
     <PackageReference Include="VirtoCommerce.CartModule.Data" Version="3.1005.0" />
   </ItemGroup>
 
+  <!-- $(XOrderSrc) defaults to the in-repo source. The before/after comparison mode (the Program.cs
+       baseline-src flag) overrides it per BenchmarkDotNet job via /p:XOrderSrc=(baseline-worktree)/src,
+       so the "before" job builds XOrder.Core/Data from the baseline revision. ProjectReference (not a
+       bare DLL HintPath) is deliberate: it is what restores the transitive package graph the benchmark
+       depends on. See README "Comparing before/after a change". -->
+  <PropertyGroup>
+    <XOrderSrc Condition="'$(XOrderSrc)' == ''">..\..\src</XOrderSrc>
+  </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\..\src\VirtoCommerce.XOrder.Core\VirtoCommerce.XOrder.Core.csproj" />
-    <ProjectReference Include="..\..\src\VirtoCommerce.XOrder.Data\VirtoCommerce.XOrder.Data.csproj" />
+    <ProjectReference Include="$(XOrderSrc)\VirtoCommerce.XOrder.Core\VirtoCommerce.XOrder.Core.csproj" />
+    <ProjectReference Include="$(XOrderSrc)\VirtoCommerce.XOrder.Data\VirtoCommerce.XOrder.Data.csproj" />
   </ItemGroup>
 
 </Project>

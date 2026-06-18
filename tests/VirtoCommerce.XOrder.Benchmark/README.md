@@ -53,7 +53,22 @@ Results are written to `BenchmarkDotNet.Artifacts/`; read the `*-report-github.m
 ## Comparing before/after a change
 
 Compare rather than reading a single run's absolute numbers — the same two approaches as the XCart
-benchmark README: (1) two runs into separate `--artifacts` dirs, git-switched, diffing the
-`Allocated` columns (reliable since allocations are deterministic); or (2) a single-process
-side-by-side with a saved baseline build for a `Ratio` column (valid when the change keeps the
-benchmarked public API stable).
+benchmark README:
+
+1. **Two runs, git-switched.** Run into separate `--artifacts` dirs (current vs changed code) and
+   diff the `Allocated` columns — reliable since allocations are deterministic across runs.
+2. **Single-process side-by-side (`--baseline-src`).** Point the benchmark at a baseline checkout
+   of the source for `Ratio` / `Alloc Ratio` columns in one run:
+   ```bash
+   git worktree add /tmp/xorder-before <baseline-ref>
+   dotnet run -c Release -- --filter "*" --baseline-src /tmp/xorder-before/src
+   git worktree remove /tmp/xorder-before
+   ```
+   `--baseline-src <path>` is opt-in and additive — without it the run is unchanged. The path is the
+   `src` root of the baseline checkout; the `before` job (the baseline) rebuilds
+   `XOrder.Core`/`XOrder.Data` from it via `/p:XOrderSrc=<path>` (a `ProjectReference` swap, so the
+   full transitive package graph still restores — a bare DLL reference would not). An `Alloc Ratio`
+   of `0.85` on an `after` row means the change allocates ~15% less. Valid only when the change keeps
+   the benchmarked public API stable. Do **not** add `--job <preset>` — BDN appends it as a *third*
+   job rather than reconfiguring the before/after pair; for a stricter `Mean` add `--apples
+   --iterationCount N`.
