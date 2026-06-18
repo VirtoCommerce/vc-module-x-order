@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="../../src/VirtoCommerce.XOrder.Core/VirtoCommerce.XOrder.Core.csproj" />
+  <Project Path="../../src/VirtoCommerce.XOrder.Data/VirtoCommerce.XOrder.Data.csproj" />
+  <Project Path="VirtoCommerce.XOrder.Benchmark.csproj" />
+</Solution>

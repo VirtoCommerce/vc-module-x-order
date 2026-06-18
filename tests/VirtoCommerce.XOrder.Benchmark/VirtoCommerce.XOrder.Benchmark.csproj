@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <!-- BenchmarkDotNet refuses to measure in Debug; only Release is meaningful. -->
+    <!-- TreatWarningsAsErrors is intentionally NOT overridden: the repo-wide Directory.Build.props
+         value (true) applies, and this project builds warning-clean. -->
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Version resolved by `dotnet add package BenchmarkDotNet` (latest compatible at scaffold
+         time). Bump via `dotnet add package`, not by hand. -->
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <!-- The real createOrderFromCart graph spans modules whose *Data* assemblies XOrder references
+         only at *Core* level. The benchmark needs the implementations:
+         - OrdersModule.Data  → CustomerOrderBuilder (the real cart→order conversion)
+         - XCart.Data         → CartAggregateRepository (the cleanup-save recalculate) + CartMappingProfile
+         - CartModule.Data    → DefaultShoppingCartTotalsCalculator (real totals)
+         Versions aligned with the module.manifest dependencies (Orders 3.1007.0, XCart 3.1001.0). -->
+    <PackageReference Include="VirtoCommerce.OrdersModule.Data" Version="3.1007.0" />
+    <PackageReference Include="VirtoCommerce.XCart.Data" Version="3.1001.0" />
+    <PackageReference Include="VirtoCommerce.CartModule.Data" Version="3.1005.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\VirtoCommerce.XOrder.Core\VirtoCommerce.XOrder.Core.csproj" />
+    <ProjectReference Include="..\..\src\VirtoCommerce.XOrder.Data\VirtoCommerce.XOrder.Data.csproj" />
+  </ItemGroup>
+
+</Project>
