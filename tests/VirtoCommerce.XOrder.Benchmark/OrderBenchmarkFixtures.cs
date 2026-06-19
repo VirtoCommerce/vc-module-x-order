@@ -4,30 +4,20 @@ using System.Threading;
 using AutoMapper;
 using MediatR;
 using Moq;
-using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CartModule.Core.Services;
-using VirtoCommerce.CartModule.Data.Services;
-using VirtoCommerce.CatalogModule.Core.Model;
-using VirtoCommerce.CoreModule.Core.Common;
 using VirtoCommerce.CoreModule.Core.Currency;
 using VirtoCommerce.CustomerModule.Core.Services;
 using VirtoCommerce.FileExperienceApi.Core.Models;
 using VirtoCommerce.FileExperienceApi.Core.Services;
-using VirtoCommerce.MarketingModule.Core.Model.Promotions;
 using VirtoCommerce.MarketingModule.Core.Search;
-using VirtoCommerce.MarketingModule.Core.Services;
 using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.OrdersModule.Data.Services;
 using VirtoCommerce.PaymentModule.Core.Services;
 using VirtoCommerce.Platform.Core.Caching;
-using VirtoCommerce.Platform.Core.Modularity;
 using VirtoCommerce.Platform.Core.Settings;
-using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.StoreModule.Core.Services;
-using VirtoCommerce.TaxModule.Core.Services;
-using VirtoCommerce.Xapi.Core.Models;
-using VirtoCommerce.Xapi.Core.Pipelines;
 using VirtoCommerce.Xapi.Core.Services;
+using VirtoCommerce.XCart.Benchmark;
 using VirtoCommerce.XCart.Core;
 using VirtoCommerce.XCart.Core.Models;
 using VirtoCommerce.XCart.Core.Queries;
@@ -44,31 +34,19 @@ namespace VirtoCommerce.XOrder.Benchmark;
 /// Fixture builders for the createOrderFromCart benchmark. The whole real graph runs — real
 /// CustomerOrderBuilder (cart→order conversion), real order/cart aggregate repositories, real
 /// totals calculator — with only the I/O leaves mocked (DB writes no-op, cart load via mediator).
+///
+/// The cart graph itself is built by the shared <see cref="CartBenchmarkFixtures"/> from the XCart
+/// benchmark Core library, so the order benchmark's seed cart matches the cart benchmarks' shape
+/// (same line items, configuration items, currency, store) without duplicating cart-graph code.
+/// Only the order-specific harness — order builder, order/cart repositories, validation-context
+/// factory, mediator — lives here.
 /// </summary>
 internal static class OrderBenchmarkFixtures
 {
-    public const string StoreId = "benchmark-store";
-
-    public static readonly Currency Currency = new(new Language("en-US"), "USD")
-    {
-        ExchangeRate = 1m,
-        RoundingPolicy = new DefaultMoneyRoundingPolicy(),
-    };
-
-    /// <summary>Mutable holder: the mediator returns <see cref="CurrentCart"/>, which the benchmark
-    /// rebuilds each iteration (createOrderFromCart consumes the cart, so it can't be shared).</summary>
-    public sealed class OrderHarness
-    {
-        public CreateOrderFromCartCommandHandler Handler { get; set; } = null!;
-        public CartAggregate CurrentCart { get; set; } = null!;
-    }
-
-    private static Store CreateStore() => new() { Id = StoreId, Settings = [] };
-
     private static Mock<ICurrencyService> CurrencyServiceMock()
     {
         var mock = new Mock<ICurrencyService>();
-        mock.Setup(x => x.GetAllCurrenciesAsync()).ReturnsAsync([Currency]);
+        mock.Setup(x => x.GetAllCurrenciesAsync()).ReturnsAsync([CartBenchmarkFixtures.Currency]);
         return mock;
     }
 
@@ -76,7 +54,7 @@ internal static class OrderBenchmarkFixtures
     {
         var mock = new Mock<IStoreService>();
         mock.Setup(x => x.GetAsync(It.IsAny<IList<string>>(), It.IsAny<string>(), It.IsAny<bool>()))
-            .ReturnsAsync([CreateStore()]); // GetByIdAsync extension delegates to GetAsync
+            .ReturnsAsync([CartBenchmarkFixtures.CreateStore()]); // GetByIdAsync extension delegates to GetAsync
         return mock;
     }
 
@@ -91,113 +69,28 @@ internal static class OrderBenchmarkFixtures
         return mock;
     }
 
-    /// <summary>A bare cart aggregate with the real totals calculator and all other deps mocked.</summary>
-    private static CartAggregate CreateBareAggregate()
+    /// <summary>Mutable holder: the mediator returns <see cref="CurrentCart"/>, which the benchmark
+    /// rebuilds each iteration (createOrderFromCart consumes the cart, so it can't be shared).</summary>
+    public sealed class OrderHarness
     {
-        var totalsCalculator = new DefaultShoppingCartTotalsCalculator(CurrencyServiceMock().Object);
-
-        var marketingEvaluator = new Mock<IMarketingPromoEvaluator>();
-        marketingEvaluator
-            .Setup(x => x.EvaluatePromotionAsync(It.IsAny<PromotionEvaluationContext>()))
-            .ReturnsAsync(new PromotionResult());
-
-        // XCart 3.1001.0 (the version x-order ships against) has an 11-arg CartAggregate ctor —
-        // no ICartValidationContextFactory (that arrived on a later XCart). Match the shipped API.
-        return new CartAggregate(
-            marketingEvaluator.Object,
-            totalsCalculator,
-            Mock.Of<IOptionalDependency<ITaxProviderSearchService>>(),
-            Mock.Of<ICartProductService>(),
-            Mock.Of<IDynamicPropertyUpdaterService>(),
-            Mock.Of<IMapper>(), // conversion doesn't map via the cart aggregate
-            Mock.Of<IMemberService>(),
-            Mock.Of<IGenericPipelineLauncher>(),
-            Mock.Of<IConfigurationItemValidator>(),
-            Mock.Of<IFileUploadService>(),
-            Mock.Of<ICartSharingService>());
+        public CreateOrderFromCartCommandHandler Handler { get; set; } = null!;
+        public CartAggregate CurrentCart { get; set; } = null!;
     }
-
-    private static CartProduct CreateCartProduct(string productId) =>
-        new(new CatalogProduct
-        {
-            Id = productId,
-            CatalogId = "catalog",
-            Code = $"SKU-{productId}",
-            Name = $"Product {productId}",
-            IsActive = true,
-            IsBuyable = true,
-            TrackInventory = false,
-        })
-        {
-            Price = new ProductPrice(Currency)
-            {
-                ListPrice = new Money(10m, Currency),
-                SalePrice = new Money(9m, Currency),
-            },
-        };
-
-    private static List<ConfigurationItem> CreateConfigurationItems(int lineItemIndex) =>
-        // A small priced configuration-item set per configured line item — the part
-        // ConvertCartToOrder maps across the cart→order boundary and the recalculates walk.
-        Enumerable.Range(0, 3).Select(v => new ConfigurationItem
-        {
-            Id = $"ci-{lineItemIndex}-{v}",
-            Type = "Variation",
-            ProductId = $"variation-{lineItemIndex}-{v}",
-            Quantity = 1,
-        }).ToList();
 
     /// <summary>
     /// Builds a fresh, valid, recalculated checkout cart with <paramref name="itemCount"/> selected
-    /// line items of the given <paramref name="shape"/> and matching active/buyable products — so
-    /// the handler's ValidateCart passes and conversion has real data. Configured items additionally
-    /// carry a configuration-item set so the configured cart→order conversion path is exercised.
-    /// No payments/shipments (the validator only checks those when present).
+    /// line items of the given <paramref name="shape"/> — so the handler's ValidateCart passes and
+    /// conversion has real data. The cart graph (line items, configuration items) comes from the
+    /// shared <see cref="CartBenchmarkFixtures"/>; the aggregate is the upstream cart aggregate with
+    /// the real totals calculator and mocked I/O leaves.
     /// </summary>
     public static CartAggregate CreateCartAggregate(int itemCount, CartShape shape)
     {
-        var aggregate = CreateBareAggregate();
+        // Conversion does not map via the cart aggregate, so a mock mapper is enough here.
+        var aggregate = CartBenchmarkFixtures.CreateAggregate(Mock.Of<IMapper>());
+        var cart = CartBenchmarkFixtures.CreateCart(itemCount, shape);
 
-        var items = new List<LineItem>(itemCount);
-        for (var i = 0; i < itemCount; i++)
-        {
-            var item = new LineItem
-            {
-                Id = $"li-{i}",
-                ProductId = $"product-{i}",
-                CatalogId = "catalog",
-                Sku = $"SKU-product-{i}",
-                Name = $"Product {i}",
-                Currency = Currency.Code,
-                Quantity = 2,
-                ListPrice = 10m,
-                SalePrice = 9m,
-                SelectedForCheckout = true,
-            };
-
-            if (shape == CartShape.Configured)
-            {
-                item.IsConfigured = true;
-                item.ConfigurationItems = CreateConfigurationItems(i);
-            }
-
-            items.Add(item);
-        }
-
-        var cart = new ShoppingCart
-        {
-            Id = "benchmark-cart",
-            Name = "default",
-            StoreId = StoreId,
-            CustomerId = "benchmark-user",
-            Currency = Currency.Code,
-            LanguageCode = "en-US",
-            Items = items,
-            Shipments = [],
-            Payments = [],
-        };
-
-        aggregate.GrabCart(cart, CreateStore(), member: null, Currency);
+        aggregate.GrabCart(cart, CartBenchmarkFixtures.CreateStore(), member: null, CartBenchmarkFixtures.Currency);
 
         // Settle totals before conversion (sync — IterationSetup cannot await). Validation reads
         // the products from the context (built in CreateHarness), not from aggregate.CartProducts,
@@ -237,7 +130,7 @@ internal static class OrderBenchmarkFixtures
 
         // Used only for the cleanup SaveAsync (recalculate + no-op write); the load path is unused.
         var cartRepository = new CartAggregateRepository(
-            cartAggregateFactory: CreateBareAggregate,
+            cartAggregateFactory: () => CartBenchmarkFixtures.CreateAggregate(Mock.Of<IMapper>()),
             shoppingCartSearchService: Mock.Of<IShoppingCartSearchService>(),
             shoppingCartService: Mock.Of<IShoppingCartService>(),
             currencyService: CurrencyServiceMock().Object,
@@ -257,7 +150,7 @@ internal static class OrderBenchmarkFixtures
                 new CartValidationContext
                 {
                     CartAggregate = aggregate,
-                    AllCartProducts = aggregate.LineItems.Select(li => CreateCartProduct(li.ProductId)).ToList(),
+                    AllCartProducts = aggregate.LineItems.Select(li => CartBenchmarkFixtures.CreateCartProduct(li.ProductId)).ToList(),
                 });
 
         harness.Handler = new CreateOrderFromCartCommandHandler(

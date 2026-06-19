@@ -14,15 +14,15 @@
          time). Bump via `dotnet add package`, not by hand. -->
     <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageReference Include="Moq" Version="4.20.72" />
-    <!-- The real createOrderFromCart graph spans modules whose *Data* assemblies XOrder references
-         only at *Core* level. The benchmark needs the implementations:
-         - OrdersModule.Data  → CustomerOrderBuilder (the real cart→order conversion)
-         - XCart.Data         → CartAggregateRepository (the cleanup-save recalculate) + CartMappingProfile
-         - CartModule.Data    → DefaultShoppingCartTotalsCalculator (real totals)
-         Versions aligned with the module.manifest dependencies (Orders 3.1007.0, XCart 3.1001.0). -->
+    <!-- The cart-graph fixtures and the cart aggregate are shared from the XCart benchmark Core
+         library, so the order benchmark builds its seed cart the same way the cart benchmarks do
+         (no duplicated cart-graph code). Core transitively brings XCart.Core/Data (the
+         CartAggregate ctor + CartAggregateRepository + CartMappingProfile) and CartModule.Data
+         (DefaultShoppingCartTotalsCalculator), so those are no longer referenced here directly.
+         Core pins XCart 3.1021.0 (the 12-arg CartAggregate ctor); it is restored from the local
+         bench feed (see the local nuget.config). OrdersModule.Data is order-specific and stays. -->
+    <PackageReference Include="VirtoCommerce.XCart.Benchmark.Core" Version="3.1021.0" />
     <PackageReference Include="VirtoCommerce.OrdersModule.Data" Version="3.1007.0" />
-    <PackageReference Include="VirtoCommerce.XCart.Data" Version="3.1001.0" />
-    <PackageReference Include="VirtoCommerce.CartModule.Data" Version="3.1005.0" />
   </ItemGroup>
 
   <!-- $(XOrderSrc) defaults to the in-repo source. The before/after comparison mode (the Program.cs

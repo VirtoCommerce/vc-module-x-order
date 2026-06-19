@@ -32,9 +32,21 @@ fresh cart aggregate in `[IterationSetup]`, outside the measured region. That fo
 GraphQL request duration, real CPU%, EF query/persistence time, concurrency/caching — these are
 single-threaded, in-memory measurements.
 
+## Cart fixtures (shared)
+
+The seed cart graph (line items, configuration items, the cart aggregate, store, currency) is built
+by the shared `VirtoCommerce.XCart.Benchmark.Core` library's `CartBenchmarkFixtures`, not duplicated
+here — so the order benchmark's cart matches the cart benchmarks' shape. Only the order-specific
+harness (order builder, order/cart repositories, validation-context factory, mediator) lives in this
+project. Core transitively brings `XCart.Core`/`XCart.Data` and `CartModule.Data`, so those are no
+longer referenced directly; `OrdersModule.Data` is order-specific and stays.
+
 ## Prerequisites
 
 - .NET 10 SDK
+- The `VirtoCommerce.XCart.Benchmark.Core` package on a reachable feed. It is currently restored from
+  a **local** feed (see the project's `nuget.config`, which is local-only and not committed). Standard
+  publication of the Core package is a separate, later decision.
 
 ## Running
 

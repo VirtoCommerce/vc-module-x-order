@@ -1,6 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
+using VirtoCommerce.XCart.Benchmark;
 using VirtoCommerce.XOrder.Core;
 using VirtoCommerce.XOrder.Core.Commands;
 
