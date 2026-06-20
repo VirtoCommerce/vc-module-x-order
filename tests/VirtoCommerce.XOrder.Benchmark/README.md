@@ -32,21 +32,43 @@ fresh cart aggregate in `[IterationSetup]`, outside the measured region. That fo
 GraphQL request duration, real CPU%, EF query/persistence time, concurrency/caching — these are
 single-threaded, in-memory measurements.
 
-## Cart fixtures (shared)
+## Layout and the module-agnostic seam
 
-The seed cart graph (line items, configuration items, the cart aggregate, store, currency) is built
-by the shared `VirtoCommerce.XCart.Benchmark.Core` library's `CartBenchmarkFixtures`, not duplicated
-here — so the order benchmark's cart matches the cart benchmarks' shape. Only the order-specific
-harness (order builder, order/cart repositories, validation-context factory, mediator) lives in this
-project. Core transitively brings `XCart.Core`/`XCart.Data` and `CartModule.Data`, so those are no
-longer referenced directly; `OrdersModule.Data` is order-specific and stays.
+The benchmark **logic** (the `[Benchmark]` method, `[Params]`, the DI host, and the seam) lives in the
+`VirtoCommerce.XOrder.Benchmark.Core` **library** as the abstract `CreateOrderFromCartBenchmarksBase`,
+so a consuming module (LEO) can reference it and run the same benchmark under its own setup. This
+project is a thin runner exe: `CreateOrderFromCartBenchmarks` is a concrete subclass that bakes the
+upstream `UpstreamOrderBenchmarkSetup` via `CreateSetup()`.
+
+A setup (`IOrderModuleBenchmarkSetup`) answers the three things that differ per module:
+
+| Member | Upstream | A consumer (e.g. LEO) |
+|---|---|---|
+| `CreateCartSetup()` | the upstream cart graph (`UpstreamCartBenchmarkSetup`) | its own cart setup, so the conversion runs over its real cart graph |
+| `ConfigureServices(services)` | nothing — the host's base order wiring is the subject | overrides the order builder / aggregate / repository + command handler |
+| `CreateCommand(cartId)` | base `CreateOrderFromCartCommand` | its overridden command type (so MediatR routes to its handler) |
+
+The **input cart** is built by the XCart benchmark Core library's `CartBenchmarkHost` (loaded +
+recalculated exactly as the cart benchmarks build it, including a consumer's real cart graph via the
+`CreateCart` hook), so the order benchmark's seed cart matches the cart benchmarks' shape. Only the
+order-specific wiring lives in `OrderBenchmarkHost`. Core transitively brings `XCart.Core`/`XCart.Data`
+and `CartModule.Data`; `OrdersModule.Data` is order-specific.
+
+## Comparing a consuming module against upstream
+
+Because the benchmark logic lives in the Core library, a consuming module references the
+`VirtoCommerce.XOrder.Benchmark.Core` package, implements `IOrderModuleBenchmarkSetup` (its cart setup,
+its order overrides, its command), and defines a concrete subclass of `CreateOrderFromCartBenchmarksBase`
+baking that setup. The **same** createOrderFromCart benchmark then runs against the consumer's order
+graph — run each runner into separate `--artifacts` and diff the `Allocated` column (deterministic;
+`Mean` from a short run is noise).
 
 ## Prerequisites
 
 - .NET 10 SDK
-- The `VirtoCommerce.XCart.Benchmark.Core` package on a reachable feed. It is currently restored from
-  a **local** feed (see the project's `nuget.config`, which is local-only and not committed). Standard
-  publication of the Core package is a separate, later decision.
+- The `VirtoCommerce.XCart.Benchmark.Core` package (currently `3.1021.3`) on a reachable feed. It is
+  restored from a **local** feed (see the project's `nuget.config`, local-only and not committed).
+  Standard publication of the Core package is a separate, later decision.
 
 ## Running
 

@@ -4,39 +4,22 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <!-- BenchmarkDotNet refuses to measure in Debug; only Release is meaningful. -->
-    <!-- TreatWarningsAsErrors is intentionally NOT overridden: the repo-wide Directory.Build.props
-         value (true) applies, and this project builds warning-clean. -->
+    <!-- TreatWarningsAsErrors is inherited from Directory.Build.props (true); this project builds clean. -->
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Version resolved by `dotnet add package BenchmarkDotNet` (latest compatible at scaffold
-         time). Bump via `dotnet add package`, not by hand. -->
+    <!-- Version resolved by `dotnet add package BenchmarkDotNet` (latest compatible). -->
     <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
-    <PackageReference Include="Moq" Version="4.20.72" />
-    <!-- The cart-graph fixtures and the cart aggregate are shared from the XCart benchmark Core
-         library, so the order benchmark builds its seed cart the same way the cart benchmarks do
-         (no duplicated cart-graph code). Core transitively brings XCart.Core/Data (the
-         CartAggregate ctor + CartAggregateRepository + CartMappingProfile) and CartModule.Data
-         (DefaultShoppingCartTotalsCalculator), so those are no longer referenced here directly.
-         Core pins XCart 3.1021.0 (the 12-arg CartAggregate ctor); it is restored from the local
-         bench feed (see the local nuget.config). OrdersModule.Data is order-specific and stays. -->
-    <PackageReference Include="VirtoCommerce.XCart.Benchmark.Core" Version="3.1021.0" />
-    <PackageReference Include="VirtoCommerce.OrdersModule.Data" Version="3.1007.0" />
   </ItemGroup>
 
-  <!-- $(XOrderSrc) defaults to the in-repo source. The before/after comparison mode (the Program.cs
-       baseline-src flag) overrides it per BenchmarkDotNet job via /p:XOrderSrc=(baseline-worktree)/src,
-       so the "before" job builds XOrder.Core/Data from the baseline revision. ProjectReference (not a
-       bare DLL HintPath) is deliberate: it is what restores the transitive package graph the benchmark
-       depends on. See README "Comparing before/after a change". -->
-  <PropertyGroup>
-    <XOrderSrc Condition="'$(XOrderSrc)' == ''">..\..\src</XOrderSrc>
-  </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="$(XOrderSrc)\VirtoCommerce.XOrder.Core\VirtoCommerce.XOrder.Core.csproj" />
-    <ProjectReference Include="$(XOrderSrc)\VirtoCommerce.XOrder.Data\VirtoCommerce.XOrder.Data.csproj" />
+    <!-- The benchmark logic, the module-agnostic order seam, and the DI host live in the Core library;
+         this exe is a thin upstream runner (UpstreamOrderBenchmarkSetup) over it. Core brings
+         XCart.Benchmark.Core + XOrder.Core/Data transitively. The before/after baseline-src flag
+         (Program.cs) overrides $(XOrderSrc) on the Core ProjectReference per BDN job via global-property
+         propagation. -->
+    <ProjectReference Include="..\VirtoCommerce.XOrder.Benchmark.Core\VirtoCommerce.XOrder.Benchmark.Core.csproj" />
   </ItemGroup>
 
 </Project>

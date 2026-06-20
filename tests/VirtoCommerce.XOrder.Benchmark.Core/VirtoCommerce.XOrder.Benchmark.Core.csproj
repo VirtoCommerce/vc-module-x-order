@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <!-- Files keep namespace VirtoCommerce.XOrder.Benchmark so benchmark full names (and BDN filter
+         globs) are unchanged after the move out of the runner project. -->
+    <RootNamespace>VirtoCommerce.XOrder.Benchmark</RootNamespace>
+    <!-- Packable so a consuming module (LEO) can reference the shared order benchmark + seam via a
+         (local) NuGet feed and run the same createOrderFromCart benchmark under its own setup. -->
+    <IsPackable>true</IsPackable>
+    <!-- TreatWarningsAsErrors is inherited from Directory.Build.props (true); this project builds clean. -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Version resolved by `dotnet add package BenchmarkDotNet` (latest compatible). -->
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <!-- The cart-input graph + the cart DI host (CartBenchmarkHost) + the module-agnostic cart seam come
+         from the XCart benchmark Core library, so the order benchmark loads its seed cart exactly the way
+         the cart benchmarks do — including a consumer's real cart graph via Theme 1's CreateCart hook.
+         Brings XCart.Core/Data and CartModule.Data transitively. Restored from the local bench feed. -->
+    <PackageReference Include="VirtoCommerce.XCart.Benchmark.Core" Version="3.1021.3" />
+    <PackageReference Include="VirtoCommerce.OrdersModule.Data" Version="3.1007.0" />
+  </ItemGroup>
+
+  <!-- $(XOrderSrc) defaults to the in-repo source; the before/after comparison mode overrides it per
+       BenchmarkDotNet job via /p:XOrderSrc=(baseline-worktree)/src. ProjectReference (not a bare DLL
+       HintPath) is deliberate: it restores the transitive package graph the benchmark depends on. -->
+  <PropertyGroup>
+    <XOrderSrc Condition="'$(XOrderSrc)' == ''">..\..\src</XOrderSrc>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(XOrderSrc)\VirtoCommerce.XOrder.Core\VirtoCommerce.XOrder.Core.csproj" />
+    <ProjectReference Include="$(XOrderSrc)\VirtoCommerce.XOrder.Data\VirtoCommerce.XOrder.Data.csproj" />
+  </ItemGroup>
+
+</Project>
