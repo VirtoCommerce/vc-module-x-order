@@ -59,10 +59,6 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
                     return cartAggregate;
                 });
 
-            var validationContextMock = new Mock<ICartValidationContextFactory>();
-            validationContextMock.Setup(x => x.CreateValidationContextAsync(It.IsAny<CartAggregate>(), It.IsAny<IList<CartProduct>>()))
-                .ReturnsAsync(new CartValidationContext());
-
             var orderAggregateRepositoryMock = new Mock<ICustomerOrderAggregateRepository>();
 
             var memberService = new Mock<IMemberService>();
@@ -74,7 +70,6 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
                 cartService.Object,
                 orderAggregateRepositoryMock.Object,
                 aggregationService.Object,
-                validationContextMock.Object,
                 memberService.Object,
                 mediatorMock.Object);
 
@@ -115,16 +110,16 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
             customerAggrRep.Setup(x => x.CreateOrderFromCart(It.IsAny<ShoppingCart>()))
                 .ReturnsAsync(new CustomerOrderAggregate(null, null));
 
-            var cartAggregate = new CartAggregate(null, null, null, null, null, null, null, null, null, null, null);
+            var validationContextFactory = new Mock<ICartValidationContextFactory>();
+            validationContextFactory.Setup(x => x.CreateValidationContextAsync(It.IsAny<CartAggregate>()))
+                .ReturnsAsync(new CartValidationContext());
+
+            var cartAggregate = new CartAggregate(null, null, null, null, null, null, null, null, null, null, null, validationContextFactory.Object);
             cartAggregate.GrabCart(cart, new Store(), new Contact(), new Currency());
 
             var cartAggrRepository = new Mock<ICartAggregateRepository>();
             cartAggrRepository.Setup(x => x.GetCartForShoppingCartAsync(It.IsAny<ShoppingCart>(), null))
                 .ReturnsAsync(cartAggregate);
-
-            var contextFactory = new Mock<ICartValidationContextFactory>();
-            contextFactory.Setup(x => x.CreateValidationContextAsync(It.IsAny<CartAggregate>(), It.IsAny<IList<CartProduct>>()))
-                .ReturnsAsync(new CartValidationContext());
 
             var mediatorMock = new Mock<IMediator>();
             mediatorMock
@@ -137,7 +132,6 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
                 cartService.Object,
                 customerAggrRep.Object,
                 cartAggrRepository.Object,
-                contextFactory.Object,
                 memberService.Object,
                 mediatorMock.Object)
             {
@@ -164,7 +158,9 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
                 Mock.Of<IGenericPipelineLauncher>(),
                 Mock.Of<IConfigurationItemValidator>(),
                 Mock.Of<IFileUploadService>(),
-                Mock.Of<ICartSharingService>());
+                Mock.Of<ICartSharingService>(),
+                Mock.Of<ICartValidationContextFactory>(x =>
+                    x.CreateValidationContextAsync(It.IsAny<CartAggregate>()) == Task.FromResult(new CartValidationContext())));
 
             var contact = new Contact()
             {
