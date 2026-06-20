@@ -36,13 +36,13 @@ single-threaded, in-memory measurements.
 
 The benchmark **logic** (the `[Benchmark]` method, `[Params]`, the DI host, and the seam) lives in the
 `VirtoCommerce.XOrder.Benchmark.Core` **library** as the abstract `CreateOrderFromCartBenchmarksBase`,
-so a consuming module (LEO) can reference it and run the same benchmark under its own setup. This
+so a consuming module can reference it and run the same benchmark under its own setup. This
 project is a thin runner exe: `CreateOrderFromCartBenchmarks` is a concrete subclass that bakes the
 upstream `UpstreamOrderBenchmarkSetup` via `CreateSetup()`.
 
 A setup (`IOrderModuleBenchmarkSetup`) answers the three things that differ per module:
 
-| Member | Upstream | A consumer (e.g. LEO) |
+| Member | Upstream | A consuming module |
 |---|---|---|
 | `CreateCartSetup()` | the upstream cart graph (`UpstreamCartBenchmarkSetup`) | its own cart setup, so the conversion runs over its real cart graph |
 | `ConfigureServices(services)` | nothing — the host's base order wiring is the subject | overrides the order builder / aggregate / repository + command handler |

@@ -14,7 +14,7 @@ namespace VirtoCommerce.XOrder.Benchmark;
 /// <para>The benchmark <b>logic</b> lives here in the Core library; each runner exe defines a concrete
 /// subclass overriding <see cref="CreateSetup"/> to bake its module setup (upstream / a consumer), so
 /// the SAME benchmark runs against the un-extended XOrder handler or a consumer's overridden handler +
-/// order builder + aggregate over a consumer cart graph — a LEO run is then directly comparable.</para>
+/// order builder + aggregate over a consumer cart graph — a consumer run is then directly comparable.</para>
 ///
 /// <para>createOrderFromCart consumes the cart (cleanup removes the items), so it is NOT idempotent —
 /// each iteration rebuilds a fresh cart in <c>[IterationSetup]</c>, outside the measured region. That
