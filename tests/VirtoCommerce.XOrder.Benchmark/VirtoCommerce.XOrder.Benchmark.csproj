@@ -17,7 +17,7 @@
     <!-- The benchmark logic, the module-agnostic order seam, and the DI host live in the Core library;
          this exe is a thin upstream runner (UpstreamOrderBenchmarkSetup) over it. Core brings
          XCart.Benchmark.Core + XOrder.Core/Data transitively. The before/after baseline-src flag
-         (Program.cs) overrides $(XOrderSrc) on the Core ProjectReference per BDN job via global-property
+         (Program.cs) overrides $(BaselineSrc) on the Core ProjectReference per BDN job via global-property
          propagation. -->
     <ProjectReference Include="..\VirtoCommerce.XOrder.Benchmark.Core\VirtoCommerce.XOrder.Benchmark.Core.csproj" />
   </ItemGroup>

@@ -100,7 +100,7 @@ benchmark README:
    ```
    `--baseline-src <path>` is opt-in and additive — without it the run is unchanged. The path is the
    `src` root of the baseline checkout; the `before` job (the baseline) rebuilds
-   `XOrder.Core`/`XOrder.Data` from it via `/p:XOrderSrc=<path>` (a `ProjectReference` swap, so the
+   `XOrder.Core`/`XOrder.Data` from it via `/p:BaselineSrc=<path>` (a `ProjectReference` swap, so the
    full transitive package graph still restores — a bare DLL reference would not). An `Alloc Ratio`
    of `0.85` on an `after` row means the change allocates ~15% less. Valid only when the change keeps
    the benchmarked public API stable. Do **not** add `--job <preset>` — BDN appends it as a *third*

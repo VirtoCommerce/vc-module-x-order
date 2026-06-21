@@ -21,7 +21,7 @@ if (baselineSrc is null)
 else
 {
     var config = ManualConfig.Create(DefaultConfig.Instance)
-        .AddJob(Job.Default.WithMsBuildArguments($"/p:XOrderSrc={baselineSrc}").WithId("before").AsBaseline())
+        .AddJob(Job.Default.WithMsBuildArguments($"/p:BaselineSrc={baselineSrc}").WithId("before").AsBaseline())
         .AddJob(Job.Default.WithId("after"));
 
     BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(rest, config);

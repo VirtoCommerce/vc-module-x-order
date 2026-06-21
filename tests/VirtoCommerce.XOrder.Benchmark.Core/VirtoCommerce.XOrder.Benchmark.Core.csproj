@@ -23,16 +23,18 @@
     <PackageReference Include="VirtoCommerce.OrdersModule.Data" Version="3.1007.0" />
   </ItemGroup>
 
-  <!-- $(XOrderSrc) defaults to the in-repo source; the before/after comparison mode overrides it per
-       BenchmarkDotNet job via /p:XOrderSrc=(baseline-worktree)/src. ProjectReference (not a bare DLL
-       HintPath) is deliberate: it restores the transitive package graph the benchmark depends on. -->
+  <!-- $(BaselineSrc) defaults to the in-repo source; the before/after comparison mode overrides it per
+       BenchmarkDotNet job via /p:BaselineSrc=(baseline-worktree)/src. The property is named by ROLE (the
+       baseline source tree), not by module, so every module's benchmark Core uses the same name (the
+       .csproj appends its own module subpath). ProjectReference (not a bare DLL HintPath) is deliberate:
+       it restores the transitive package graph the benchmark depends on. -->
   <PropertyGroup>
-    <XOrderSrc Condition="'$(XOrderSrc)' == ''">..\..\src</XOrderSrc>
+    <BaselineSrc Condition="'$(BaselineSrc)' == ''">..\..\src</BaselineSrc>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(XOrderSrc)\VirtoCommerce.XOrder.Core\VirtoCommerce.XOrder.Core.csproj" />
-    <ProjectReference Include="$(XOrderSrc)\VirtoCommerce.XOrder.Data\VirtoCommerce.XOrder.Data.csproj" />
+    <ProjectReference Include="$(BaselineSrc)\VirtoCommerce.XOrder.Core\VirtoCommerce.XOrder.Core.csproj" />
+    <ProjectReference Include="$(BaselineSrc)\VirtoCommerce.XOrder.Data\VirtoCommerce.XOrder.Data.csproj" />
   </ItemGroup>
 
 </Project>
