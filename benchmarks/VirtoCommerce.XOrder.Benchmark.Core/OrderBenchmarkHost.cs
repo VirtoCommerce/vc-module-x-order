@@ -27,7 +27,6 @@ using VirtoCommerce.XCart.Core.Validators;
 using VirtoCommerce.XOrder.Core;
 using VirtoCommerce.XOrder.Core.Commands;
 using VirtoCommerce.XOrder.Core.Services;
-using VirtoCommerce.XOrder.Data.Commands;
 using VirtoCommerce.XOrder.Data.Services;
 
 namespace VirtoCommerce.XOrder.Benchmark;
@@ -72,8 +71,12 @@ public static class OrderBenchmarkHost
 
         var services = new ServiceCollection();
 
-        // Base XOrder command handler — MediatR scans the Data assembly where the handler lives.
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateOrderFromCartCommandHandler).Assembly));
+        // Base handlers — register MediatR from the Core AND Data assemblies, mirroring the module's
+        // production AddSchema(typeof(CoreAssemblyMarker), typeof(DataAssemblyMarker)). Anchor on the
+        // assembly marker types, not specific handlers that could be renamed/removed.
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(
+            typeof(VirtoCommerce.XOrder.Core.CoreAssemblyMarker).Assembly,
+            typeof(VirtoCommerce.XOrder.Data.DataAssemblyMarker).Assembly));
 
         // The handler loads the cart through IMediator.Send(GetCartByIdQuery); return the per-iteration
         // cart aggregate (this single registered handler is what MediatR resolves for that query).
