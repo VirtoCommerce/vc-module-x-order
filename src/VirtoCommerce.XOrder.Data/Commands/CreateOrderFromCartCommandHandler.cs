@@ -10,7 +10,6 @@ using VirtoCommerce.Xapi.Core.Helpers;
 using VirtoCommerce.XCart.Core;
 using VirtoCommerce.XCart.Core.Queries;
 using VirtoCommerce.XCart.Core.Services;
-using VirtoCommerce.XCart.Core.Validators;
 using VirtoCommerce.XOrder.Core;
 using VirtoCommerce.XOrder.Core.Commands;
 using VirtoCommerce.XOrder.Core.Services;
@@ -21,7 +20,6 @@ namespace VirtoCommerce.XOrder.Data.Commands
     {
         private readonly ICustomerOrderAggregateRepository _customerOrderAggregateRepository;
         private readonly ICartAggregateRepository _cartRepository;
-        private readonly ICartValidationContextFactory _cartValidationContextFactory;
         private readonly IMemberService _memberService;
         private readonly IMediator _mediator;
 
@@ -31,13 +29,11 @@ namespace VirtoCommerce.XOrder.Data.Commands
             IShoppingCartService cartService,
             ICustomerOrderAggregateRepository customerOrderAggregateRepository,
             ICartAggregateRepository cartRepository,
-            ICartValidationContextFactory cartValidationContextFactory,
             IMemberService memberService,
             IMediator mediator)
         {
             _customerOrderAggregateRepository = customerOrderAggregateRepository;
             _cartRepository = cartRepository;
-            _cartValidationContextFactory = cartValidationContextFactory;
             _memberService = memberService;
             _mediator = mediator;
         }
@@ -77,8 +73,7 @@ namespace VirtoCommerce.XOrder.Data.Commands
 
         protected virtual async Task ValidateCart(CartAggregate cartAggregate)
         {
-            var context = await _cartValidationContextFactory.CreateValidationContextAsync(cartAggregate, cartAggregate.CartProducts.Select(x => x.Value).ToList());
-            await cartAggregate.ValidateAsync(context, ValidationRuleSet);
+            await cartAggregate.ValidateAsync(ValidationRuleSet);
 
             var errors = cartAggregate.GetValidationErrors();
             if (errors.Any())
