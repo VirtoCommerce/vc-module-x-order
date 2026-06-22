@@ -19,7 +19,7 @@
          from the XCart benchmark Core library, so the order benchmark loads its seed cart exactly the way
          the cart benchmarks do — including a consumer's real cart graph via Theme 1's CreateCart hook.
          Brings XCart.Core/Data and CartModule.Data transitively. Restored from the local bench feed. -->
-    <PackageReference Include="VirtoCommerce.XCart.Benchmark.Core" Version="3.1021.4" />
+    <PackageReference Include="VirtoCommerce.XCart.Benchmark.Core" Version="3.1021.6" />
     <PackageReference Include="VirtoCommerce.OrdersModule.Data" Version="3.1007.0" />
   </ItemGroup>
 

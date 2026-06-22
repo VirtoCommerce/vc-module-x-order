@@ -38,13 +38,13 @@ The benchmark **logic** (the `[Benchmark]` method, `[Params]`, the DI host, and 
 `VirtoCommerce.XOrder.Benchmark.Core` **library** as the abstract `CreateOrderFromCartBenchmarksBase`,
 so a consuming module can reference it and run the same benchmark under its own setup. This
 project is a thin runner exe: `CreateOrderFromCartBenchmarks` is a concrete subclass that bakes the
-upstream `UpstreamOrderBenchmarkSetup` via `CreateSetup()`.
+stock `XOrderBenchmarkSetup` via `CreateSetup()`.
 
-A setup (`IOrderModuleBenchmarkSetup`) answers the three things that differ per module:
+A setup (`IOrderBenchmarkSetup`) answers the three things that differ per module:
 
 | Member | Upstream | A consuming module |
 |---|---|---|
-| `CreateCartSetup()` | the upstream cart graph (`UpstreamCartBenchmarkSetup`) | its own cart setup, so the conversion runs over its real cart graph |
+| `CreateCartSetup()` | the stock cart graph (`XCartBenchmarkSetup`) | its own cart setup, so the conversion runs over its real cart graph |
 | `ConfigureServices(services)` | nothing — the host's base order wiring is the subject | overrides the order builder / aggregate / repository + command handler |
 | `CreateCommand(cartId)` | base `CreateOrderFromCartCommand` | its overridden command type (so MediatR routes to its handler) |
 
@@ -57,7 +57,7 @@ and `CartModule.Data`; `OrdersModule.Data` is order-specific.
 ## Comparing a consuming module against upstream
 
 Because the benchmark logic lives in the Core library, a consuming module references the
-`VirtoCommerce.XOrder.Benchmark.Core` package, implements `IOrderModuleBenchmarkSetup` (its cart setup,
+`VirtoCommerce.XOrder.Benchmark.Core` package, implements `IOrderBenchmarkSetup` (its cart setup,
 its order overrides, its command), and defines a concrete subclass of `CreateOrderFromCartBenchmarksBase`
 baking that setup. The **same** createOrderFromCart benchmark then runs against the consumer's order
 graph — run each runner into separate `--artifacts` and diff the `Allocated` column (deterministic;
@@ -66,7 +66,7 @@ graph — run each runner into separate `--artifacts` and diff the `Allocated` c
 ## Prerequisites
 
 - .NET 10 SDK
-- The `VirtoCommerce.XCart.Benchmark.Core` package (currently `3.1021.3`) on a reachable feed. It is
+- The `VirtoCommerce.XCart.Benchmark.Core` package on a reachable feed. It is
   restored from a **local** feed (see the project's `nuget.config`, local-only and not committed).
   Standard publication of the Core package is a separate, later decision.
 

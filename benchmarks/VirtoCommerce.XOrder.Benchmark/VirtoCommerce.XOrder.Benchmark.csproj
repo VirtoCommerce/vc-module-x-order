@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <!-- The benchmark logic, the module-agnostic order seam, and the DI host live in the Core library;
-         this exe is a thin upstream runner (UpstreamOrderBenchmarkSetup) over it. Core brings
+         this exe is a thin stock runner (XOrderBenchmarkSetup) over it. Core brings
          XCart.Benchmark.Core + XOrder.Core/Data transitively. The before/after baseline-src flag
          (Program.cs) overrides $(BaselineSrc) on the Core ProjectReference per BDN job via global-property
          propagation. -->

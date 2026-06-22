@@ -40,11 +40,11 @@ namespace VirtoCommerce.XOrder.Benchmark;
 /// the totals math behind the two cart recalculates).
 ///
 /// <para>The input cart comes from <see cref="CartBenchmarkHost"/> via the setup's
-/// <see cref="IOrderModuleBenchmarkSetup.CreateCartSetup"/>, so it is loaded + recalculated exactly as
+/// <see cref="IOrderBenchmarkSetup.CreateCartSetup"/>, so it is loaded + recalculated exactly as
 /// the cart benchmarks build it (including a consumer's real cart graph). The order machinery (builder,
 /// aggregate, repository) is registered base-first, then the setup's
-/// <see cref="IOrderModuleBenchmarkSetup.ConfigureServices"/> applies its overrides last (DI
-/// last-registration wins). The benchmark dispatches <see cref="IOrderModuleBenchmarkSetup.CreateCommand"/>
+/// <see cref="IOrderBenchmarkSetup.ConfigureServices"/> applies its overrides last (DI
+/// last-registration wins). The benchmark dispatches <see cref="IOrderBenchmarkSetup.CreateCommand"/>
 /// through MediatR, so the consumer's overridden command type routes to its handler.</para>
 /// </summary>
 public static class OrderBenchmarkHost
@@ -57,7 +57,7 @@ public static class OrderBenchmarkHost
     /// <see cref="OrderHarness.RefreshCart"/> (createOrderFromCart consumes the cart, so it must be
     /// rebuilt before each measured invocation — the caller does this in <c>[IterationSetup]</c>).
     /// </summary>
-    public static OrderHarness BuildHarness(IOrderModuleBenchmarkSetup setup, int lineItemCount, CartShape shape)
+    public static OrderHarness BuildHarness(IOrderBenchmarkSetup setup, int lineItemCount, CartShape shape)
     {
         // Input cart provider — reuses the whole cart benchmark wiring (incl. a consumer's cart graph via
         // Theme 1's CreateCart hook). GetCartByIdAsync returns a freshly loaded + recalculated aggregate.

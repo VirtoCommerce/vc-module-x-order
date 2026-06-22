@@ -37,7 +37,7 @@ public abstract class CreateOrderFromCartBenchmarksBase
     public CartShape Shape { get; set; }
 
     /// <summary>The module setup baked by the concrete runner subclass (upstream / a consumer).</summary>
-    protected abstract IOrderModuleBenchmarkSetup CreateSetup();
+    protected abstract IOrderBenchmarkSetup CreateSetup();
 
     [GlobalSetup]
     public void Setup() => _harness = OrderBenchmarkHost.BuildHarness(CreateSetup(), LineItemCount, Shape);
