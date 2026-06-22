@@ -103,6 +103,9 @@ benchmark README:
    `XOrder.Core`/`XOrder.Data` from it via `/p:BaselineSrc=<path>` (a `ProjectReference` swap, so the
    full transitive package graph still restores — a bare DLL reference would not). An `Alloc Ratio`
    of `0.85` on an `after` row means the change allocates ~15% less. Valid only when the change keeps
-   the benchmarked public API stable. Do **not** add `--job <preset>` — BDN appends it as a *third*
-   job rather than reconfiguring the before/after pair; for a stricter `Mean` add `--apples
-   --iterationCount N`.
+   the benchmarked public API stable. **Defaults to `--job Dry`** (byte-exact `Alloc Ratio` in seconds;
+   the time `Ratio` is directional only, not a verdict — the runner prints a reminder); pass `--job
+   Short` for a rough time direction or **`--job Default` for a trustworthy `Mean`**. The chosen job is
+   consumed by `--baseline-src` and applied to **both** before and after (not forwarded to BDN, so it
+   won't append a third unpaired job); for a stricter `Mean` add `--apples --iterationCount N` on top of
+   `--job Default`.
