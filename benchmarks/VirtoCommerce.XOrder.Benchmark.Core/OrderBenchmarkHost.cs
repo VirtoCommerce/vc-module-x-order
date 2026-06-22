@@ -75,8 +75,8 @@ public static class OrderBenchmarkHost
         // production AddSchema(typeof(CoreAssemblyMarker), typeof(DataAssemblyMarker)). Anchor on the
         // assembly marker types, not specific handlers that could be renamed/removed.
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(
-            typeof(VirtoCommerce.XOrder.Core.CoreAssemblyMarker).Assembly,
-            typeof(VirtoCommerce.XOrder.Data.DataAssemblyMarker).Assembly));
+            typeof(Core.CoreAssemblyMarker).Assembly,
+            typeof(Data.DataAssemblyMarker).Assembly));
 
         // The handler loads the cart through IMediator.Send(GetCartByIdQuery); return the per-iteration
         // cart aggregate (this single registered handler is what MediatR resolves for that query).
@@ -102,7 +102,7 @@ public static class OrderBenchmarkHost
         // ── Order machinery (base; a consumer setup overrides builder / aggregate / repository) ──────
         services.AddTransient<ICustomerOrderBuilder, CustomerOrderBuilder>();
         services.AddTransient<CustomerOrderAggregate>();
-        services.AddTransient<Func<CustomerOrderAggregate>>(sp => () => sp.GetRequiredService<CustomerOrderAggregate>());
+        services.AddTransient<Func<CustomerOrderAggregate>>(sp => sp.GetRequiredService<CustomerOrderAggregate>);
         services.AddTransient<ICustomerOrderAggregateRepository, CustomerOrderAggregateRepository>();
 
         // ── Consumer overrides — last wins by DI last-registration ───────────────────────────────────
