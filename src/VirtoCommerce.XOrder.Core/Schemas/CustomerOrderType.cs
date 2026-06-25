@@ -176,6 +176,10 @@ namespace VirtoCommerce.XOrder.Core.Schemas
 
                     return result.Results;
                 });
+
+            ExtendableField<ListGraphType<OrderTotalType>>("orderTotals",
+                "Order totals",
+                resolve: context => context.Source.OrderTotals);
         }
     }
 }

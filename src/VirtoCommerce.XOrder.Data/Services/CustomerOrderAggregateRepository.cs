@@ -82,9 +82,14 @@ namespace VirtoCommerce.XOrder.Data.Services
 
             foreach (var order in orders)
             {
+                var orderCurrencies = currencies
+                    .Select(x => currencies.GetCurrencyForLanguage(x.Code, cultureName ?? order.LanguageCode))
+                    .ToList();
+
                 var aggregateFactory = _customerOrderAggregateFactory();
                 var orderAggregate = aggregateFactory.GrabCustomerOrder(order.CloneTyped(),
                     currencies.GetCurrencyForLanguage(order.Currency, cultureName ?? order.LanguageCode),
+                    orderCurrencies,
                     await GetStore(order.StoreId));
                 orderAggregates.Add(orderAggregate);
             }

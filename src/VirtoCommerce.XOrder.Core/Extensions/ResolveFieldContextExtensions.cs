@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GraphQL;
 using VirtoCommerce.CoreModule.Core.Currency;
+using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Xapi.Core.Extensions;
 using VirtoCommerce.Xapi.Core.Infrastructure;
@@ -11,6 +12,11 @@ namespace VirtoCommerce.XOrder.Core.Extensions
 {
     public static class ResolveFieldContextExtensions
     {
+        public static CustomerOrderAggregate GetOrder(this IResolveFieldContext userContext)
+        {
+            return userContext.GetValueForSource<CustomerOrderAggregate>();
+        }
+
         public static Currency GetOrderCurrency<T>(this IResolveFieldContext<T> userContext)
         {
             return userContext.GetValueForSource<CustomerOrderAggregate>()?.Currency;
@@ -38,6 +44,22 @@ namespace VirtoCommerce.XOrder.Core.Extensions
             var query = AbstractTypeFactory<T>.TryCreateInstance();
             query.Map(context);
             return query;
+        }
+
+        public static Currency GetOrderItemCurrency(this IResolveFieldContext<LineItem> context)
+        {
+            var order = context.GetOrder();
+            if (order == null)
+            {
+                return null;
+            }
+
+            if (context.Source.Currency.IsNullOrEmpty())
+            {
+                return order.Currency;
+            }
+
+            return order.AllCurrencies?.FirstOrDefault(x => x.Code.EqualsIgnoreCase(context.Source.Currency));
         }
     }
 }
