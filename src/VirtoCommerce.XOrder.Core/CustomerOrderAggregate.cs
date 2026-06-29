@@ -16,6 +16,7 @@ using VirtoCommerce.Platform.Core.Domain;
 using VirtoCommerce.StoreModule.Core.Model;
 using VirtoCommerce.Xapi.Core.Models;
 using VirtoCommerce.Xapi.Core.Services;
+using VirtoCommerce.XOrder.Core.Models;
 using VirtoCommerce.XOrder.Core.Validators;
 
 namespace VirtoCommerce.XOrder.Core
@@ -33,14 +34,34 @@ namespace VirtoCommerce.XOrder.Core
         }
 
         public CustomerOrder Order { get; protected set; }
+
         public Currency Currency { get; protected set; }
+
+        public IList<Currency> AllCurrencies { get; protected set; }
 
         public Store Store { get; protected set; }
 
-        public CustomerOrderAggregate GrabCustomerOrder(CustomerOrder order, Currency currency, Store store)
+        public IList<OrderTotalAggregate> OrderTotals
+        {
+            get
+            {
+                var orderTotals = Order.OrderTotals?.Select(x => new OrderTotalAggregate() { OrderTotal = x }).ToList() ?? [];
+
+                foreach (var item in orderTotals)
+                {
+                    item.IsDefaultTotalCurrency = Order.Currency.EqualsIgnoreCase(item.OrderTotal.CurrencyCode);
+                    item.Currency = AllCurrencies?.FirstOrDefault(x => x.Code.EqualsIgnoreCase(item.OrderTotal.CurrencyCode)) ?? Currency;
+                }
+
+                return orderTotals;
+            }
+        }
+
+        public CustomerOrderAggregate GrabCustomerOrder(CustomerOrder order, Currency mainCurrency, IList<Currency> currencyList, Store store)
         {
             Order = order;
-            Currency = currency;
+            Currency = mainCurrency;
+            AllCurrencies = currencyList;
             Store = store;
 
             return this;
