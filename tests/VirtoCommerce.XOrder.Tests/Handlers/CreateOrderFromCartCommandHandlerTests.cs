@@ -107,18 +107,21 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
             var cartService = new Mock<IShoppingCartService>();
 
             var customerAggrRep = new Mock<ICustomerOrderAggregateRepository>();
-            customerAggrRep.Setup(x => x.CreateOrderFromCart(It.IsAny<ShoppingCart>()))
+            customerAggrRep
+                .Setup(x => x.CreateOrderFromCart(It.IsAny<ShoppingCart>()))
                 .ReturnsAsync(new CustomerOrderAggregate(null, null));
 
             var contextFactory = new Mock<ICartValidationContextFactory>();
-            contextFactory.Setup(x => x.CreateValidationContextAsync(It.IsAny<CartAggregate>()))
+            contextFactory
+                .Setup(x => x.CreateValidationContextAsync(It.IsAny<CartAggregate>()))
                 .ReturnsAsync(new CartValidationContext());
 
             var cartAggregate = new CartAggregate(null, null, null, null, null, null, null, null, null, null, null, contextFactory.Object, Mock.Of<ICartItemBuilder>());
             cartAggregate.GrabCart(cart, new Store(), new Contact(), new Currency());
 
             var cartAggrRepository = new Mock<ICartAggregateRepository>();
-            cartAggrRepository.Setup(x => x.GetCartForShoppingCartAsync(It.IsAny<ShoppingCart>(), null))
+            cartAggrRepository
+                .Setup(x => x.GetCartForShoppingCartAsync(It.IsAny<ShoppingCart>(), null))
                 .ReturnsAsync(cartAggregate);
 
             var mediatorMock = new Mock<IMediator>();
@@ -148,7 +151,8 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
         private static CartAggregate GetCartAggregateMock(ShoppingCart cart)
         {
             var validationContextFactory = new Mock<ICartValidationContextFactory>();
-            validationContextFactory.Setup(x => x.CreateValidationContextAsync(It.IsAny<CartAggregate>()))
+            validationContextFactory
+                .Setup(x => x.CreateValidationContextAsync(It.IsAny<CartAggregate>()))
                 .ReturnsAsync(new CartValidationContext());
 
             var cartAggregate = new CartAggregate(
