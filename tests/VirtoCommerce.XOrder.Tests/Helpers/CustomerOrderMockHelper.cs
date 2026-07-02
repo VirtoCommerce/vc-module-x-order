@@ -113,7 +113,7 @@ namespace VirtoCommerce.XOrder.Tests.Helpers
                 _dynamicPropertyUpdaterService.Object,
                 _promotionUsageSearchService.Object);
 
-            aggregate.GrabCustomerOrder(customerOrder, currency, null);
+            aggregate.GrabCustomerOrder(customerOrder, currency, null, null);
 
             return aggregate;
         }

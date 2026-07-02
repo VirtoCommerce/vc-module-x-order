@@ -31,15 +31,15 @@ public class OrderConfigurationItemType : ExtendableGraphType<ConfigurationItem>
 
         Field<NonNullGraphType<MoneyType>>(nameof(ConfigurationItem.Price))
             .Description("List price")
-            .Resolve(context => context.Source.Price.ToMoney(context.GetOrderCurrency()));
+            .Resolve(context => context.Source.Price.ToMoney(context.GetConfiguratonItemCurrency()));
 
         Field<NonNullGraphType<MoneyType>>(nameof(ConfigurationItem.SalePrice))
             .Description("Sale price")
-            .Resolve(context => context.Source.SalePrice.ToMoney(context.GetOrderCurrency()));
+            .Resolve(context => context.Source.SalePrice.ToMoney(context.GetConfiguratonItemCurrency()));
 
         Field<NonNullGraphType<MoneyType>>(nameof(ConfigurationItem.ExtendedPrice))
             .Description("Extended price")
-            .Resolve(context => context.Source.ExtendedPrice.ToMoney(context.GetOrderCurrency()));
+            .Resolve(context => context.Source.ExtendedPrice.ToMoney(context.GetConfiguratonItemCurrency()));
 
         ExtendableField<ListGraphType<OrderConfigurationItemFileType>>(nameof(ConfigurationItem.Files),
             resolve: context => context.Source.Files,

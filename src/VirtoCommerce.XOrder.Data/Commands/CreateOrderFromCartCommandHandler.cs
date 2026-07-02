@@ -10,7 +10,6 @@ using VirtoCommerce.Xapi.Core.Helpers;
 using VirtoCommerce.XCart.Core;
 using VirtoCommerce.XCart.Core.Queries;
 using VirtoCommerce.XCart.Core.Services;
-using VirtoCommerce.XCart.Core.Validators;
 using VirtoCommerce.XOrder.Core;
 using VirtoCommerce.XOrder.Core.Commands;
 using VirtoCommerce.XOrder.Core.Services;
