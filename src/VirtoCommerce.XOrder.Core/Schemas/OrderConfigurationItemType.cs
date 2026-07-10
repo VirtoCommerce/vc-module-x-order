@@ -20,6 +20,7 @@ public class OrderConfigurationItemType : ExtendableGraphType<ConfigurationItem>
     {
         Field(x => x.Id, nullable: false).Description("Configuration item ID");
         Field(x => x.SectionId, nullable: false).Description("Configuration item section ID");
+        Field(x => x.SectionName, nullable: true).Description("Configuration item section name");
         Field(x => x.Name, nullable: true).Description("Configuration item name");
         Field(x => x.ProductId, nullable: true).Description("Configuration item product ID");
         Field(x => x.Sku, nullable: true).Description("Configuration item SKU");
