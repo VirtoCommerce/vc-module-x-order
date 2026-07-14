@@ -93,7 +93,7 @@ public class ProductSnapshotResolutionTests
 
         var order = new CustomerOrder { Id = orderId };
         var orderAggregate = new CustomerOrderAggregate(null, null);
-        orderAggregate.GrabCustomerOrder(order, null, null);
+        orderAggregate.GrabCustomerOrder(order, null, null, null);
 
         // SetExpandedObjectGraph puts the aggregate under each entity's Id
         userContext.TryAdd(lineItemId, orderAggregate);

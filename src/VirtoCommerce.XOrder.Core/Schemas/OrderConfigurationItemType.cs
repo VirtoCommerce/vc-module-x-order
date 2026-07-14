@@ -20,6 +20,7 @@ public class OrderConfigurationItemType : ExtendableGraphType<ConfigurationItem>
     {
         Field(x => x.Id, nullable: false).Description("Configuration item ID");
         Field(x => x.SectionId, nullable: false).Description("Configuration item section ID");
+        Field(x => x.SectionName, nullable: true).Description("Configuration item section name");
         Field(x => x.Name, nullable: true).Description("Configuration item name");
         Field(x => x.ProductId, nullable: true).Description("Configuration item product ID");
         Field(x => x.Sku, nullable: true).Description("Configuration item SKU");
@@ -30,15 +31,15 @@ public class OrderConfigurationItemType : ExtendableGraphType<ConfigurationItem>
 
         Field<NonNullGraphType<MoneyType>>(nameof(ConfigurationItem.Price))
             .Description("List price")
-            .Resolve(context => context.Source.Price.ToMoney(context.GetOrderCurrency()));
+            .Resolve(context => context.Source.Price.ToMoney(context.GetConfiguratonItemCurrency()));
 
         Field<NonNullGraphType<MoneyType>>(nameof(ConfigurationItem.SalePrice))
             .Description("Sale price")
-            .Resolve(context => context.Source.SalePrice.ToMoney(context.GetOrderCurrency()));
+            .Resolve(context => context.Source.SalePrice.ToMoney(context.GetConfiguratonItemCurrency()));
 
         Field<NonNullGraphType<MoneyType>>(nameof(ConfigurationItem.ExtendedPrice))
             .Description("Extended price")
-            .Resolve(context => context.Source.ExtendedPrice.ToMoney(context.GetOrderCurrency()));
+            .Resolve(context => context.Source.ExtendedPrice.ToMoney(context.GetConfiguratonItemCurrency()));
 
         ExtendableField<ListGraphType<OrderConfigurationItemFileType>>(nameof(ConfigurationItem.Files),
             resolve: context => context.Source.Files,
