@@ -1,3 +1,4 @@
+using System;
 using GraphQL.DataLoader;
 using GraphQL.Resolvers;
 using GraphQL.Types;
@@ -14,9 +15,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas;
 
 public class OrderConfigurationItemType : ExtendableGraphType<ConfigurationItem>
 {
-    public OrderConfigurationItemType(
-        IMediator mediator,
-        IDataLoaderContextAccessor dataLoader)
+    public OrderConfigurationItemType(IDataLoaderContextAccessor dataLoader)
     {
         Field(x => x.Id, nullable: false).Description("Configuration item ID");
         Field(x => x.SectionId, nullable: false).Description("Configuration item section ID");
@@ -54,5 +53,11 @@ public class OrderConfigurationItemType : ExtendableGraphType<ConfigurationItem>
                     context, $"order_configurationItems_products_{context.Source.CustomerOrderId}", context.Source.ProductId)),
         };
         AddField(productField);
+    }
+
+    [Obsolete("Use the constructor without IMediator. The mediator is resolved from context.RequestServices per request.", DiagnosticId = "VC0015", UrlFormat = "https://docs.virtocommerce.org/products/products-virto3-versions")]
+    public OrderConfigurationItemType(IMediator mediator, IDataLoaderContextAccessor dataLoader)
+        : this(dataLoader)
+    {
     }
 }
