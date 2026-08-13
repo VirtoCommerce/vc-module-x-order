@@ -22,6 +22,7 @@ namespace VirtoCommerce.XOrder.Data.Extensions
         {
             services.AddSingleton<ScopedSchemaFactory<DataAssemblyMarker>>();
 
+            services.AddSingleton<IXOrderMapper, XOrderMapper>();
             services.AddTransient<ICustomerOrderAggregateRepository, CustomerOrderAggregateRepository>();
             services.AddSingleton<IAuthorizationHandler, CanAccessOrderAuthorizationHandler>();
 
