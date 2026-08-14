@@ -1,6 +1,5 @@
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.SearchModule.Core.Services;
@@ -12,22 +11,19 @@ namespace VirtoCommerce.XOrder.Data.Queries
 {
     public class SearchPaymentsQueryHandler : IQueryHandler<SearchPaymentsQuery, PaymentSearchResult>
     {
-        private readonly IMapper _mapper;
         private readonly ISearchPhraseParser _searchPhraseParser;
         private readonly IPaymentSearchService _paymentsSearchService;
 
-        public SearchPaymentsQueryHandler(IMapper mapper,
-            ISearchPhraseParser searchPhraseParser,
+        public SearchPaymentsQueryHandler(ISearchPhraseParser searchPhraseParser,
             IPaymentSearchService paymentsSearchService)
         {
-            _mapper = mapper;
             _searchPhraseParser = searchPhraseParser;
             _paymentsSearchService = paymentsSearchService;
         }
 
         public virtual async Task<PaymentSearchResult> Handle(SearchPaymentsQuery request, CancellationToken cancellationToken)
         {
-            var searchCriteria = new PaymentsSearchCriteriaBuilder(_searchPhraseParser, _mapper)
+            var searchCriteria = new PaymentsSearchCriteriaBuilder(_searchPhraseParser)
                                         .ParseFilters(request.Filter)
                                         .WithCustomerId(request.CustomerId)
                                         .WithPaging(request.Skip, request.Take)
