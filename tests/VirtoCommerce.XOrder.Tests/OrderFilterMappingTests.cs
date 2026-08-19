@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using FluentAssertions;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
@@ -7,8 +8,10 @@ using Xunit;
 
 namespace VirtoCommerce.XOrder.Tests;
 
-public class OrderFilterMappingExtensionsTests
+public class OrderFilterMappingTests
 {
+    private readonly IXOrderMapper _mapper = new XOrderMapper();
+
     [Fact]
     public void MapTo_SetsMatchingFieldsOnPaymentSearchCriteria()
     {
@@ -19,7 +22,7 @@ public class OrderFilterMappingExtensionsTests
 
         var criteria = new PaymentSearchCriteria();
 
-        filters.MapTo(criteria);
+        _mapper.MapTo(filters, criteria);
 
         criteria.CustomerId.Should().Be("customer-1");
     }
@@ -34,8 +37,22 @@ public class OrderFilterMappingExtensionsTests
 
         var criteria = new PaymentSearchCriteria();
 
-        filters.MapTo(criteria);
+        _mapper.MapTo(filters, criteria);
 
         criteria.CustomerId.Should().BeNull();
+    }
+
+    [Fact]
+    public void MapTo_NullFilters_DoesNotThrow()
+    {
+        var criteria = new PaymentSearchCriteria();
+
+        FluentActions.Invoking(() => _mapper.MapTo(null, criteria)).Should().NotThrow();
+    }
+
+    [Fact]
+    public void MapTo_NullCriteria_Throws()
+    {
+        FluentActions.Invoking(() => _mapper.MapTo([], null)).Should().Throw<ArgumentNullException>();
     }
 }

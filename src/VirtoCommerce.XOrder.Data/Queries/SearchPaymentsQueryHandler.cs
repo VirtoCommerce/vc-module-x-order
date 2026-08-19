@@ -13,17 +13,20 @@ namespace VirtoCommerce.XOrder.Data.Queries
     {
         private readonly ISearchPhraseParser _searchPhraseParser;
         private readonly IPaymentSearchService _paymentsSearchService;
+        private readonly IXOrderMapper _mapper;
 
         public SearchPaymentsQueryHandler(ISearchPhraseParser searchPhraseParser,
-            IPaymentSearchService paymentsSearchService)
+            IPaymentSearchService paymentsSearchService,
+            IXOrderMapper mapper)
         {
             _searchPhraseParser = searchPhraseParser;
             _paymentsSearchService = paymentsSearchService;
+            _mapper = mapper;
         }
 
         public virtual async Task<PaymentSearchResult> Handle(SearchPaymentsQuery request, CancellationToken cancellationToken)
         {
-            var searchCriteria = new PaymentsSearchCriteriaBuilder(_searchPhraseParser)
+            var searchCriteria = new PaymentsSearchCriteriaBuilder(_searchPhraseParser, _mapper)
                                         .ParseFilters(request.Filter)
                                         .WithCustomerId(request.CustomerId)
                                         .WithPaging(request.Skip, request.Take)

@@ -21,7 +21,7 @@ public class XOrderMapperTests
     [Fact]
     public void ToFacetResult_NullSource_ReturnsNull()
     {
-        var result = _mapper.ToFacetResult(null, "en-US");
+        var result = _mapper.ToFacetResult(null, new FacetMappingContext { CultureName = "en-US" });
 
         result.Should().BeNull();
     }
@@ -45,7 +45,7 @@ public class XOrderMapperTests
             ],
         };
 
-        var result = _mapper.ToFacetResult(source, "en-US") as TermFacetResult;
+        var result = _mapper.ToFacetResult(source, new FacetMappingContext { CultureName = "en-US" }) as TermFacetResult;
 
         result.Should().NotBeNull();
         result.Name.Should().Be("status");
@@ -79,7 +79,7 @@ public class XOrderMapperTests
             ],
         };
 
-        var result = _mapper.ToFacetResult(source, "en-US") as RangeFacetResult;
+        var result = _mapper.ToFacetResult(source, new FacetMappingContext { CultureName = "en-US" }) as RangeFacetResult;
 
         result.Should().NotBeNull();
         result.Name.Should().Be("total");
@@ -102,7 +102,7 @@ public class XOrderMapperTests
             Items = [new OrderAggregationItem { RequestedLowerBound = "", RequestedUpperBound = "100" }],
         };
 
-        var act = () => _mapper.ToFacetResult(source, "en-US");
+        var act = () => _mapper.ToFacetResult(source, new FacetMappingContext { CultureName = "en-US" });
 
         act.Should().Throw<FormatException>();
     }
@@ -112,7 +112,7 @@ public class XOrderMapperTests
     {
         var source = new OrderAggregation { AggregationType = "category", Field = "categoryId" };
 
-        var result = _mapper.ToFacetResult(source, "en-US");
+        var result = _mapper.ToFacetResult(source, new FacetMappingContext { CultureName = "en-US" });
 
         result.Should().BeNull();
     }
@@ -137,7 +137,7 @@ public class XOrderMapperTests
         };
 
         var expected = _legacyMapper.Map<FacetResult>(source, options => options.Items["cultureName"] = "en-US");
-        var actual = _mapper.ToFacetResult(source, "en-US");
+        var actual = _mapper.ToFacetResult(source, new FacetMappingContext { CultureName = "en-US" });
 
         actual.Should().BeEquivalentTo(expected);
     }
@@ -165,7 +165,7 @@ public class XOrderMapperTests
         };
 
         var expected = _legacyMapper.Map<FacetResult>(source, options => options.Items["cultureName"] = "en-US");
-        var actual = _mapper.ToFacetResult(source, "en-US");
+        var actual = _mapper.ToFacetResult(source, new FacetMappingContext { CultureName = "en-US" });
 
         actual.Should().BeEquivalentTo(expected);
     }
