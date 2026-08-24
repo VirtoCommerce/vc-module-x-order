@@ -34,24 +34,32 @@ namespace VirtoCommerce.XOrder.Data.Schemas
     {
         public const string _commandName = "command";
 
-        public readonly IMediator _mediator;
         private readonly ICurrencyService _currencyService;
         private readonly IAuthorizationService _authorizationService;
         private readonly ICustomerOrderService _customerOrderService;
         private readonly IUserManagerCore _userManagerCore;
 
         public OrderSchema(
-            IMediator mediator,
             ICurrencyService currencyService,
             IAuthorizationService authorizationService,
             ICustomerOrderService customerOrderService,
             IUserManagerCore userManagerCore)
         {
-            _mediator = mediator;
             _currencyService = currencyService;
             _authorizationService = authorizationService;
             _customerOrderService = customerOrderService;
             _userManagerCore = userManagerCore;
+        }
+
+        [Obsolete("Use the constructor without IMediator. The mediator is resolved from context.RequestServices per request.", DiagnosticId = "VC0015", UrlFormat = "https://docs.virtocommerce.org/products/products-virto3-versions")]
+        public OrderSchema(
+            IMediator mediator,
+            ICurrencyService currencyService,
+            IAuthorizationService authorizationService,
+            ICustomerOrderService customerOrderService,
+            IUserManagerCore userManagerCore)
+            : this(currencyService, authorizationService, customerOrderService, userManagerCore)
+        {
         }
 
         public void Build(ISchema schema)
@@ -68,7 +76,7 @@ namespace VirtoCommerce.XOrder.Data.Schemas
                     var request = context.ExtractQuery<GetOrderQuery>();
 
                     context.CopyArgumentsToUserContext();
-                    var orderAggregate = await _mediator.Send(request);
+                    var orderAggregate = await context.GetMediator().Send(request);
 
                     if (orderAggregate == null)
                     {
@@ -93,7 +101,7 @@ namespace VirtoCommerce.XOrder.Data.Schemas
                 .PageSize(Connections.DefaultPageSize)
                 .OrderArguments();
 
-            paymentsConnectionBuilder.ResolveAsync(async context => await ResolvePaymentsConnectionAsync(_mediator, context));
+            paymentsConnectionBuilder.ResolveAsync(async context => await ResolvePaymentsConnectionAsync(context));
             schema.Query.AddField(paymentsConnectionBuilder.FieldType);
 
             _ = schema.Mutation.AddField(FieldBuilder<object, CustomerOrderAggregate>
@@ -105,11 +113,11 @@ namespace VirtoCommerce.XOrder.Data.Schemas
                                 var command = context.GetArgument(type, _commandName) as CreateOrderFromCartCommand;
 
                                 // check anonymous access to order create
-                                var cartAggregate = await GetCartAggregateAsync(command.CartId);
+                                var cartAggregate = await GetCartAggregateAsync(context, command.CartId);
                                 var createAnonymousOrderEnabled = cartAggregate.Store.Settings.GetValue<bool>(XOrderSettings.CreateAnonymousOrder);
                                 await AuthorizeAsync(context, cartAggregate.Cart, allowAnonymous: createAnonymousOrderEnabled);
 
-                                var response = (CustomerOrderAggregate)await _mediator.Send(context.GetArgument(type, _commandName));
+                                var response = (CustomerOrderAggregate)await context.GetMediator().Send(context.GetArgument(type, _commandName));
                                 context.SetExpandedObjectGraph(response);
                                 return response;
                             })
@@ -124,7 +132,7 @@ namespace VirtoCommerce.XOrder.Data.Schemas
                                 var command = (ChangeOrderStatusCommand)context.GetArgument(type, _commandName);
                                 await CheckAuthAsync(context, command.OrderId);
 
-                                return await _mediator.Send(command);
+                                return await context.GetMediator().Send(command);
                             })
                             .FieldType);
 
@@ -138,7 +146,7 @@ namespace VirtoCommerce.XOrder.Data.Schemas
                                 var command = (InitializePaymentCommand)context.GetArgument(type, _commandName);
                                 await CheckAuthAsync(context, command.OrderId);
 
-                                return await _mediator.Send(command);
+                                return await context.GetMediator().Send(command);
                             })
                             .FieldType);
 
@@ -152,7 +160,7 @@ namespace VirtoCommerce.XOrder.Data.Schemas
                                 var command = (AuthorizePaymentCommand)context.GetArgument(type, _commandName);
                                 await CheckAuthAsync(context, command.OrderId);
 
-                                return await _mediator.Send(command);
+                                return await context.GetMediator().Send(command);
                             })
                             .FieldType);
 
@@ -166,7 +174,7 @@ namespace VirtoCommerce.XOrder.Data.Schemas
                                 var command = (UpdateOrderDynamicPropertiesCommand)context.GetArgument(type, _commandName);
                                 await CheckAuthAsync(context, command.OrderId);
 
-                                return await _mediator.Send(command);
+                                return await context.GetMediator().Send(command);
                             })
                             .FieldType);
 
@@ -179,7 +187,7 @@ namespace VirtoCommerce.XOrder.Data.Schemas
                                 var command = (UpdateOrderItemDynamicPropertiesCommand)context.GetArgument(type, _commandName);
                                 await CheckAuthAsync(context, command.OrderId);
 
-                                return await _mediator.Send(command);
+                                return await context.GetMediator().Send(command);
                             })
                             .FieldType);
 
@@ -192,7 +200,7 @@ namespace VirtoCommerce.XOrder.Data.Schemas
                                 var command = (UpdateOrderPaymentDynamicPropertiesCommand)context.GetArgument(type, _commandName);
                                 await CheckAuthAsync(context, command.OrderId);
 
-                                return await _mediator.Send(command);
+                                return await context.GetMediator().Send(command);
                             })
                             .FieldType);
 
@@ -205,7 +213,7 @@ namespace VirtoCommerce.XOrder.Data.Schemas
                                 var command = (UpdateOrderShipmentDynamicPropertiesCommand)context.GetArgument(type, _commandName);
                                 await CheckAuthAsync(context, command.OrderId);
 
-                                return await _mediator.Send(command);
+                                return await context.GetMediator().Send(command);
                             })
                             .FieldType);
 
@@ -218,7 +226,7 @@ namespace VirtoCommerce.XOrder.Data.Schemas
                                 var command = (AddOrUpdateOrderPaymentCommand)context.GetArgument(type, _commandName);
                                 await CheckAuthAsync(context, command.OrderId);
 
-                                var response = await _mediator.Send(command);
+                                var response = await context.GetMediator().Send(command);
 
                                 context.SetExpandedObjectGraph(response);
 
@@ -227,14 +235,14 @@ namespace VirtoCommerce.XOrder.Data.Schemas
                             .FieldType);
         }
 
-        private async Task<object> ResolvePaymentsConnectionAsync(IMediator mediator, IResolveConnectionContext<object> context)
+        private async Task<object> ResolvePaymentsConnectionAsync(IResolveConnectionContext<object> context)
         {
             var query = context.ExtractQuery<SearchPaymentsQuery>();
             await AuthorizeAsync(context, query, allowAnonymous: true);
 
             context.UserContext.Add(nameof(Currency.CultureName).ToCamelCase(), query.CultureName);
 
-            var response = await mediator.Send(query);
+            var response = await context.GetMediator().Send(query);
 
             foreach (var payment in response.Results)
             {
@@ -256,9 +264,9 @@ namespace VirtoCommerce.XOrder.Data.Schemas
             await AuthorizeAsync(context, order, allowAnonymous: true);
         }
 
-        private async Task<CartAggregate> GetCartAggregateAsync(string cartId)
+        private async Task<CartAggregate> GetCartAggregateAsync(IResolveFieldContext context, string cartId)
         {
-            var cart = await _mediator.Send(new GetCartByIdQuery { CartId = cartId })
+            var cart = await context.GetMediator().Send(new GetCartByIdQuery { CartId = cartId })
                 ?? throw new ArgumentException($"Cart does not exist, ID: '{cartId}'", nameof(cartId));
 
             return cart;

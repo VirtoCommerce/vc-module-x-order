@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using GraphQL;
 using GraphQL.Types;
@@ -24,14 +25,23 @@ namespace VirtoCommerce.XOrder.Data.Queries.BaseQueries
         private readonly IUserManagerCore _userManagerCore;
 
         protected BaseSearchOrderQueryBuilder(
+            IAuthorizationService authorizationService,
+            ICurrencyService currencyService,
+            IUserManagerCore userManagerCore)
+            : base(authorizationService)
+        {
+            _currencyService = currencyService;
+            _userManagerCore = userManagerCore;
+        }
+
+        [Obsolete("Use the constructor without IMediator. The mediator is resolved from context.RequestServices per request.", DiagnosticId = "VC0015", UrlFormat = "https://docs.virtocommerce.org/products/products-virto3-versions")]
+        protected BaseSearchOrderQueryBuilder(
             IMediator mediator,
             IAuthorizationService authorizationService,
             ICurrencyService currencyService,
             IUserManagerCore userManagerCore)
-            : base(mediator, authorizationService)
+            : this(authorizationService, currencyService, userManagerCore)
         {
-            _currencyService = currencyService;
-            _userManagerCore = userManagerCore;
         }
 
         protected override FieldType GetFieldType()

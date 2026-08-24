@@ -1,3 +1,4 @@
+using System;
 using AutoMapper;
 using GraphQL;
 using GraphQL.DataLoader;
@@ -22,7 +23,6 @@ namespace VirtoCommerce.XOrder.Core.Schemas
     public class OrderLineItemType : ExtendableGraphType<LineItem>
     {
         public OrderLineItemType(
-            IMediator mediator,
             IDataLoaderContextAccessor dataLoader,
             IDynamicPropertyResolverService dynamicPropertyResolverService,
             IMapper mapper,
@@ -129,6 +129,18 @@ namespace VirtoCommerce.XOrder.Core.Schemas
                 "configurationItems",
                 "Configuration items for configurable product",
                 resolve: context => context.Source.ConfigurationItems ?? []);
+        }
+
+        [Obsolete("Use the constructor without IMediator. The mediator is resolved from context.RequestServices per request.", DiagnosticId = "VC0015", UrlFormat = "https://docs.virtocommerce.org/products/products-virto3-versions")]
+        public OrderLineItemType(
+            IMediator mediator,
+            IDataLoaderContextAccessor dataLoader,
+            IDynamicPropertyResolverService dynamicPropertyResolverService,
+            IMapper mapper,
+            IMemberService memberService,
+            ILocalizableSettingService localizableSettingService)
+            : this(dataLoader, dynamicPropertyResolverService, mapper, memberService, localizableSettingService)
+        {
         }
     }
 }
