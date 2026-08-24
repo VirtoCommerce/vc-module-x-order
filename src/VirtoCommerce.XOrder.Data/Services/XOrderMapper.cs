@@ -19,35 +19,33 @@ public class XOrderMapper : IXOrderMapper
             return null;
         }
 
-        var cultureName = context?.CultureName;
-
         return source.AggregationType switch
         {
-            "attr" => ToTermFacetResult(source, cultureName),
+            "attr" => ToTermFacetResult(source, context),
             "range" => ToRangeFacetResult(source),
             _ => null,
         };
     }
 
-    protected virtual TermFacetResult ToTermFacetResult(OrderAggregation source, string cultureName)
+    protected virtual TermFacetResult ToTermFacetResult(OrderAggregation source, FacetMappingContext context)
     {
         var result = AbstractTypeFactory<TermFacetResult>.TryCreateInstance();
 
         result.Name = source.Field;
         result.Label = source.Field;
-        result.Terms = source.Items?.Select(x => ToFacetTerm(x, cultureName)).ToArray() ?? [];
+        result.Terms = source.Items?.Select(x => ToFacetTerm(x, context)).ToArray() ?? [];
 
         return result;
     }
 
-    protected virtual FacetTerm ToFacetTerm(OrderAggregationItem source, string cultureName)
+    protected virtual FacetTerm ToFacetTerm(OrderAggregationItem source, FacetMappingContext context)
     {
         var result = AbstractTypeFactory<FacetTerm>.TryCreateInstance();
 
         result.Count = source.Count;
         result.IsSelected = source.IsApplied;
         result.Term = source.Value?.ToString();
-        result.Label = source.Labels?.FirstBestMatchForLanguage(x => x.Language, cultureName)?.Label ?? source.Value?.ToString();
+        result.Label = source.Labels?.FirstBestMatchForLanguage(x => x.Language, context?.CultureName)?.Label ?? source.Value?.ToString();
 
         return result;
     }
