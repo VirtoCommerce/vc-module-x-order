@@ -14,18 +14,20 @@ namespace VirtoCommerce.XOrder.Tests;
 public class XOrderMapperTests
 {
     [Fact]
-    public void ToFacetResult_NullSource_PassesNullToFacetMapper()
+    public void ToFacetResult_NullSource_PassesNullToFacetMapperAndReturnsNull()
     {
         AggregationFacetSource captured = null;
         var facetMapperMock = new Mock<IFacetMapper>();
         facetMapperMock
             .Setup(x => x.ToFacetResult(It.IsAny<AggregationFacetSource>(), It.IsAny<FacetMappingContext>()))
-            .Callback<AggregationFacetSource, FacetMappingContext>((source, _) => captured = source);
+            .Callback<AggregationFacetSource, FacetMappingContext>((source, _) => captured = source)
+            .Returns((FacetResult)null);
         var mapper = new XOrderMapper(facetMapperMock.Object);
 
-        mapper.ToFacetResult(null, new FacetMappingContext { CultureName = "en-US" });
+        var result = mapper.ToFacetResult(null, new FacetMappingContext { CultureName = "en-US" });
 
         captured.Should().BeNull();
+        result.Should().BeNull();
     }
 
     [Fact]
@@ -80,6 +82,23 @@ public class XOrderMapperTests
         // OrderAggregation has no Statistics/TermValuesSortingType concept - the DTO must reflect that.
         captured.Statistics.Should().BeNull();
         captured.TermValuesSortingType.Should().BeNull();
+    }
+
+    [Fact]
+    public void ToFacetResult_NoAggregationLevelLabels_PassesNullLabelsThrough()
+    {
+        // Orders never sets Labels above item level - passing null through lets the shared mapper's
+        // own fallback reproduce this module's old Label == Field behaviour.
+        AggregationFacetSource captured = null;
+        var facetMapperMock = new Mock<IFacetMapper>();
+        facetMapperMock
+            .Setup(x => x.ToFacetResult(It.IsAny<AggregationFacetSource>(), It.IsAny<FacetMappingContext>()))
+            .Callback<AggregationFacetSource, FacetMappingContext>((source, _) => captured = source);
+        var mapper = new XOrderMapper(facetMapperMock.Object);
+
+        mapper.ToFacetResult(new OrderAggregation { AggregationType = "attr", Field = "status" }, new FacetMappingContext());
+
+        captured!.Labels.Should().BeNull();
     }
 
     [Fact]
