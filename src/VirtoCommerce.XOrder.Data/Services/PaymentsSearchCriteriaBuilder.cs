@@ -37,6 +37,10 @@ namespace VirtoCommerce.XOrder.Data.Services
             {
                 throw new OperationCanceledException("phrase parser must be set");
             }
+            if (_mapper == null)
+            {
+                throw new OperationCanceledException("mapper must be set");
+            }
 
             var parseResult = _phraseParser.Parse(filterPhrase);
             _mapper.MapTo(parseResult.Filters, _searchCriteria);

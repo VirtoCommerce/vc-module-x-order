@@ -9,5 +9,7 @@ public interface IXOrderMapper
 {
     FacetResult ToFacetResult(OrderAggregation source, FacetMappingContext context);
 
+    FacetMappingContext CreateFacetMappingContext(string cultureName);
+
     void MapTo(IList<IFilter> filters, PaymentSearchCriteria criteria);
 }

@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using FluentAssertions;
+using Moq;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.SearchModule.Core.Model;
+using VirtoCommerce.Xapi.Core.Services;
 using VirtoCommerce.XOrder.Data.Services;
 using Xunit;
 
@@ -10,7 +12,7 @@ namespace VirtoCommerce.XOrder.Tests;
 
 public class OrderFilterMappingTests
 {
-    private readonly IXOrderMapper _mapper = new XOrderMapper();
+    private readonly IXOrderMapper _mapper = new XOrderMapper(Mock.Of<IFacetMapper>());
 
     [Fact]
     public void MapTo_SetsMatchingFieldsOnPaymentSearchCriteria()
