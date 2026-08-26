@@ -5,6 +5,7 @@ using Moq;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.Xapi.Core.Services;
+using VirtoCommerce.XOrder.Core.Services;
 using VirtoCommerce.XOrder.Data.Services;
 using Xunit;
 

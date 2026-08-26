@@ -2,6 +2,7 @@ using System;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Services;
+using VirtoCommerce.XOrder.Core.Services;
 
 namespace VirtoCommerce.XOrder.Data.Services
 {

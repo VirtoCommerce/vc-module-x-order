@@ -5,6 +5,7 @@ using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.SearchModule.Core.Services;
 using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.XOrder.Core.Queries;
+using VirtoCommerce.XOrder.Core.Services;
 using VirtoCommerce.XOrder.Data.Services;
 
 namespace VirtoCommerce.XOrder.Data.Queries

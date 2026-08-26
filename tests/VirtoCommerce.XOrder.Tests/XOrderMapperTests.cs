@@ -5,6 +5,7 @@ using Moq;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.Xapi.Core.Models.Facets;
 using VirtoCommerce.Xapi.Core.Services;
+using VirtoCommerce.XOrder.Core.Services;
 using VirtoCommerce.XOrder.Data.Extensions;
 using VirtoCommerce.XOrder.Data.Services;
 using Xunit;
@@ -112,21 +113,6 @@ public class XOrderMapperTests
         var mapper = new XOrderMapper(facetMapperMock.Object);
 
         var result = mapper.ToFacetResult(new OrderAggregation { AggregationType = "attr" }, new FacetMappingContext());
-
-        result.Should().BeSameAs(expected);
-    }
-
-    [Fact]
-    public void CreateFacetMappingContext_DelegatesToFacetMapper()
-    {
-        var expected = new FacetMappingContext();
-        var facetMapperMock = new Mock<IFacetMapper>();
-        facetMapperMock
-            .Setup(x => x.CreateFacetMappingContext("en-US"))
-            .Returns(expected);
-        var mapper = new XOrderMapper(facetMapperMock.Object);
-
-        var result = mapper.CreateFacetMappingContext("en-US");
 
         result.Should().BeSameAs(expected);
     }

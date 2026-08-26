@@ -10,7 +10,6 @@ using VirtoCommerce.Xapi.Core.Models.Facets;
 using VirtoCommerce.XOrder.Core.Queries;
 using VirtoCommerce.XOrder.Core.Services;
 using VirtoCommerce.XOrder.Data.Queries;
-using VirtoCommerce.XOrder.Data.Services;
 using Xunit;
 
 namespace VirtoCommerce.XOrder.Tests.Queries;
@@ -53,10 +52,6 @@ public class SearchOrderQueryHandlerTests
         _aggregateRepositoryMock
             .Setup(x => x.GetAggregatesFromOrdersAsync(It.IsAny<IList<CustomerOrder>>(), It.IsAny<string>()))
             .ReturnsAsync([]);
-
-        _mapperMock
-            .Setup(x => x.CreateFacetMappingContext("en-US"))
-            .Returns(new FacetMappingContext { CultureName = "en-US" });
 
         var capturedContexts = new List<FacetMappingContext>();
         _mapperMock
