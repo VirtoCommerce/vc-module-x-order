@@ -7,6 +7,7 @@ using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.OrdersModule.Core.Search.Indexed;
 using VirtoCommerce.SearchModule.Core.Services;
 using VirtoCommerce.Xapi.Core.Models.Facets;
+using VirtoCommerce.XOrder.Core.Models;
 using VirtoCommerce.XOrder.Core.Queries;
 using VirtoCommerce.XOrder.Core.Services;
 using VirtoCommerce.XOrder.Data.Queries;
@@ -69,6 +70,7 @@ public class SearchOrderQueryHandlerTests
 
         capturedContexts.Should().HaveCount(2);
         capturedContexts[0].Should().BeSameAs(capturedContexts[1]);
+        capturedContexts[0].Should().BeOfType<OrderFacetMappingContext>();
         capturedContexts[0].CultureName.Should().Be("en-US");
     }
 
