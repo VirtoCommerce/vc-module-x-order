@@ -5,8 +5,10 @@ Microbenchmark for the order-creation **XAPI command handler** — the operation
 the leaves. A tool for **local development and code analysis**: run it while changing order/cart
 code to see the allocation and throughput effect.
 
-The metric to trust is **allocations** (`[MemoryDiagnoser]`) — deterministic across machines and
-runs. Wall-clock `Mean` is a complementary signal, meaningful only within a single controlled run.
+The metric to trust is **allocations** (`[MemoryDiagnoser]`) measured at **`--job Short` or above** —
+reproducible across machines and runs there, and not at `--job Dry`; see
+[Reading allocations: use `--job Short`](#reading-allocations-use---job-short). Wall-clock `Mean` is a
+complementary signal, meaningful only within a single controlled run.
 
 ## Subject
 
@@ -60,8 +62,8 @@ Because the benchmark logic lives in the Core library, a consuming module refere
 `VirtoCommerce.XOrder.Benchmark.Core` package, implements `IOrderBenchmarkSetup` (its cart setup,
 its order overrides, its command), and defines a concrete subclass of `CreateOrderFromCartBenchmarksBase`
 baking that setup. The **same** createOrderFromCart benchmark then runs against the consumer's order
-graph — run each runner into separate `--artifacts` and diff the `Allocated` column (deterministic;
-`Mean` from a short run is noise).
+graph — run each runner at `--job Short` into separate `--artifacts` and diff the `Allocated` column
+(reproducible at Short, not at Dry; `Mean` from a short run is noise).
 
 ## Prerequisites
 
@@ -90,7 +92,8 @@ Compare rather than reading a single run's absolute numbers — the same two app
 benchmark README:
 
 1. **Two runs, git-switched.** Run into separate `--artifacts` dirs (current vs changed code) and
-   diff the `Allocated` columns — reliable since allocations are deterministic across runs.
+   diff the `Allocated` columns — run both sides at `--job Short`, where allocations reproduce across
+   separate runs; they do not at `--job Dry`.
 2. **Single-process side-by-side (`--baseline-src`).** Point the benchmark at a baseline checkout
    of the source for `Ratio` / `Alloc Ratio` columns in one run:
    ```bash
@@ -103,12 +106,40 @@ benchmark README:
    `XOrder.Core`/`XOrder.Data` from it via `/p:BaselineSrc=<path>` (a `ProjectReference` swap, so the
    full transitive package graph still restores — a bare DLL reference would not). An `Alloc Ratio`
    of `0.85` on an `after` row means the change allocates ~15% less. Valid only when the change keeps
-   the benchmarked public API stable. **Defaults to `--job Dry`** (byte-exact `Alloc Ratio` in seconds;
-   the time `Ratio` is directional only, not a verdict — the runner prints a reminder); pass `--job
-   Short` for a rough time direction or **`--job Default` for a trustworthy `Mean`**. The chosen job is
+   the benchmarked public API stable. **Defaults to `--job Dry`, which is the wrong job for the
+   allocation axis** — pass `--job Short` explicitly for any `Alloc Ratio` you intend to act on
+   ([why](#reading-allocations-use---job-short)); Dry stays useful only for confirming in seconds that
+   both sides still build and run. The time `Ratio` at Dry or Short is directional only, not a verdict
+   — the runner prints a reminder; pass **`--job Default` for a trustworthy `Mean`**. The chosen job is
    consumed by `--baseline-src` and applied to **both** before and after (not forwarded to BDN, so it
    won't append a third unpaired job); for a stricter `Mean` add `--apples --iterationCount N` on top of
    `--job Default`.
+
+### Reading allocations: use `--job Short`
+
+`--job Dry` runs one cold invocation, so the first call's JIT and static initialisation land inside
+the measured region — negligible against a large cart, dominant against a small one. Measured on the
+XCart suite (`AddCartItemsBenchmarks`, three runs of the same binary per job), the `Allocated` spread
+across runs was **36.7 %** at Dry versus **0.15 %** at Short for the one-line-item case, converging to
+under 1 % on both by 100 line items. Dry is biased as well as noisy: that case reads 92–127 KB at Dry
+against a steady 58.3 KB at Short.
+
+Read allocations at `--job Short` or above, and treat a Short-to-Short difference under ~1 % as noise.
+Reserve Dry for "does it still run" — it executes every case once in seconds, which is the cheapest
+way to catch a broken fixture or a missing DI registration.
+
+### Recognising a run that measured nothing
+
+BenchmarkDotNet exits **0** whether or not a single case produced a figure, and `executed benchmarks: N`
+counts attempts rather than results — so a suite whose subject cannot be constructed looks, by exit code
+and summary line, exactly like a healthy one. Read these instead:
+
+- `NA` in the **`Mean`** column. `Error` is always `NA` in a Dry run, so `Mean` is the column that tells
+  a result from a failure.
+- `There are not any results runs`, once per failed case, and a `Benchmarks with issues:` block listing
+  them by name.
+- Exceptions in `BenchmarkDotNet.Artifacts/BenchmarkRun-*.log` — they sit in the body of that file, not
+  in the console tail.
 
 ### Before you trust a green result, show the arm can go red
 
