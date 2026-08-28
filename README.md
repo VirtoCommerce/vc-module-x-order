@@ -53,6 +53,7 @@ See [Product Snapshot](https://github.com/VirtoCommerce/vc-module-product-snapsh
 * [How to extend](https://docs.virtocommerce.org/platform/developer-guide/GraphQL-Storefront-API-Reference-xAPI/x-api-extensions/)
 * [Virto Commerce Frontend architecture](https://docs.virtocommerce.org/storefront/developer-guide/architecture/)
 * [View on GitHub](https://github.com/VirtoCommerce/vc-module-x-order)
+* [How to measure a change with the benchmarks](benchmarks/VirtoCommerce.XOrder.Benchmark/README.md)
 
 ## References
 

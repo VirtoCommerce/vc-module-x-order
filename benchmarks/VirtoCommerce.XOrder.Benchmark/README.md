@@ -109,3 +109,15 @@ benchmark README:
    consumed by `--baseline-src` and applied to **both** before and after (not forwarded to BDN, so it
    won't append a third unpaired job); for a stricter `Mean` add `--apples --iterationCount N` on top of
    `--job Default`.
+
+### Before you trust a green result, show the arm can go red
+
+A benchmark has no assertions, so "no regression" and "this run never touched your change" print the
+same number. Two of the ways to miss are structural rather than accidental: the DB writes and the
+cart load are mocked, so a change that adds a persistence round-trip or another cart fetch shows
+nothing; and this project holds a single benchmark, `CreateOrderFromCart`, so anything outside the
+cart→order conversion path it drives is simply not on the graph.
+
+Before reading a `1.00` ratio as good news, perturb the code you changed — revert the optimisation,
+or add an obvious allocation — and confirm the number moves. If it does not, the benchmark does not
+reach your change and the result says nothing about it.
