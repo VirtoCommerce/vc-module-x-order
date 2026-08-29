@@ -5,16 +5,14 @@ using VirtoCommerce.XOrder.Core.Commands;
 namespace VirtoCommerce.XOrder.Benchmark;
 
 /// <summary>
-/// The default setup: the un-extended XOrder platform for the shared order benchmark engine. The input
-/// cart is the stock cart graph, no order overrides are contributed (the base XOrder handler + builder +
-/// aggregate the host registers ARE the measured subject), and the dispatched command is the base
-/// <see cref="CreateOrderFromCartCommand"/>. A consuming module provides its own setup to compare.
+/// The upstream setup: un-extended XOrder over an un-extended cart. A consuming module ships its own
+/// <see cref="IOrderBenchmarkSetup"/> instead, and the same benchmark then measures its graph — which is
+/// what makes the two runs comparable.
 /// </summary>
 public sealed class XOrderBenchmarkSetup : IOrderBenchmarkSetup
 {
     public ICartBenchmarkSetup CreateCartSetup() => new XCartBenchmarkSetup();
 
-    // The host's base order wiring is the subject — no consumer overrides it.
     public void ConfigureServices(IServiceCollection services)
     {
     }

@@ -20,14 +20,15 @@ The configured shape carries a configuration-item set per line item, so the conf
 conversion path (`ConvertCartToOrder` mapping `ConfigurationItems`) is covered — a regression there
 shows up as an allocation delta in the Configured rows.
 
-The measured compute = cart validation + cart→order conversion + **two** cart recalculates (the
-cleanup save), all real; only the DB writes (`ICustomerOrderService.SaveChangesAsync`,
-`IShoppingCartService.SaveChangesAsync`) are no-op mocks, and the cart load comes from a mocked
-`IMediator`. The totals calculator is the **real** `DefaultShoppingCartTotalsCalculator`.
+The measured compute = cart validation + cart→order conversion + **one** cart recalculate (the
+cleanup save — `CartAggregateRepository.SaveAsync` calls `RecalculateAsync`, which itself runs two
+`CalculateTotals` passes), all real; only the DB writes (`ICustomerOrderService.SaveChangesAsync`,
+`IShoppingCartService.SaveChangesAsync`) are no-op mocks, and the cart load is served by a **real**
+registered MediatR handler over the harness's per-iteration cart. The totals calculator is the
+**real** `DefaultShoppingCartTotalsCalculator`.
 
 `createOrderFromCart` mutates the cart (cleanup removes its items), so each iteration rebuilds a
-fresh cart aggregate in `[IterationSetup]`, outside the measured region. That forces
-`InvocationCount=1`; the `Allocated` figure stays exact, only `Mean` precision softens.
+fresh cart aggregate in `[IterationSetup]`, outside the measured region.
 
 ### What this does NOT measure
 
@@ -68,14 +69,13 @@ graph — run each runner at `--job Short` into separate `--artifacts` and diff 
 ## Prerequisites
 
 - .NET 10 SDK
-- The `VirtoCommerce.XCart.Benchmark.Core` package on a reachable feed. It is
-  restored from a **local** feed (see the project's `nuget.config`, local-only and not committed).
-  Standard publication of the Core package is a separate, later decision.
+- The `VirtoCommerce.XCart.Benchmark.Core` package, published to nuget.org (currently prerelease
+  versions only, so restore must allow prereleases).
 
 ## Running
 
 ```bash
-cd tests/VirtoCommerce.XOrder.Benchmark
+cd benchmarks/VirtoCommerce.XOrder.Benchmark
 
 # validate first — compiles + executes each case once, no measurement
 dotnet run -c Release -- --filter "*" --job Dry
@@ -128,6 +128,20 @@ Read allocations at `--job Short` or above, and treat a Short-to-Short differenc
 Reserve Dry for "does it still run" — it executes every case once in seconds, which is the cheapest
 way to catch a broken fixture or a missing DI registration.
 
+This subject does not survive repeated invocation — the handler empties the cart it converts — so a
+number is only real if each invocation got its own cart. `[IterationSetup]` supplies one per iteration;
+one invocation per iteration is what makes that enough, and the two stock jobs reach it by different
+routes. At `Short` and above BenchmarkDotNet pins `InvocationCount=1`, because the benchmark has an
+iteration setup and the job pins neither `InvocationCount` nor `UnrollFactor`. At `Dry` the pin does not
+apply — `Dry` sets `UnrollFactor` — and the count stays 1 only because `ColdStart` skips the pilot.
+
+So the resolved job line is not the check: `ShortRun(InvocationCount=1, …)` says it, but
+`Dry(IterationCount=1, LaunchCount=1, RunStrategy=ColdStart, UnrollFactor=1, WarmupCount=1)` does not
+mention `InvocationCount` at all. **The tell that holds at every job is `1 op` in each `WorkloadActual`
+row.** Three edits break the invariant while still printing a plausible number: `InvocationCount` above
+1, `UnrollFactor` set on its own (which suppresses the pin, after which Throughput's pilot picks a count
+above 1), and removing the iteration setup.
+
 ### Recognising a run that measured nothing
 
 BenchmarkDotNet exits **0** whether or not a single case produced a figure, and `executed benchmarks: N`
@@ -140,14 +154,18 @@ and summary line, exactly like a healthy one. Read these instead:
   them by name.
 - Exceptions in `BenchmarkDotNet.Artifacts/BenchmarkRun-*.log` — they sit in the body of that file, not
   in the console tail.
+- `You should select the target benchmark(s)` — with no `--filter`, BenchmarkDotNet asks interactively,
+  and a non-interactive caller (CI, a script, an agent) hands it EOF. It then exits **0** having printed
+  the menu and nothing else: none of the three tells above fire, because no case was ever attempted.
+  Always pass `--filter` when nothing is there to answer the prompt.
 
 ### Before you trust a green result, show the arm can go red
 
 A benchmark has no assertions, so "no regression" and "this run never touched your change" print the
-same number. Two of the ways to miss are structural rather than accidental: the DB writes and the
-cart load are mocked, so a change that adds a persistence round-trip or another cart fetch shows
-nothing; and this project holds a single benchmark, `CreateOrderFromCart`, so anything outside the
-cart→order conversion path it drives is simply not on the graph.
+same number. Two of the ways to miss are structural rather than accidental: the DB writes are mocked
+and the cart load is served from the harness, so a change that adds a persistence round-trip or
+another cart fetch shows nothing; and this project holds a single benchmark, `CreateOrderFromCart`,
+so anything outside the cart→order conversion path it drives is simply not on the graph.
 
 Before reading a `1.00` ratio as good news, perturb the code you changed — revert the optimisation,
 or add an obvious allocation — and confirm the number moves. If it does not, the benchmark does not

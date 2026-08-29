@@ -3,22 +3,14 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
-    <!-- BenchmarkDotNet refuses to measure in Debug; only Release is meaningful. -->
-    <!-- TreatWarningsAsErrors is inherited from Directory.Build.props (true); this project builds clean. -->
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Version resolved by `dotnet add package BenchmarkDotNet` (latest compatible). -->
     <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
   </ItemGroup>
 
   <ItemGroup>
-    <!-- The benchmark logic, the module-agnostic order seam, and the DI host live in the Core library;
-         this exe is a thin stock runner (XOrderBenchmarkSetup) over it. Core brings
-         XCart.Benchmark.Core + XOrder.Core/Data transitively. The before/after baseline-src flag
-         (Program.cs) overrides $(BaselineSrc) on the Core ProjectReference per BDN job via global-property
-         propagation. -->
     <ProjectReference Include="..\VirtoCommerce.XOrder.Benchmark.Core\VirtoCommerce.XOrder.Benchmark.Core.csproj" />
   </ItemGroup>
 

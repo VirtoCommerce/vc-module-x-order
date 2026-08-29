@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -20,10 +19,8 @@ using VirtoCommerce.StoreModule.Core.Services;
 using VirtoCommerce.Xapi.Core.Services;
 using VirtoCommerce.XCart.Benchmark;
 using VirtoCommerce.XCart.Core;
-using VirtoCommerce.XCart.Core.Models;
 using VirtoCommerce.XCart.Core.Queries;
 using VirtoCommerce.XCart.Core.Services;
-using VirtoCommerce.XCart.Core.Validators;
 using VirtoCommerce.XOrder.Core;
 using VirtoCommerce.XOrder.Core.Commands;
 using VirtoCommerce.XOrder.Core.Services;
@@ -35,8 +32,7 @@ namespace VirtoCommerce.XOrder.Benchmark;
 /// Builds the benchmark harness for the createOrderFromCart command the same way the order module is
 /// wired in production: the command/query <b>handler</b> (and a consumer's override of it) is resolved
 /// through MediatR exactly as it ships. The single design rule matches the cart benchmarks: everything
-/// that does I/O is a mock, everything that is pure compute runs for real (the cart→order conversion,
-/// the totals math behind the two cart recalculates).
+/// that does I/O is a mock, everything that is pure compute runs for real.
 ///
 /// <para>The input cart comes from <see cref="CartBenchmarkHost"/> via the setup's
 /// <see cref="IOrderBenchmarkSetup.CreateCartSetup"/>, so it is loaded + recalculated exactly as
@@ -53,13 +49,12 @@ public static class OrderBenchmarkHost
     /// <summary>
     /// Composes the order benchmark harness for a cart of <paramref name="lineItemCount"/> items of the
     /// given <paramref name="shape"/>. The input cart is loaded fresh from the cart repository on every
-    /// <see cref="OrderHarness.RefreshCart"/> (createOrderFromCart consumes the cart, so it must be
-    /// rebuilt before each measured invocation — the caller does this in <c>[IterationSetup]</c>).
+    /// <see cref="OrderHarness.RefreshCart"/>.
     /// </summary>
     public static OrderHarness BuildHarness(IOrderBenchmarkSetup setup, int lineItemCount, CartShape shape)
     {
         // Input cart provider — reuses the whole cart benchmark wiring (incl. a consumer's cart graph via
-        // Theme 1's CreateCart hook). GetCartByIdAsync returns a freshly loaded + recalculated aggregate.
+        // the CreateCart hook). GetCartByIdAsync returns a freshly loaded + recalculated aggregate.
         var cartProvider = CartBenchmarkHost.BuildProvider(setup.CreateCartSetup(), lineItemCount, shape);
         var cartRepository = cartProvider.GetRequiredService<ICartAggregateRepository>();
 
@@ -78,8 +73,6 @@ public static class OrderBenchmarkHost
             typeof(Core.CoreAssemblyMarker).Assembly,
             typeof(Data.DataAssemblyMarker).Assembly));
 
-        // The handler loads the cart through IMediator.Send(GetCartByIdQuery); return the per-iteration
-        // cart aggregate (this single registered handler is what MediatR resolves for that query).
         services.AddSingleton<IRequestHandler<GetCartByIdQuery, CartAggregate>>(new CurrentCartQueryHandler(harness));
 
         // Cleanup save (recalculate + no-op DB write) reuses the cart provider's repository, so the
@@ -87,17 +80,19 @@ public static class OrderBenchmarkHost
         services.AddSingleton(cartRepository);
 
         // ── Mocked I/O leaves ─────────────────────────────────────────────────────────────────────
-        services.AddSingleton(Mock.Of<IShoppingCartService>());           // a handler ctor dep (unused in the body)
+        services.AddSingleton(Mock.Of<IShoppingCartService>());
         services.AddSingleton(Mock.Of<IMemberService>());
-        services.AddSingleton(Mock.Of<ICustomerOrderService>());          // SaveChangesAsync no-op (DB write dropped)
-        services.AddSingleton(Mock.Of<ISettingsManager>());               // ConvertCartToOrder doesn't read settings
+        services.AddSingleton(Mock.Of<ICustomerOrderService>());
+        services.AddSingleton(Mock.Of<ISettingsManager>()); // ConvertCartToOrder reads the initial order + line-item status
         services.AddSingleton(Mock.Of<IPaymentMethodsSearchService>());
         services.AddSingleton(Mock.Of<IDynamicPropertyUpdaterService>());
         services.AddSingleton(Mock.Of<IPromotionUsageSearchService>());
         services.AddSingleton(CurrencyServiceMock());
         services.AddSingleton(StoreServiceMock());
         services.AddSingleton(FileUploadServiceMock());
-        services.AddSingleton(ValidationContextFactoryMock());
+        // No ICartValidationContextFactory here: the cart aggregate this handler validates is built by
+        // CartBenchmarkHost's container, so that host's registration is the one it resolves — a copy in
+        // this collection would look like it configured validation while changing nothing.
 
         // ── Order machinery (base; a consumer setup overrides builder / aggregate / repository) ──────
         services.AddTransient<ICustomerOrderBuilder, CustomerOrderBuilder>();
@@ -105,7 +100,6 @@ public static class OrderBenchmarkHost
         services.AddTransient<Func<CustomerOrderAggregate>>(sp => sp.GetRequiredService<CustomerOrderAggregate>);
         services.AddTransient<ICustomerOrderAggregateRepository, CustomerOrderAggregateRepository>();
 
-        // ── Consumer overrides — last wins by DI last-registration ───────────────────────────────────
         setup.ConfigureServices(services);
 
         harness.Mediator = services.BuildServiceProvider().GetRequiredService<IMediator>();
@@ -142,25 +136,8 @@ public static class OrderBenchmarkHost
         return mock.Object;
     }
 
-    private static ICartValidationContextFactory ValidationContextFactoryMock()
-    {
-        // The handler passes the aggregate's CartProducts (empty here), so derive AllCartProducts from
-        // the loaded line items (active/buyable priced products) instead, so per-item ValidateCart rules pass.
-        var mock = new Mock<ICartValidationContextFactory>();
-        mock.Setup(x => x.CreateValidationContextAsync(It.IsAny<CartAggregate>(), It.IsAny<IList<CartProduct>>()))
-            .ReturnsAsync((CartAggregate aggregate, IList<CartProduct> _) =>
-                new CartValidationContext
-                {
-                    CartAggregate = aggregate,
-                    AllCartProducts = aggregate.LineItems.Select(x => CartBenchmarkFixtures.CreateCartProduct(x.ProductId)).ToList(),
-                });
-
-        return mock.Object;
-    }
-
     /// <summary>Mutable harness: the registered <see cref="GetCartByIdQuery"/> handler returns
-    /// <see cref="CurrentCart"/>, which <see cref="RefreshCart"/> rebuilds each iteration (createOrderFromCart
-    /// consumes the cart, so it can't be shared across invocations).</summary>
+    /// <see cref="CurrentCart"/>, which <see cref="RefreshCart"/> rebuilds each iteration.</summary>
     public sealed class OrderHarness
     {
         public IMediator Mediator { get; set; }
@@ -174,8 +151,6 @@ public static class OrderBenchmarkHost
         public Task<CustomerOrderAggregate> SendAsync() => Mediator.Send(Command);
     }
 
-    // Returns the harness's per-iteration cart for the handler's GetCartByIdQuery (mirrors the prior
-    // mocked-mediator behavior, but as a real registered MediatR handler so Send routes through it).
     private sealed class CurrentCartQueryHandler(OrderHarness harness) : IRequestHandler<GetCartByIdQuery, CartAggregate>
     {
         public Task<CartAggregate> Handle(GetCartByIdQuery request, CancellationToken cancellationToken) =>

@@ -4,14 +4,6 @@ using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 
-// BenchmarkSwitcher forwards CLI args (--filter, --job, --anyCategories, ...) to BenchmarkDotNet.
-// Always pass --filter when running non-interactively to avoid the interactive selection prompt.
-//
-// Opt-in before/after comparison: `--baseline-src <path-to-src>` adds a second BenchmarkDotNet job
-// ("before") that rebuilds XOrder.Core/Data from <path> (a git worktree on the baseline revision)
-// and runs it against the current source ("after"), yielding a Ratio column in a single process.
-// The flag is parsed out here and never reaches BDN. When absent the run is unchanged.
-// See README "Comparing before/after a change".
 var (baselineSrc, rest) = ExtractOption(args, "--baseline-src");
 
 if (baselineSrc is null)
@@ -21,10 +13,9 @@ if (baselineSrc is null)
 else
 {
     // before+after differ ONLY by source, so the job is chosen here — extracted from args, NOT left for
-    // the switcher's --job (that would append a third, unpaired job). Default to Dry: allocations are
-    // deterministic at any job, so a Dry before/after yields a byte-exact Alloc Ratio in seconds (the
-    // cheap routine check; the alloc axis is the trustworthy one). The time Ratio at Dry/Short is NOT a
-    // verdict (cold JIT / too few iterations) — pass `--job Default` only when a trustworthy Mean is the point.
+    // the switcher's --job (that would append a third, unpaired job). The Dry default confirms in seconds
+    // that both sides still build and run; it is the wrong job for the allocation axis — see the README
+    // section "Reading allocations: use --job Short".
     var (jobName, restAfterJob) = ExtractOption(rest, "--job");
     rest = restAfterJob;
     var normalized = (jobName ?? "dry").ToLowerInvariant();
@@ -48,8 +39,6 @@ else
     BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(rest, config);
 }
 
-// Removes "<name> <value>" from args and returns the value (null if the flag is absent), so the
-// remaining args pass through to BenchmarkSwitcher untouched.
 static (string, string[]) ExtractOption(string[] args, string name)
 {
     var index = Array.IndexOf(args, name);
