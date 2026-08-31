@@ -112,8 +112,12 @@ benchmark README:
    both sides still build and run. The time `Ratio` at Dry or Short is directional only, not a verdict
    — the runner prints a reminder; pass **`--job Default` for a trustworthy `Mean`**. The chosen job is
    consumed by `--baseline-src` and applied to **both** before and after (not forwarded to BDN, so it
-   won't append a third unpaired job); for a stricter `Mean` add `--apples --iterationCount N` on top of
-   `--job Default`.
+   won't append a third unpaired job). Under `--baseline-src`, spell the job as `--job <name>` or
+   `--job=<name>`: the short forms BDN also answers to (`-j Short`, `-jShort`, `-j=Short`) and a
+   repeated `--job` are **rejected with an error**. One form still slips through — a short bundle ending
+   in `j`, e.g. `-mj Short` — and measured, it runs at **Dry** without saying so, which is the wrong job
+   for the allocation axis. Use the long spelling. For a stricter `Mean` add
+   `--apples --iterationCount N` on top of `--job Default`.
 
 ### Reading allocations: use `--job Short`
 
