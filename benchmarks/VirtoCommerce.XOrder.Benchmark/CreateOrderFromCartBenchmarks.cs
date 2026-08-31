@@ -1,9 +1,9 @@
 namespace VirtoCommerce.XOrder.Benchmark;
 
 /// <summary>
-/// Stock runner's concrete createOrderFromCart benchmark: the logic is inherited from
-/// <see cref="CreateOrderFromCartBenchmarksBase"/> (Core library); this subclass only bakes the
-/// stock module setup so BenchmarkDotNet discovers and runs it in this exe.
+/// BenchmarkDotNet discovers benchmarks only in the runner's own assembly, so the abstract
+/// <see cref="CreateOrderFromCartBenchmarksBase"/> needs a concrete subclass here to run at all —
+/// deleting this apparently-empty class yields a run with no cases.
 /// </summary>
 public class CreateOrderFromCartBenchmarks : CreateOrderFromCartBenchmarksBase
 {

@@ -16,27 +16,23 @@ public interface IOrderBenchmarkSetup
     /// <summary>
     /// The cart setup that builds the <b>input</b> cart the order is created from. The order host loads
     /// it through <see cref="CartBenchmarkHost"/>, so the cart is recalculated exactly as the cart
-    /// benchmarks build it — the stock setup returns <see cref="XCartBenchmarkSetup"/>; a consumer can
-    /// return its own cart setup so the conversion runs over its real cart graph.
+    /// benchmarks build it; return your own cart setup and the conversion runs over your real cart graph.
     /// </summary>
     ICartBenchmarkSetup CreateCartSetup();
 
     /// <summary>
     /// Contributes the module's order registrations to the benchmark DI container built by
-    /// <see cref="OrderBenchmarkHost"/>: the order builder (<c>ICustomerOrderBuilder</c>), the order
-    /// aggregate + repository (<c>ICustomerOrderAggregateRepository</c>), and any command/handler
-    /// overrides (<c>OverrideCommandType().WithCommandHandler()</c>). Called AFTER the host registers
-    /// the base XOrder handler and the shared mocked I/O leaves, so registrations here win by DI
-    /// last-registration semantics. The stock setup contributes nothing (the host's base wiring is the
-    /// measured subject).
+    /// <see cref="OrderBenchmarkHost"/>. Called AFTER the host's base registrations, so an <c>Add*</c>
+    /// here wins by last-registration semantics. Use <c>Add*</c>, never <c>TryAdd*</c>: the host has
+    /// already registered these service types, so a <c>TryAdd*</c> no-ops and the run silently measures
+    /// the stock graph.
     /// </summary>
     void ConfigureServices(IServiceCollection services);
 
     /// <summary>
     /// Builds the command the benchmark dispatches. Its <b>runtime type</b> drives MediatR to the right
-    /// handler — the stock setup returns a <see cref="CreateOrderFromCartCommand"/> (base handler); a consumer
-    /// that registered <c>OverrideCommandType&lt;CreateOrderFromCartCommand, TOverride&gt;()</c> returns
-    /// its <c>TOverride</c> so its handler runs. <paramref name="cartId"/> is the benchmark cart id.
+    /// handler: after <c>OverrideCommandType&lt;CreateOrderFromCartCommand, TOverride&gt;()</c>, return the
+    /// <c>TOverride</c> or the base handler runs instead.
     /// </summary>
     CreateOrderFromCartCommand CreateCommand(string cartId);
 }

@@ -33,28 +33,13 @@ namespace VirtoCommerce.XOrder.Benchmark;
 /// wired in production: the command/query <b>handler</b> (and a consumer's override of it) is resolved
 /// through MediatR exactly as it ships. The single design rule matches the cart benchmarks: everything
 /// that does I/O is a mock, everything that is pure compute runs for real.
-///
-/// <para>The input cart comes from <see cref="CartBenchmarkHost"/> via the setup's
-/// <see cref="IOrderBenchmarkSetup.CreateCartSetup"/>, so it is loaded + recalculated exactly as
-/// the cart benchmarks build it (including a consumer's real cart graph). The order machinery (builder,
-/// aggregate, repository) is registered base-first, then the setup's
-/// <see cref="IOrderBenchmarkSetup.ConfigureServices"/> applies its overrides last (DI
-/// last-registration wins). The benchmark dispatches <see cref="IOrderBenchmarkSetup.CreateCommand"/>
-/// through MediatR, so the consumer's overridden command type routes to its handler.</para>
 /// </summary>
 public static class OrderBenchmarkHost
 {
     public const string CartId = "benchmark-cart";
 
-    /// <summary>
-    /// Composes the order benchmark harness for a cart of <paramref name="lineItemCount"/> items of the
-    /// given <paramref name="shape"/>. The input cart is loaded fresh from the cart repository on every
-    /// <see cref="OrderHarness.RefreshCart"/>.
-    /// </summary>
     public static OrderHarness BuildHarness(IOrderBenchmarkSetup setup, int lineItemCount, CartShape shape)
     {
-        // Input cart provider — reuses the whole cart benchmark wiring (incl. a consumer's cart graph via
-        // the CreateCart hook). GetCartByIdAsync returns a freshly loaded + recalculated aggregate.
         var cartProvider = CartBenchmarkHost.BuildProvider(setup.CreateCartSetup(), lineItemCount, shape);
         var cartRepository = cartProvider.GetRequiredService<ICartAggregateRepository>();
 
@@ -136,8 +121,6 @@ public static class OrderBenchmarkHost
         return mock.Object;
     }
 
-    /// <summary>Mutable harness: the registered <see cref="GetCartByIdQuery"/> handler returns
-    /// <see cref="CurrentCart"/>, which <see cref="RefreshCart"/> rebuilds each iteration.</summary>
     public sealed class OrderHarness
     {
         public IMediator Mediator { get; set; }
