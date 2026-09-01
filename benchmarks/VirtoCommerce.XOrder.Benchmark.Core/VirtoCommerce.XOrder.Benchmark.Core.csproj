@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <!-- Files keep namespace VirtoCommerce.XOrder.Benchmark so benchmark full names (and BDN filter
+         globs) are unchanged. -->
+    <RootNamespace>VirtoCommerce.XOrder.Benchmark</RootNamespace>
+    <!-- Packable so a consuming module can reference the shared order benchmark + seam from NuGet and
+         run the same createOrderFromCart benchmark under its own setup. -->
+    <IsPackable>true</IsPackable>
+    <!-- The seam's xmldoc is written for a consumer, so the package has to carry it — without this the
+         .xml never ships and none of it reaches their IntelliSense. It also buys cref validation: with
+         Directory.Build.props setting TreatWarningsAsErrors, an unresolvable cref becomes a build error
+         instead of a link that silently goes nowhere. CS1591 stays suppressed — the point is checking the
+         docs that exist, not demanding one on every public member. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <!-- Conditional on NoBuild on purpose. The module CI packs the whole solution with NoBuild=true,
+         where building the XOrder.Core/Data ProjectReferences fails with NETSDK1085; setting this
+         unconditionally would also stop the BaselineSrc swap rebuilding them from the baseline source. -->
+    <BuildProjectReferences Condition="'$(NoBuild)' == 'true'">false</BuildProjectReferences>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <!-- The cart-input graph + the cart DI host (CartBenchmarkHost) + the module-agnostic cart seam come
+         from the XCart benchmark Core library. Brings XCart.Core/Data and CartModule.Data transitively.
+         Published to nuget.org. -->
+    <PackageReference Include="VirtoCommerce.XCart.Benchmark.Core" Version="3.1031.0" />
+    <PackageReference Include="VirtoCommerce.OrdersModule.Data" Version="3.1011.0" />
+  </ItemGroup>
+
+  <!-- $(BaselineSrc) defaults to the in-repo source; the before/after comparison mode overrides it per
+       BenchmarkDotNet job via /p:BaselineSrc=(baseline-worktree)/src. The name is the contract between
+       this file and the `/p:BaselineSrc=` the runner builds, and it is deliberately the same in every
+       module's benchmark Core — rename it here and both jobs quietly fall back to the default, giving a
+       comparison of the branch against itself and a 1.00 ratio that looks like "no change". -->
+  <PropertyGroup>
+    <BaselineSrc Condition="'$(BaselineSrc)' == ''">..\..\src</BaselineSrc>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(BaselineSrc)\VirtoCommerce.XOrder.Core\VirtoCommerce.XOrder.Core.csproj" />
+    <ProjectReference Include="$(BaselineSrc)\VirtoCommerce.XOrder.Data\VirtoCommerce.XOrder.Data.csproj" />
+  </ItemGroup>
+
+</Project>
