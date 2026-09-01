@@ -69,8 +69,8 @@ graph — run each runner at `--job Short` into separate `--artifacts` and diff 
 ## Prerequisites
 
 - .NET 10 SDK
-- The `VirtoCommerce.XCart.Benchmark.Core` package, published to nuget.org (currently prerelease
-  versions only, so restore must allow prereleases).
+- The `VirtoCommerce.XCart.Benchmark.Core` package, published to nuget.org as a release — restore
+  needs no prerelease opt-in.
 
 ## Running
 

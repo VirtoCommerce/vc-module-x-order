@@ -27,7 +27,7 @@
     <!-- The cart-input graph + the cart DI host (CartBenchmarkHost) + the module-agnostic cart seam come
          from the XCart benchmark Core library. Brings XCart.Core/Data and CartModule.Data transitively.
          Published to nuget.org. -->
-    <PackageReference Include="VirtoCommerce.XCart.Benchmark.Core" Version="3.1031.0-alpha.328-benchmarks" />
+    <PackageReference Include="VirtoCommerce.XCart.Benchmark.Core" Version="3.1031.0" />
     <PackageReference Include="VirtoCommerce.OrdersModule.Data" Version="3.1011.0" />
   </ItemGroup>
 
