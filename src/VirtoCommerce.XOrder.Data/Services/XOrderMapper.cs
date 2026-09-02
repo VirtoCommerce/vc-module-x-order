@@ -1,77 +1,81 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
-using VirtoCommerce.Platform.Core.Common;
-using VirtoCommerce.Xapi.Core.Extensions;
+using VirtoCommerce.SearchModule.Core.Model;
+using VirtoCommerce.Xapi.Core.Index;
 using VirtoCommerce.Xapi.Core.Models.Facets;
+using VirtoCommerce.Xapi.Core.Services;
+using VirtoCommerce.XOrder.Core.Services;
 
 namespace VirtoCommerce.XOrder.Data.Services;
 
 public class XOrderMapper : IXOrderMapper
 {
-    public virtual FacetResult ToFacetResult(OrderAggregation source, string cultureName)
+    private readonly IFacetMapper _facetMapper;
+
+    public XOrderMapper(IFacetMapper facetMapper)
+    {
+        _facetMapper = facetMapper;
+    }
+
+    public virtual FacetResult ToFacetResult(OrderAggregation source, FacetMappingContext context)
+    {
+        return _facetMapper.ToFacetResult(ToAggregationFacetSource(source), context);
+    }
+
+    protected virtual AggregationFacetSource ToAggregationFacetSource(OrderAggregation source)
     {
         if (source == null)
         {
             return null;
         }
 
-        return source.AggregationType switch
+        return new AggregationFacetSource
         {
-            "attr" => ToTermFacetResult(source, cultureName),
-            "range" => ToRangeFacetResult(source),
-            _ => null,
+            AggregationType = source.AggregationType,
+            Field = source.Field,
+            Labels = source.Labels?.Select(ToAggregationFacetLabel).ToList(),
+            Items = source.Items?.Select(ToAggregationFacetItem).ToList(),
         };
     }
 
-    protected virtual TermFacetResult ToTermFacetResult(OrderAggregation source, string cultureName)
+    protected virtual AggregationFacetItem ToAggregationFacetItem(OrderAggregationItem source)
     {
-        var result = AbstractTypeFactory<TermFacetResult>.TryCreateInstance();
-
-        result.Name = source.Field;
-        result.Label = source.Field;
-        result.Terms = source.Items?.Select(x => ToFacetTerm(x, cultureName)).ToArray() ?? [];
-
-        return result;
+        return new AggregationFacetItem
+        {
+            Value = source.Value,
+            Count = source.Count,
+            IsApplied = source.IsApplied,
+            Labels = source.Labels?.Select(ToAggregationFacetLabel).ToList(),
+            RequestedLowerBound = source.RequestedLowerBound,
+            RequestedUpperBound = source.RequestedUpperBound,
+            IncludeLower = source.IncludeLower,
+            IncludeUpper = source.IncludeUpper,
+        };
     }
 
-    protected virtual FacetTerm ToFacetTerm(OrderAggregationItem source, string cultureName)
+    protected virtual AggregationFacetLabel ToAggregationFacetLabel(OrderAggregationLabel source)
     {
-        var result = AbstractTypeFactory<FacetTerm>.TryCreateInstance();
-
-        result.Count = source.Count;
-        result.IsSelected = source.IsApplied;
-        result.Term = source.Value?.ToString();
-        result.Label = source.Labels?.FirstBestMatchForLanguage(x => x.Language, cultureName)?.Label ?? source.Value?.ToString();
-
-        return result;
+        return new AggregationFacetLabel
+        {
+            Language = source.Language,
+            Label = source.Label,
+        };
     }
 
-    protected virtual RangeFacetResult ToRangeFacetResult(OrderAggregation source)
+    public virtual void MapTo(IList<IFilter> filters, PaymentSearchCriteria criteria)
     {
-        var result = AbstractTypeFactory<RangeFacetResult>.TryCreateInstance();
+        ArgumentNullException.ThrowIfNull(criteria);
 
-        result.Name = source.Field;
-        result.Label = source.Field;
-        result.Ranges = source.Items?.Select(ToFacetRange).ToArray() ?? [];
+        if (filters == null)
+        {
+            return;
+        }
 
-        return result;
-    }
-
-    protected virtual FacetRange ToFacetRange(OrderAggregationItem source)
-    {
-        var result = AbstractTypeFactory<FacetRange>.TryCreateInstance();
-
-        result.Count = source.Count;
-        result.IsSelected = source.IsApplied;
-        result.From = Convert.ToInt64(source.RequestedLowerBound);
-        result.IncludeFrom = source.IncludeLower;
-        result.FromStr = source.RequestedLowerBound;
-        result.To = Convert.ToInt64(source.RequestedUpperBound);
-        result.IncludeTo = source.IncludeUpper;
-        result.ToStr = source.RequestedUpperBound;
-        result.Label = source.Value?.ToString();
-
-        return result;
+        foreach (var term in filters.OfType<TermFilter>())
+        {
+            term.MapTo(criteria);
+        }
     }
 }

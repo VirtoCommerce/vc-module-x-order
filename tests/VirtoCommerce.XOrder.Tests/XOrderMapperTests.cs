@@ -1,10 +1,11 @@
-using System;
 using System.Linq;
-using AutoMapper;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.Xapi.Core.Models.Facets;
+using VirtoCommerce.Xapi.Core.Services;
+using VirtoCommerce.XOrder.Core.Services;
 using VirtoCommerce.XOrder.Data.Extensions;
 using VirtoCommerce.XOrder.Data.Services;
 using Xunit;
@@ -13,26 +14,38 @@ namespace VirtoCommerce.XOrder.Tests;
 
 public class XOrderMapperTests
 {
-    private static readonly IMapper _legacyMapper = new MapperConfiguration(cfg =>
-        cfg.AddProfile<LegacyOrderAggregationFacetMappingProfile>()).CreateMapper();
-
-    private readonly XOrderMapper _mapper = new();
-
     [Fact]
-    public void ToFacetResult_NullSource_ReturnsNull()
+    public void ToFacetResult_NullSource_PassesNullToFacetMapperAndReturnsNull()
     {
-        var result = _mapper.ToFacetResult(null, "en-US");
+        AggregationFacetSource captured = null;
+        var facetMapperMock = new Mock<IFacetMapper>();
+        facetMapperMock
+            .Setup(x => x.ToFacetResult(It.IsAny<AggregationFacetSource>(), It.IsAny<FacetMappingContext>()))
+            .Callback<AggregationFacetSource, FacetMappingContext>((source, _) => captured = source)
+            .Returns((FacetResult)null);
+        var mapper = new XOrderMapper(facetMapperMock.Object);
 
+        var result = mapper.ToFacetResult(null, new FacetMappingContext { CultureName = "en-US" });
+
+        captured.Should().BeNull();
         result.Should().BeNull();
     }
 
     [Fact]
-    public void ToFacetResult_AttrAggregation_MapsToTermFacetResult()
+    public void ToFacetResult_ConvertsOrderAggregationToAggregationFacetSource()
     {
+        AggregationFacetSource captured = null;
+        var facetMapperMock = new Mock<IFacetMapper>();
+        facetMapperMock
+            .Setup(x => x.ToFacetResult(It.IsAny<AggregationFacetSource>(), It.IsAny<FacetMappingContext>()))
+            .Callback<AggregationFacetSource, FacetMappingContext>((source, _) => captured = source);
+        var mapper = new XOrderMapper(facetMapperMock.Object);
+
         var source = new OrderAggregation
         {
             AggregationType = "attr",
             Field = "status",
+            Labels = [new OrderAggregationLabel { Language = "en-US", Label = "Status" }],
             Items =
             [
                 new OrderAggregationItem
@@ -41,36 +54,6 @@ public class XOrderMapperTests
                     Count = 4,
                     IsApplied = true,
                     Labels = [new OrderAggregationLabel { Language = "en-US", Label = "New" }],
-                },
-            ],
-        };
-
-        var result = _mapper.ToFacetResult(source, "en-US") as TermFacetResult;
-
-        result.Should().NotBeNull();
-        result.Name.Should().Be("status");
-        result.Label.Should().Be("status");
-        result.Terms.Should().HaveCount(1);
-        result.Terms[0].Term.Should().Be("new");
-        result.Terms[0].Label.Should().Be("New");
-        result.Terms[0].Count.Should().Be(4);
-        result.Terms[0].IsSelected.Should().BeTrue();
-    }
-
-    [Fact]
-    public void ToFacetResult_RangeAggregation_MapsToRangeFacetResult()
-    {
-        var source = new OrderAggregation
-        {
-            AggregationType = "range",
-            Field = "total",
-            Items =
-            [
-                new OrderAggregationItem
-                {
-                    Value = "0-100",
-                    Count = 2,
-                    IsApplied = false,
                     RequestedLowerBound = "0",
                     RequestedUpperBound = "100",
                     IncludeLower = true,
@@ -79,95 +62,59 @@ public class XOrderMapperTests
             ],
         };
 
-        var result = _mapper.ToFacetResult(source, "en-US") as RangeFacetResult;
+        mapper.ToFacetResult(source, new FacetMappingContext { CultureName = "en-US" });
 
-        result.Should().NotBeNull();
-        result.Name.Should().Be("total");
-        result.Label.Should().Be("total");
-        result.Ranges.Should().HaveCount(1);
-        result.Ranges[0].From.Should().Be(0);
-        result.Ranges[0].To.Should().Be(100);
-        result.Ranges[0].IncludeFrom.Should().BeTrue();
-        result.Ranges[0].IncludeTo.Should().BeFalse();
-        result.Ranges[0].Count.Should().Be(2);
+        captured.Should().NotBeNull();
+        captured!.AggregationType.Should().Be("attr");
+        captured.Field.Should().Be("status");
+        captured.Labels.Should().ContainSingle().Which.Label.Should().Be("Status");
+
+        captured.Items.Should().ContainSingle();
+        var item = captured.Items![0];
+        item.Value.Should().Be("new");
+        item.Count.Should().Be(4);
+        item.IsApplied.Should().BeTrue();
+        item.Labels.Should().ContainSingle().Which.Label.Should().Be("New");
+        item.RequestedLowerBound.Should().Be("0");
+        item.RequestedUpperBound.Should().Be("100");
+        item.IncludeLower.Should().BeTrue();
+        item.IncludeUpper.Should().BeFalse();
+
+        // OrderAggregation has no Statistics/TermValuesSortingType concept - the DTO must reflect that.
+        captured.Statistics.Should().BeNull();
+        captured.TermValuesSortingType.Should().BeNull();
     }
 
     [Fact]
-    public void ToFacetResult_RangeAggregation_EmptyBounds_ThrowsFormatException()
+    public void ToFacetResult_NoAggregationLevelLabels_PassesNullLabelsThrough()
     {
-        var source = new OrderAggregation
-        {
-            AggregationType = "range",
-            Field = "total",
-            Items = [new OrderAggregationItem { RequestedLowerBound = "", RequestedUpperBound = "100" }],
-        };
+        // Orders never sets Labels above item level - passing null through lets the shared mapper's
+        // own fallback reproduce this module's old Label == Field behaviour.
+        AggregationFacetSource captured = null;
+        var facetMapperMock = new Mock<IFacetMapper>();
+        facetMapperMock
+            .Setup(x => x.ToFacetResult(It.IsAny<AggregationFacetSource>(), It.IsAny<FacetMappingContext>()))
+            .Callback<AggregationFacetSource, FacetMappingContext>((source, _) => captured = source);
+        var mapper = new XOrderMapper(facetMapperMock.Object);
 
-        var act = () => _mapper.ToFacetResult(source, "en-US");
+        mapper.ToFacetResult(new OrderAggregation { AggregationType = "attr", Field = "status" }, new FacetMappingContext());
 
-        act.Should().Throw<FormatException>();
+        captured!.Labels.Should().BeNull();
     }
 
     [Fact]
-    public void ToFacetResult_UnrecognizedAggregationType_ReturnsNull()
+    public void ToFacetResult_ReturnsFacetMapperResult()
     {
-        var source = new OrderAggregation { AggregationType = "category", Field = "categoryId" };
+        var expected = new TermFacetResult();
+        var facetMapperMock = new Mock<IFacetMapper>();
+        facetMapperMock
+            .Setup(x => x.ToFacetResult(It.IsAny<AggregationFacetSource>(), It.IsAny<FacetMappingContext>()))
+            .Returns(expected);
+        var mapper = new XOrderMapper(facetMapperMock.Object);
 
-        var result = _mapper.ToFacetResult(source, "en-US");
+        var result = mapper.ToFacetResult(new OrderAggregation { AggregationType = "attr" }, new FacetMappingContext());
 
-        result.Should().BeNull();
-    }
-
-    [Fact]
-    public void ToFacetResult_ProducesSameResultAsLegacyAutoMapperConventionMap()
-    {
-        var source = new OrderAggregation
-        {
-            AggregationType = "attr",
-            Field = "status",
-            Items =
-            [
-                new OrderAggregationItem
-                {
-                    Value = "new",
-                    Count = 4,
-                    IsApplied = true,
-                    Labels = [new OrderAggregationLabel { Language = "en-US", Label = "New" }],
-                },
-            ],
-        };
-
-        var expected = _legacyMapper.Map<FacetResult>(source, options => options.Items["cultureName"] = "en-US");
-        var actual = _mapper.ToFacetResult(source, "en-US");
-
-        actual.Should().BeEquivalentTo(expected);
-    }
-
-    [Fact]
-    public void ToFacetResult_RangeAggregation_ProducesSameResultAsLegacyAutoMapperConventionMap()
-    {
-        var source = new OrderAggregation
-        {
-            AggregationType = "range",
-            Field = "total",
-            Items =
-            [
-                new OrderAggregationItem
-                {
-                    Value = "0-100",
-                    Count = 2,
-                    IsApplied = false,
-                    RequestedLowerBound = "0",
-                    RequestedUpperBound = "100",
-                    IncludeLower = true,
-                    IncludeUpper = false,
-                },
-            ],
-        };
-
-        var expected = _legacyMapper.Map<FacetResult>(source, options => options.Items["cultureName"] = "en-US");
-        var actual = _mapper.ToFacetResult(source, "en-US");
-
-        actual.Should().BeEquivalentTo(expected);
+        result.Should().BeSameAs(expected);
     }
 
     [Fact]

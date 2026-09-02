@@ -2,17 +2,20 @@ using System;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Services;
+using VirtoCommerce.XOrder.Core.Services;
 
 namespace VirtoCommerce.XOrder.Data.Services
 {
     public class PaymentsSearchCriteriaBuilder
     {
         private readonly ISearchPhraseParser _phraseParser;
+        private readonly IXOrderMapper _mapper;
         private readonly PaymentSearchCriteria _searchCriteria;
 
-        public PaymentsSearchCriteriaBuilder(ISearchPhraseParser phraseParser) : this()
+        public PaymentsSearchCriteriaBuilder(ISearchPhraseParser phraseParser, IXOrderMapper mapper) : this()
         {
             _phraseParser = phraseParser;
+            _mapper = mapper;
         }
 
         public PaymentsSearchCriteriaBuilder()
@@ -35,9 +38,13 @@ namespace VirtoCommerce.XOrder.Data.Services
             {
                 throw new OperationCanceledException("phrase parser must be set");
             }
+            if (_mapper == null)
+            {
+                throw new OperationCanceledException("mapper must be set");
+            }
 
             var parseResult = _phraseParser.Parse(filterPhrase);
-            parseResult.Filters.MapTo(_searchCriteria);
+            _mapper.MapTo(parseResult.Filters, _searchCriteria);
             _searchCriteria.Keyword = parseResult.Keyword;
             return this;
         }

@@ -3,8 +3,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
 using VirtoCommerce.OrdersModule.Core.Search.Indexed;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Services;
 using VirtoCommerce.Xapi.Core.Infrastructure;
+using VirtoCommerce.XOrder.Core.Models;
 using VirtoCommerce.XOrder.Core.Queries;
 using VirtoCommerce.XOrder.Core.Services;
 using VirtoCommerce.XOrder.Data.Services;
@@ -46,7 +48,14 @@ namespace VirtoCommerce.XOrder.Data.Queries
             var searchResult = await _customerOrderSearchService.SearchCustomerOrdersAsync(searchCriteria);
             var aggregates = await _customerOrderAggregateRepository.GetAggregatesFromOrdersAsync(searchResult.Results, request.CultureName);
 
-            var facets = searchResult.Aggregations?.Select(x => _mapper.ToFacetResult(x, request.CultureName)).ToList() ?? [];
+            var context = CreateFacetMappingContext(request);
+            var facets = searchResult.Aggregations?.Select((x, i) =>
+            {
+                var result = _mapper.ToFacetResult(x, context);
+                result?.Order = i;
+
+                return result;
+            }).ToList() ?? [];
 
             return new SearchOrderResponse
             {
@@ -54,6 +63,14 @@ namespace VirtoCommerce.XOrder.Data.Queries
                 Results = aggregates,
                 Facets = facets,
             };
+        }
+
+        protected virtual OrderFacetMappingContext CreateFacetMappingContext(SearchOrderQuery request)
+        {
+            var context = AbstractTypeFactory<OrderFacetMappingContext>.TryCreateInstance();
+            context.CultureName = request.CultureName;
+
+            return context;
         }
 
         protected virtual CustomerOrderIndexedSearchCriteria GetOrderIndexedSearchCriteria(SearchOrderQuery request)
