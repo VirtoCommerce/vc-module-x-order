@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using VirtoCommerce.OrdersModule.Core.Model.Search;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.SearchModule.Core.Model;
 using VirtoCommerce.Xapi.Core.Index;
 using VirtoCommerce.Xapi.Core.Models.Facets;
@@ -31,37 +32,40 @@ public class XOrderMapper : IXOrderMapper
             return null;
         }
 
-        return new AggregationFacetSource
-        {
-            AggregationType = source.AggregationType,
-            Field = source.Field,
-            Labels = source.Labels?.Select(ToAggregationFacetLabel).ToList(),
-            Items = source.Items?.Select(ToAggregationFacetItem).ToList(),
-        };
+        var result = AbstractTypeFactory<AggregationFacetSource>.TryCreateInstance();
+
+        result.AggregationType = source.AggregationType;
+        result.Field = source.Field;
+        result.Labels = source.Labels?.Select(ToAggregationFacetLabel).ToList();
+        result.Items = source.Items?.Select(ToAggregationFacetItem).ToList();
+
+        return result;
     }
 
     protected virtual AggregationFacetItem ToAggregationFacetItem(OrderAggregationItem source)
     {
-        return new AggregationFacetItem
-        {
-            Value = source.Value,
-            Count = source.Count,
-            IsApplied = source.IsApplied,
-            Labels = source.Labels?.Select(ToAggregationFacetLabel).ToList(),
-            RequestedLowerBound = source.RequestedLowerBound,
-            RequestedUpperBound = source.RequestedUpperBound,
-            IncludeLower = source.IncludeLower,
-            IncludeUpper = source.IncludeUpper,
-        };
+        var result = AbstractTypeFactory<AggregationFacetItem>.TryCreateInstance();
+
+        result.Value = source.Value;
+        result.Count = source.Count;
+        result.IsApplied = source.IsApplied;
+        result.Labels = source.Labels?.Select(ToAggregationFacetLabel).ToList();
+        result.RequestedLowerBound = source.RequestedLowerBound;
+        result.RequestedUpperBound = source.RequestedUpperBound;
+        result.IncludeLower = source.IncludeLower;
+        result.IncludeUpper = source.IncludeUpper;
+
+        return result;
     }
 
     protected virtual AggregationFacetLabel ToAggregationFacetLabel(OrderAggregationLabel source)
     {
-        return new AggregationFacetLabel
-        {
-            Language = source.Language,
-            Label = source.Label,
-        };
+        var result = AbstractTypeFactory<AggregationFacetLabel>.TryCreateInstance();
+
+        result.Language = source.Language;
+        result.Label = source.Label;
+
+        return result;
     }
 
     public virtual void MapTo(IList<IFilter> filters, PaymentSearchCriteria criteria)

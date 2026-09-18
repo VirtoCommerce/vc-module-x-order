@@ -1,4 +1,3 @@
-using AutoMapper;
 using GraphQL;
 using GraphQL.DataLoader;
 using GraphQL.Resolvers;
@@ -21,7 +20,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
     public class PaymentInType : ExtendableGraphType<PaymentIn>
     {
         public PaymentInType(
-            IMapper mapper,
+            IXapiMapper mapper,
             IMemberService memberService,
             IDataLoaderContextAccessor dataLoader,
             IDynamicPropertyResolverService dynamicPropertyResolverService,
