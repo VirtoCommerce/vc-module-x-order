@@ -1,5 +1,4 @@
 using System;
-using AutoMapper;
 using GraphQL;
 using GraphQL.DataLoader;
 using GraphQL.Resolvers;
@@ -25,7 +24,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
         public OrderLineItemType(
             IDataLoaderContextAccessor dataLoader,
             IDynamicPropertyResolverService dynamicPropertyResolverService,
-            IMapper mapper,
+            IXapiMapper mapper,
             IMemberService memberService,
             ILocalizableSettingService localizableSettingService)
         {
@@ -136,7 +135,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             IMediator mediator,
             IDataLoaderContextAccessor dataLoader,
             IDynamicPropertyResolverService dynamicPropertyResolverService,
-            IMapper mapper,
+            IXapiMapper mapper,
             IMemberService memberService,
             ILocalizableSettingService localizableSettingService)
             : this(dataLoader, dynamicPropertyResolverService, mapper, memberService, localizableSettingService)

@@ -1,5 +1,4 @@
 using System.Linq;
-using AutoMapper;
 using GraphQL;
 using GraphQL.DataLoader;
 using GraphQL.Resolvers;
@@ -26,7 +25,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
     public class OrderShipmentType : ExtendableGraphType<Shipment>
     {
         public OrderShipmentType(
-            IMapper mapper,
+            IXapiMapper mapper,
             IMemberService memberService,
             IDataLoaderContextAccessor dataLoader,
             IDynamicPropertyResolverService dynamicPropertyResolverService,
