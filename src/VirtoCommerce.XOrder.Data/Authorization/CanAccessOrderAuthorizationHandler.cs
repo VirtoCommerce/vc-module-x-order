@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using VirtoCommerce.CartModule.Core.Model;
+using VirtoCommerce.CustomerModule.Core.Extensions;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Services;
 using VirtoCommerce.OrdersModule.Core.Model;
@@ -22,10 +23,12 @@ namespace VirtoCommerce.XOrder.Data.Authorization
     public class CanAccessOrderAuthorizationHandler : PermissionAuthorizationHandlerBase<CanAccessOrderAuthorizationRequirement>
     {
         private readonly IMemberService _memberService;
+        private readonly IOrganizationMembershipSearchService _organizationMembershipSearchService;
 
-        public CanAccessOrderAuthorizationHandler(IMemberService memberService)
+        public CanAccessOrderAuthorizationHandler(IMemberService memberService, IOrganizationMembershipSearchService organizationMembershipSearchService)
         {
             _memberService = memberService;
+            _organizationMembershipSearchService = organizationMembershipSearchService;
         }
 
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, CanAccessOrderAuthorizationRequirement requirement)
@@ -81,7 +84,19 @@ namespace VirtoCommerce.XOrder.Data.Authorization
             }
 
             var member = await _memberService.GetByIdAsync(memberId);
-            return MemberAssignedToOrganization(member, organizationId);
+            if (!MemberAssignedToOrganization(member, organizationId))
+            {
+                return false;
+            }
+
+            var userId = GetCurrentUserId(context);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return false;
+            }
+
+            var membership = await _organizationMembershipSearchService.GetMembershipAsync(userId, organizationId);
+            return membership?.IsCurrentlyLocked != true;
         }
 
         private static string GetCurrentUserId(AuthorizationHandlerContext context)
