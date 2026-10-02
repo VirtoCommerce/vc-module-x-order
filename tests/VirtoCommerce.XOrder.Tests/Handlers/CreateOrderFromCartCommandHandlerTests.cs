@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoFixture;
-using AutoMapper;
 using FluentAssertions;
 using FluentValidation.Internal;
 using FluentValidation.Results;
@@ -123,7 +122,7 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
                 .Setup(x => x.ValidateAsync(It.IsAny<CartValidationContext>(), It.IsAny<Action<ValidationStrategy<CartValidationContext>>>()))
                 .ReturnsAsync(new List<ValidationFailure>());
 
-            var cartAggregate = new CartAggregate(null, null, null, null, null, null, null, null, null, null, contextFactory.Object, Mock.Of<ICartItemBuilder>(), validatorRegistry.Object);
+            var cartAggregate = new CartAggregate(null, null, null, null, null, null, null, null, null, contextFactory.Object, Mock.Of<ICartItemBuilder>(), validatorRegistry.Object);
             cartAggregate.GrabCart(cart, new Store(), new Contact(), new Currency());
 
             var cartAggrRepository = new Mock<ICartAggregateRepository>();
@@ -155,20 +154,75 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
             cart.Items.Count.Should().Be(1);
         }
 
+        /// <summary>
+        /// The aggregate comes from the platform memory cache and is shared, so by the time an order is created
+        /// it can already hold several ruleSets: "*" with errors (cart-level validationErrors resolver), then "items"
+        /// without (line-item resolver). The obsolete CartValidationErrors mirror then holds the clean "items" result,
+        /// and ValidateAsync("*") is a cache hit that leaves the mirror untouched. The gate must reject on the "*"
+        /// result it asked for, not on whatever ruleSet was computed last (VCST-6089).
+        /// </summary>
+        [Fact]
+        public async Task Handle_CachedRuleSetHasErrors_ExceptionThrown()
+        {
+            // Arrange
+            var cart = new ShoppingCart
+            {
+                Name = "default",
+                Currency = "USD",
+                CustomerId = Guid.NewGuid().ToString(),
+                Items = new List<LineItem>(),
+            };
+
+            var validatorRegistry = new Mock<ICartValidatorRegistry>();
+            validatorRegistry
+                .SetupSequence(x => x.ValidateAsync(It.IsAny<CartValidationContext>(), It.IsAny<Action<ValidationStrategy<CartValidationContext>>>()))
+                .ReturnsAsync(new List<ValidationFailure> { new("Shipment", "Shipment is required") { ErrorCode = "SHIPMENT_REQUIRED" } })
+                .ReturnsAsync(new List<ValidationFailure>());
+
+            var cartAggregate = GetCartAggregate(cart, validatorRegistry.Object);
+            await cartAggregate.ValidateAsync("*");
+            await cartAggregate.ValidateAsync("items");
+
+            var mediatorMock = new Mock<IMediator>();
+            mediatorMock
+                .Setup(x => x.Send(It.IsAny<GetCartByIdQuery>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(cartAggregate);
+
+            var orderAggregateRepositoryMock = new Mock<ICustomerOrderAggregateRepository>();
+
+            var handler = new CreateOrderFromCartCommandHandler(
+                Mock.Of<IShoppingCartService>(),
+                orderAggregateRepositoryMock.Object,
+                Mock.Of<ICartAggregateRepository>(),
+                Mock.Of<IMemberService>(),
+                mediatorMock.Object);
+
+            // Act
+            var exception = await Assert.ThrowsAsync<ExecutionError>(() => handler.Handle(new CreateOrderFromCartCommand(cart.Id), CancellationToken.None));
+
+            // Assert
+            exception.Data.Contains("SHIPMENT_REQUIRED").Should().BeTrue();
+            orderAggregateRepositoryMock.Verify(x => x.CreateOrderFromCart(It.IsAny<ShoppingCart>()), Times.Never);
+        }
+
         private static CartAggregate GetCartAggregateMock(ShoppingCart cart)
+        {
+            // Registry reports a cart-level validation failure, which ValidateAsync returns: the trigger
+            // for CreateOrderFromCartCommandHandler.ValidateCart to throw ExecutionError.
+            var validatorRegistry = new Mock<ICartValidatorRegistry>();
+            validatorRegistry
+                .Setup(x => x.ValidateAsync(It.IsAny<CartValidationContext>(), It.IsAny<Action<ValidationStrategy<CartValidationContext>>>()))
+                .ReturnsAsync(new List<ValidationFailure> { new("Cart", "Cart has validation errors") { ErrorCode = "CART_HAS_ERRORS" } });
+
+            return GetCartAggregate(cart, validatorRegistry.Object);
+        }
+
+        private static CartAggregate GetCartAggregate(ShoppingCart cart, ICartValidatorRegistry validatorRegistry)
         {
             var validationContextFactory = new Mock<ICartValidationContextFactory>();
             validationContextFactory
                 .Setup(x => x.CreateValidationContextAsync(It.IsAny<CartAggregate>()))
                 .ReturnsAsync(new CartValidationContext());
-
-            // Registry reports a cart-level validation failure so ValidateAsync populates
-            // CartValidationErrors — the trigger for CreateOrderFromCartCommandHandler.ValidateCart
-            // to throw ExecutionError.
-            var validatorRegistry = new Mock<ICartValidatorRegistry>();
-            validatorRegistry
-                .Setup(x => x.ValidateAsync(It.IsAny<CartValidationContext>(), It.IsAny<Action<ValidationStrategy<CartValidationContext>>>()))
-                .ReturnsAsync(new List<ValidationFailure> { new("Cart", "Cart has validation errors") { ErrorCode = "CART_HAS_ERRORS" } });
 
             var cartAggregate = new CartAggregate(
                 Mock.Of<IMarketingPromoEvaluator>(),
@@ -176,14 +230,13 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
                 new Mock<IOptionalDependency<ITaxProviderSearchService>>().Object,
                 Mock.Of<ICartProductService>(),
                 Mock.Of<IDynamicPropertyUpdaterService>(),
-                Mock.Of<IMapper>(),
+                Mock.Of<IXCartMapper>(),
                 Mock.Of<IMemberService>(),
                 Mock.Of<IGenericPipelineLauncher>(),
                 Mock.Of<IFileUploadService>(),
-                Mock.Of<ICartSharingService>(),
                 validationContextFactory.Object,
                 Mock.Of<ICartItemBuilder>(),
-                validatorRegistry.Object);
+                validatorRegistry);
 
             var contact = new Contact()
             {

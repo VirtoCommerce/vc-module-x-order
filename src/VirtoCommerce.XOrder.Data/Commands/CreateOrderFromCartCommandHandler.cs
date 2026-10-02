@@ -73,9 +73,11 @@ namespace VirtoCommerce.XOrder.Data.Commands
 
         protected virtual async Task ValidateCart(CartAggregate cartAggregate)
         {
-            await cartAggregate.ValidateAsync(ValidationRuleSet);
+            var cartErrors = await cartAggregate.ValidateAsync(ValidationRuleSet);
 
-            var errors = cartAggregate.GetValidationErrors();
+            var errors = cartErrors
+                .Concat(cartAggregate.OperationValidationErrors)
+                .ToList();
             if (errors.Any())
             {
                 var dictionary = errors.GroupBy(x => x.ErrorCode).ToDictionary(x => x.Key, x => x.Select(y => y.ErrorMessage).FirstOrDefault());
