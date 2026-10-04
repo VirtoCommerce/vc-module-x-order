@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoFixture;
-using AutoMapper;
 using FluentAssertions;
 using FluentValidation.Internal;
 using FluentValidation.Results;
@@ -123,7 +122,7 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
                 .Setup(x => x.ValidateAsync(It.IsAny<CartValidationContext>(), It.IsAny<Action<ValidationStrategy<CartValidationContext>>>()))
                 .ReturnsAsync(new List<ValidationFailure>());
 
-            var cartAggregate = new CartAggregate(null, null, null, null, null, null, null, null, null, null, contextFactory.Object, Mock.Of<ICartItemBuilder>(), validatorRegistry.Object);
+            var cartAggregate = new CartAggregate(null, null, null, null, null, null, null, null, null, contextFactory.Object, Mock.Of<ICartItemBuilder>(), validatorRegistry.Object);
             cartAggregate.GrabCart(cart, new Store(), new Contact(), new Currency());
 
             var cartAggrRepository = new Mock<ICartAggregateRepository>();
@@ -176,11 +175,10 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
                 new Mock<IOptionalDependency<ITaxProviderSearchService>>().Object,
                 Mock.Of<ICartProductService>(),
                 Mock.Of<IDynamicPropertyUpdaterService>(),
-                Mock.Of<IMapper>(),
+                Mock.Of<IXCartMapper>(),
                 Mock.Of<IMemberService>(),
                 Mock.Of<IGenericPipelineLauncher>(),
                 Mock.Of<IFileUploadService>(),
-                Mock.Of<ICartSharingService>(),
                 validationContextFactory.Object,
                 Mock.Of<ICartItemBuilder>(),
                 validatorRegistry.Object);
