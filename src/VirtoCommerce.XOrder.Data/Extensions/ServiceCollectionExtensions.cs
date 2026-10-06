@@ -2,6 +2,7 @@ using System;
 using GraphQL.DI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
+using VirtoCommerce.FileExperienceApi.Core.Authorization;
 using VirtoCommerce.Xapi.Core.Infrastructure;
 using VirtoCommerce.Xapi.Core.Pipelines;
 using VirtoCommerce.XCart.Core.Models;
@@ -25,6 +26,7 @@ namespace VirtoCommerce.XOrder.Data.Extensions
             services.AddSingleton<IXOrderMapper, XOrderMapper>();
             services.AddTransient<ICustomerOrderAggregateRepository, CustomerOrderAggregateRepository>();
             services.AddSingleton<IAuthorizationHandler, CanAccessOrderAuthorizationHandler>();
+            services.AddSingleton<IFileAuthorizationRequirementFactory, OrderFileAuthorizationRequirementFactory>();
 
             services.AddTransient<CustomerOrderAggregate>();
             services.AddTransient<Func<CustomerOrderAggregate>>(provider => () => provider.CreateScope().ServiceProvider.GetRequiredService<CustomerOrderAggregate>());

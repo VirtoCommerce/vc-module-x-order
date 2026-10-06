@@ -5,8 +5,12 @@ using VirtoCommerce.CartModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Extensions;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Services;
+using VirtoCommerce.FileExperienceApi.Core.Extensions;
+using VirtoCommerce.FileExperienceApi.Core.Models;
 using VirtoCommerce.OrdersModule.Core.Model;
+using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.Platform.Core;
+using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.Platform.Security.Authorization;
 using VirtoCommerce.XOrder.Core.Queries;
@@ -24,11 +28,16 @@ namespace VirtoCommerce.XOrder.Data.Authorization
     {
         private readonly IMemberService _memberService;
         private readonly IOrganizationMembershipSearchService _organizationMembershipSearchService;
+        private readonly ICustomerOrderService _customerOrderService;
 
-        public CanAccessOrderAuthorizationHandler(IMemberService memberService, IOrganizationMembershipSearchService organizationMembershipSearchService)
+        public CanAccessOrderAuthorizationHandler(
+            IMemberService memberService,
+            IOrganizationMembershipSearchService organizationMembershipSearchService,
+            ICustomerOrderService customerOrderService)
         {
             _memberService = memberService;
             _organizationMembershipSearchService = organizationMembershipSearchService;
+            _customerOrderService = customerOrderService;
         }
 
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, CanAccessOrderAuthorizationRequirement requirement)
@@ -37,7 +46,19 @@ namespace VirtoCommerce.XOrder.Data.Authorization
 
             if (!result)
             {
-                if (context.Resource is CustomerOrder order)
+                var resource = context.Resource;
+
+                if (resource is File file)
+                {
+                    result = file.OwnerIsEmpty();
+
+                    if (!result && file.OwnerTypeIs<CustomerOrder>())
+                    {
+                        resource = await _customerOrderService.GetByIdAsync(file.OwnerEntityId);
+                    }
+                }
+
+                if (resource is CustomerOrder order)
                 {
                     var currentUserId = GetCurrentUserId(context);
                     result = currentUserId == null && order.IsAnonymous ||
