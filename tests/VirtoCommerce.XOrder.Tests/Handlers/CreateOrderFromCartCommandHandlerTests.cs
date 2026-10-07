@@ -155,53 +155,53 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
         }
 
         /// <summary>
-        /// The aggregate comes from the platform memory cache and is shared, so by the time an order is created
-        /// it can already hold several ruleSets: "*" with errors (cart-level validationErrors resolver), then "items"
-        /// without (line-item resolver). The obsolete CartValidationErrors mirror then holds the clean "items" result,
-        /// and ValidateAsync("*") is a cache hit that leaves the mirror untouched. The gate must reject on the "*"
-        /// result it asked for, not on whatever ruleSet was computed last (VCST-6089).
+        /// A derived aggregate can post-process validation results in a ValidateAsync(string) override (VCST-6089).
+        /// The obsolete CartValidationErrors mirror, which GetValidationErrors() reads, only ever holds the base
+        /// result, so an error the override adds never reached the old gate. The gate must reject on the list
+        /// ValidateAsync returns.
         /// </summary>
         [Fact]
-        public async Task Handle_CachedRuleSetHasErrors_ExceptionThrown()
+        public async Task Handle_ValidateAsyncOverrideAddsError_ExceptionThrown()
         {
             // Arrange
-            var cart = new ShoppingCart
-            {
-                Name = "default",
-                Currency = "USD",
-                CustomerId = Guid.NewGuid().ToString(),
-                Items = new List<LineItem>(),
-            };
+            var cart = GetEmptyCart();
+            var extraError = new ValidationFailure("Cart", "Rejected by a project rule") { ErrorCode = "PROJECT_RULE" };
 
-            var validatorRegistry = new Mock<ICartValidatorRegistry>();
-            validatorRegistry
-                .SetupSequence(x => x.ValidateAsync(It.IsAny<CartValidationContext>(), It.IsAny<Action<ValidationStrategy<CartValidationContext>>>()))
-                .ReturnsAsync(new List<ValidationFailure> { new("Shipment", "Shipment is required") { ErrorCode = "SHIPMENT_REQUIRED" } })
-                .ReturnsAsync(new List<ValidationFailure>());
-
-            var cartAggregate = GetCartAggregate(cart, validatorRegistry.Object);
-            await cartAggregate.ValidateAsync("*");
-            await cartAggregate.ValidateAsync("items");
-
-            var mediatorMock = new Mock<IMediator>();
-            mediatorMock
-                .Setup(x => x.Send(It.IsAny<GetCartByIdQuery>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(cartAggregate);
+            var cartAggregate = new ExtraErrorCartAggregate(GetValidationContextFactory(), GetValidatorRegistry(), extraError);
+            cartAggregate.GrabCart(cart, new Store(), new Contact(), new Currency());
 
             var orderAggregateRepositoryMock = new Mock<ICustomerOrderAggregateRepository>();
-
-            var handler = new CreateOrderFromCartCommandHandler(
-                Mock.Of<IShoppingCartService>(),
-                orderAggregateRepositoryMock.Object,
-                Mock.Of<ICartAggregateRepository>(),
-                Mock.Of<IMemberService>(),
-                mediatorMock.Object);
+            var handler = GetHandler(cartAggregate, orderAggregateRepositoryMock.Object);
 
             // Act
             var exception = await Assert.ThrowsAsync<ExecutionError>(() => handler.Handle(new CreateOrderFromCartCommand(cart.Id), CancellationToken.None));
 
             // Assert
-            exception.Data.Contains("SHIPMENT_REQUIRED").Should().BeTrue();
+            exception.Data.Contains("PROJECT_RULE").Should().BeTrue();
+            orderAggregateRepositoryMock.Verify(x => x.CreateOrderFromCart(It.IsAny<ShoppingCart>()), Times.Never);
+        }
+
+        /// <summary>
+        /// Errors recorded by cart operations (OperationValidationErrors) refuse the order even when the validated
+        /// ruleSet itself is clean: the gate adds them to the ValidateAsync result, as GetValidationErrors() did.
+        /// </summary>
+        [Fact]
+        public async Task Handle_OperationValidationErrors_ExceptionThrown()
+        {
+            // Arrange
+            var cart = GetEmptyCart();
+
+            var cartAggregate = GetCartAggregate(cart, GetValidatorRegistry());
+            cartAggregate.OperationValidationErrors.Add(new ValidationFailure("LineItem", "The product is no longer available") { ErrorCode = "CART_PRODUCT_UNAVAILABLE" });
+
+            var orderAggregateRepositoryMock = new Mock<ICustomerOrderAggregateRepository>();
+            var handler = GetHandler(cartAggregate, orderAggregateRepositoryMock.Object);
+
+            // Act
+            var exception = await Assert.ThrowsAsync<ExecutionError>(() => handler.Handle(new CreateOrderFromCartCommand(cart.Id), CancellationToken.None));
+
+            // Assert
+            exception.Data.Contains("CART_PRODUCT_UNAVAILABLE").Should().BeTrue();
             orderAggregateRepositoryMock.Verify(x => x.CreateOrderFromCart(It.IsAny<ShoppingCart>()), Times.Never);
         }
 
@@ -209,21 +209,59 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
         {
             // Registry reports a cart-level validation failure, which ValidateAsync returns: the trigger
             // for CreateOrderFromCartCommandHandler.ValidateCart to throw ExecutionError.
+            var validatorRegistry = GetValidatorRegistry(new ValidationFailure("Cart", "Cart has validation errors") { ErrorCode = "CART_HAS_ERRORS" });
+
+            return GetCartAggregate(cart, validatorRegistry);
+        }
+
+        private static ShoppingCart GetEmptyCart()
+        {
+            return new ShoppingCart
+            {
+                Name = "default",
+                Currency = "USD",
+                CustomerId = Guid.NewGuid().ToString(),
+                Items = new List<LineItem>(),
+            };
+        }
+
+        private static ICartValidatorRegistry GetValidatorRegistry(params ValidationFailure[] errors)
+        {
             var validatorRegistry = new Mock<ICartValidatorRegistry>();
             validatorRegistry
                 .Setup(x => x.ValidateAsync(It.IsAny<CartValidationContext>(), It.IsAny<Action<ValidationStrategy<CartValidationContext>>>()))
-                .ReturnsAsync(new List<ValidationFailure> { new("Cart", "Cart has validation errors") { ErrorCode = "CART_HAS_ERRORS" } });
+                .ReturnsAsync(new List<ValidationFailure>(errors));
 
-            return GetCartAggregate(cart, validatorRegistry.Object);
+            return validatorRegistry.Object;
         }
 
-        private static CartAggregate GetCartAggregate(ShoppingCart cart, ICartValidatorRegistry validatorRegistry)
+        private static ICartValidationContextFactory GetValidationContextFactory()
         {
             var validationContextFactory = new Mock<ICartValidationContextFactory>();
             validationContextFactory
                 .Setup(x => x.CreateValidationContextAsync(It.IsAny<CartAggregate>()))
                 .ReturnsAsync(new CartValidationContext());
 
+            return validationContextFactory.Object;
+        }
+
+        private static CreateOrderFromCartCommandHandler GetHandler(CartAggregate cartAggregate, ICustomerOrderAggregateRepository orderAggregateRepository)
+        {
+            var mediatorMock = new Mock<IMediator>();
+            mediatorMock
+                .Setup(x => x.Send(It.IsAny<GetCartByIdQuery>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(cartAggregate);
+
+            return new CreateOrderFromCartCommandHandler(
+                Mock.Of<IShoppingCartService>(),
+                orderAggregateRepository,
+                Mock.Of<ICartAggregateRepository>(),
+                Mock.Of<IMemberService>(),
+                mediatorMock.Object);
+        }
+
+        private static CartAggregate GetCartAggregate(ShoppingCart cart, ICartValidatorRegistry validatorRegistry)
+        {
             var cartAggregate = new CartAggregate(
                 Mock.Of<IMarketingPromoEvaluator>(),
                 Mock.Of<IShoppingCartTotalsCalculator>(),
@@ -234,7 +272,7 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
                 Mock.Of<IMemberService>(),
                 Mock.Of<IGenericPipelineLauncher>(),
                 Mock.Of<IFileUploadService>(),
-                validationContextFactory.Object,
+                GetValidationContextFactory(),
                 Mock.Of<ICartItemBuilder>(),
                 validatorRegistry);
 
@@ -246,6 +284,29 @@ namespace VirtoCommerce.XOrder.Tests.Handlers
             cartAggregate.GrabCart(cart, new Store(), contact, new Currency());
 
             return cartAggregate;
+        }
+
+        /// <summary>
+        /// Post-processes validation the way a project's derived aggregate would: the list it returns differs from
+        /// the base result, which is all the obsolete CartValidationErrors mirror ever holds.
+        /// </summary>
+        private sealed class ExtraErrorCartAggregate : CartAggregate
+        {
+            private readonly ValidationFailure _extraError;
+
+            public ExtraErrorCartAggregate(ICartValidationContextFactory validationContextFactory, ICartValidatorRegistry validatorRegistry, ValidationFailure extraError)
+                : base(null, null, null, null, null, null, null, null, null, validationContextFactory, Mock.Of<ICartItemBuilder>(), validatorRegistry)
+            {
+                _extraError = extraError;
+            }
+
+            public override async Task<IList<ValidationFailure>> ValidateAsync(string ruleSet)
+            {
+                var errors = await base.ValidateAsync(ruleSet);
+
+                // A new list: the one base returns is the cached result, so it must not be changed in place.
+                return new List<ValidationFailure>(errors) { _extraError };
+            }
         }
     }
 }
