@@ -104,35 +104,16 @@ namespace VirtoCommerce.XOrder.Data.Services
 
         protected async Task UpdateConfigurationFiles(CustomerOrder order)
         {
-            var configurationItems = order.Items
+            var fileUrls = order.Items
                 .Where(x => !x.ConfigurationItems.IsNullOrEmpty())
                 .SelectMany(x => x.ConfigurationItems.Where(y => y.Files != null))
-                .ToList();
-
-            var fileUrls = configurationItems
                 .SelectMany(x => x.Files)
                 .Where(x => !string.IsNullOrEmpty(x.Url))
                 .Select(x => x.Url)
                 .Distinct()
                 .ToArray();
 
-            var files = (await _fileUploadService.GetByPublicUrlAsync(fileUrls))
-                .Where(x => x.Scope == ConfigurationSectionFilesScope)
-                .ToList();
-
-            if (files.Count > 0)
-            {
-                foreach (var file in files)
-                {
-                    var configurationItem = configurationItems.FirstOrDefault(i => i.Files.Any(f => f.Url == file.PublicUrl));
-                    if (configurationItem != null)
-                    {
-                        file.SetOwner(configurationItem);
-                    }
-                }
-
-                await _fileUploadService.SaveChangesAsync(files);
-            }
+            await _fileUploadService.SetOwnerAsync(fileUrls, ConfigurationSectionFilesScope, order);
         }
     }
 }

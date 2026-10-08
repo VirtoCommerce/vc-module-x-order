@@ -7,6 +7,7 @@ using Moq;
 using VirtoCommerce.CustomerModule.Core.Model;
 using VirtoCommerce.CustomerModule.Core.Services;
 using VirtoCommerce.OrdersModule.Core.Model;
+using VirtoCommerce.OrdersModule.Core.Services;
 using VirtoCommerce.Platform.Core.Security;
 using VirtoCommerce.XOrder.Core.Queries;
 using VirtoCommerce.XOrder.Data.Authorization;
@@ -18,6 +19,7 @@ namespace VirtoCommerce.XOrder.Tests.Authorization
     {
         private readonly Mock<IMemberService> _memberServiceMock;
         private readonly Mock<IOrganizationMembershipSearchService> _organizationMembershipSearchServiceMock;
+        private readonly Mock<ICustomerOrderService> _customerOrderServiceMock;
 
         static OrderAuthorizationTests()
         {
@@ -39,6 +41,8 @@ namespace VirtoCommerce.XOrder.Tests.Authorization
             _organizationMembershipSearchServiceMock
                 .Setup(x => x.SearchAsync(It.IsAny<OrganizationMembershipSearchCriteria>(), It.IsAny<bool>()))
                 .ReturnsAsync(new OrganizationMembershipSearchResult { Results = [] });
+
+            _customerOrderServiceMock = new Mock<ICustomerOrderService>();
         }
 
         [Fact]
@@ -310,7 +314,7 @@ namespace VirtoCommerce.XOrder.Tests.Authorization
 
         private CanAccessOrderAuthorizationHandler CreateHandler()
         {
-            return new CanAccessOrderAuthorizationHandler(_memberServiceMock.Object, _organizationMembershipSearchServiceMock.Object);
+            return new CanAccessOrderAuthorizationHandler(_memberServiceMock.Object, _organizationMembershipSearchServiceMock.Object, _customerOrderServiceMock.Object);
         }
     }
 }
