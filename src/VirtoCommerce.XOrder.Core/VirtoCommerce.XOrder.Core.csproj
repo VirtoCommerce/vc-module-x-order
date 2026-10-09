@@ -11,7 +11,7 @@
     <PackageReference Include="VirtoCommerce.OrdersModule.Core" Version="3.1018.0" />
     <PackageReference Include="VirtoCommerce.PaymentModule.Core" Version="3.1010.0" />
     <PackageReference Include="VirtoCommerce.Xapi.Core" Version="3.1026.0" />
-    <PackageReference Include="VirtoCommerce.XCart.Core" Version="3.1038.0" />
+    <PackageReference Include="VirtoCommerce.XCart.Core" Version="3.1040.0-alpha.294-vcst-6089-cart-aggr-refactoring" />
     <PackageReference Include="VirtoCommerce.XCatalog.Core" Version="3.1023.0" />
   </ItemGroup>
 </Project>
