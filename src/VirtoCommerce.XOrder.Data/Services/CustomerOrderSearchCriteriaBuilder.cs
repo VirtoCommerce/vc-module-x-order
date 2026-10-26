@@ -64,11 +64,8 @@ namespace VirtoCommerce.XOrder.Data.Services
         {
             if (!string.IsNullOrEmpty(customerId))
             {
-                // The caller's scope must be a mandatory filter, never part of the parsed Keyword. Keyword is user
-                // input and the search phrase grammar has an OR operator, so concatenating the scope into it lets a
-                // crafted keyword (e.g. 'OR status:"..."') turn the scope into an OR alternative and read other
-                // customers' orders. Set as a field: CustomerOrderSearchRequestBuilder surfaces it via CustomerIds
-                // and AND-s it as a top-level term filter that no keyword can restructure.
+                // Scope must be a filter field, not part of the user-controlled Keyword: the phrase grammar's OR would
+                // otherwise let a crafted keyword (e.g. 'OR status:"..."') escape it and read other customers' orders.
                 _searchCriteria.CustomerId = customerId;
             }
 
@@ -79,7 +76,7 @@ namespace VirtoCommerce.XOrder.Data.Services
         {
             if (!string.IsNullOrEmpty(organizationId))
             {
-                // See WithCustomerId: scope goes to a field (AND-ed as a top-level filter), never into the parsed Keyword.
+                // Scope goes to a field, never the parsed Keyword (see WithCustomerId).
                 _searchCriteria.OrganizationId = organizationId;
             }
 
