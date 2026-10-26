@@ -64,8 +64,9 @@ namespace VirtoCommerce.XOrder.Data.Services
         {
             if (!string.IsNullOrEmpty(customerId))
             {
-                // customerId should be added before custom Keyword to prevent overriding
-                _searchCriteria.Keyword = $"customerId:\"{customerId}\" {_searchCriteria.Keyword}";
+                // Scope must be a filter field, not part of the user-controlled Keyword: the phrase grammar's OR would
+                // otherwise let a crafted keyword (e.g. 'OR status:"..."') escape it and read other customers' orders.
+                _searchCriteria.CustomerId = customerId;
             }
 
             return this;
@@ -75,8 +76,8 @@ namespace VirtoCommerce.XOrder.Data.Services
         {
             if (!string.IsNullOrEmpty(organizationId))
             {
-                // organizationId should be added before custom Keyword to prevent overriding
-                _searchCriteria.Keyword = $"organizationId:\"{organizationId}\" {_searchCriteria.Keyword}";
+                // Scope goes to a field, never the parsed Keyword (see WithCustomerId).
+                _searchCriteria.OrganizationId = organizationId;
             }
 
             return this;
