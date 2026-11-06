@@ -24,6 +24,8 @@
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
     <PackageReference Include="Moq" Version="4.21.0" />
+    <!-- Transitive override: Hangfire.MySqlStorage 2.0.3 pulls MySqlConnector 1.0.0 (GHSA-473q-m89c-ghf8, fixed in 2.6.1). Same version as platform. -->
+    <PackageReference Include="MySqlConnector" Version="2.6.2" />
     <!-- The cart-input graph + the cart DI host (CartBenchmarkHost) + the module-agnostic cart seam come
          from the XCart benchmark Core library. Brings XCart.Core/Data and CartModule.Data transitively.
          Published to nuget.org. -->
