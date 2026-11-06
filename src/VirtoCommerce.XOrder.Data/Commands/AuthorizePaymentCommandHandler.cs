@@ -1,8 +1,13 @@
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.Extensions.Logging;
+using VirtoCommerce.OrdersModule.Core.Model;
 using VirtoCommerce.OrdersModule.Core.Services;
+using VirtoCommerce.PaymentModule.Core.Model.StoredCredentials;
+using VirtoCommerce.PaymentModule.Core.Services;
 using VirtoCommerce.PaymentModule.Model.Requests;
 using VirtoCommerce.Platform.Core.Common;
 using VirtoCommerce.StoreModule.Core.Services;
@@ -15,14 +20,20 @@ namespace VirtoCommerce.XOrder.Data.Commands
     public class AuthorizePaymentCommandHandler : PaymentCommandHandlerBase, IRequestHandler<AuthorizePaymentCommand, AuthorizePaymentResult>
     {
         private readonly ICustomerOrderService _customerOrderService;
+        private readonly IStoredPaymentMethodManager _storedPaymentMethodManager;
+        private readonly ILogger<AuthorizePaymentCommandHandler> _logger;
 
         public AuthorizePaymentCommandHandler(
             ICustomerOrderService customerOrderService,
             IPaymentService paymentService,
-            IStoreService storeService)
+            IStoreService storeService,
+            IStoredPaymentMethodManager storedPaymentMethodManager,
+            ILogger<AuthorizePaymentCommandHandler> logger)
             : base(customerOrderService, paymentService, storeService)
         {
             _customerOrderService = customerOrderService;
+            _storedPaymentMethodManager = storedPaymentMethodManager;
+            _logger = logger;
         }
 
         public async Task<AuthorizePaymentResult> Handle(AuthorizePaymentCommand request, CancellationToken cancellationToken)
@@ -57,6 +68,15 @@ namespace VirtoCommerce.XOrder.Data.Commands
                 Parameters = parameters,
             };
 
+            // Save the card or pay with a saved one: the posted storeForFutureUse, consentId and storedPaymentMethodId
+            // become typed request fields, and a saved card is checked against the order's customer.
+            var storedPaymentContext = GetStoredPaymentContext(paymentInfo.CustomerOrder, paymentInfo.Payment);
+            var prepareResult = await _storedPaymentMethodManager.PrepareAsync(postProcessPaymentRequest, storedPaymentContext);
+            if (!prepareResult.IsSuccess)
+            {
+                return ErrorResult<AuthorizePaymentResult>(prepareResult.ErrorMessage);
+            }
+
             var processPaymentRequestResult = await paymentInfo.Payment.PaymentMethod.PostProcessPaymentAsync(postProcessPaymentRequest, cancellationToken);
 
             if (processPaymentRequestResult.IsSuccess)
@@ -64,6 +84,8 @@ namespace VirtoCommerce.XOrder.Data.Commands
                 paymentInfo.Payment.Status = processPaymentRequestResult.NewPaymentStatus.ToString();
 
                 await _customerOrderService.SaveChangesAsync(new[] { paymentInfo.CustomerOrder });
+
+                await SaveStoredPaymentMethodAsync(postProcessPaymentRequest, processPaymentRequestResult, storedPaymentContext);
             }
 
             var result = new AuthorizePaymentResult
@@ -73,6 +95,35 @@ namespace VirtoCommerce.XOrder.Data.Commands
             };
 
             return result;
+        }
+
+        protected virtual StoredPaymentContext GetStoredPaymentContext(CustomerOrder order, PaymentIn payment)
+        {
+            return new StoredPaymentContext
+            {
+                StoreId = order.StoreId,
+                CustomerId = order.CustomerId,
+                OrganizationId = order.OrganizationId,
+                PaymentMethodCode = payment.GatewayCode,
+                OrderId = order.Id,
+                PaymentId = payment.Id,
+            };
+        }
+
+        /// <summary>
+        /// Records the card the payment method saved, or marks the saved card that paid as used.
+        /// The payment is already approved and saved, so a failure here is logged instead of failing it.
+        /// </summary>
+        protected virtual async Task SaveStoredPaymentMethodAsync(PostProcessPaymentRequest request, PostProcessPaymentRequestResult result, StoredPaymentContext context)
+        {
+            try
+            {
+                await _storedPaymentMethodManager.SaveFromPaymentAsync(request, result, context);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Saving the card of payment {PaymentId} of order {OrderId} failed", context.PaymentId, context.OrderId);
+            }
         }
     }
 }
