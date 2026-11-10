@@ -70,6 +70,7 @@ namespace VirtoCommerce.XOrder.Core.Schemas
             Field(x => x.ReserveQuantity, nullable: false);
             Field(x => x.Quantity, nullable: false);
             Field(x => x.ProductId, nullable: false);
+            Field(x => x.PurchaseOrderLineNumber, nullable: true);
 
             Field<NonNullGraphType<CurrencyType>>(nameof(LineItem.Currency).ToCamelCase())
                 .Resolve(context => context.GetOrderItemCurrency());
