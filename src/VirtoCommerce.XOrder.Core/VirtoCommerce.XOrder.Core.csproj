@@ -9,7 +9,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="VirtoCommerce.OrdersModule.Core" Version="3.1018.0" />
-    <PackageReference Include="VirtoCommerce.PaymentModule.Core" Version="3.1010.0" />
+    <PackageReference Include="VirtoCommerce.PaymentModule.Core" Version="3.1011.0-alpha.325-vcst-6507" />
     <PackageReference Include="VirtoCommerce.Xapi.Core" Version="3.1026.0" />
     <PackageReference Include="VirtoCommerce.XCart.Core" Version="3.1042.0" />
     <PackageReference Include="VirtoCommerce.XCatalog.Core" Version="3.1023.0" />
